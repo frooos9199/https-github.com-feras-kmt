@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏁 KMT Marshal Management System
 
-## Getting Started
+نظام إدارة المارشالات لحلبة الكويت الدولية (Kuwait Motor Town)
 
-First, run the development server:
+## 📋 نظرة عامة
+
+نظام شامل لإدارة المارشالات والفعاليات وتسجيل الحضور في حلبة الكويت الدولية. يدعم لغتين (العربية والإنجليزية) مع واجهة عصرية وسهلة الاستخدام.
+
+## ✨ المميزات
+
+### للمارشالات (Marshals)
+- 📱 عرض الفعاليات القادمة والمتاحة
+- ✅ تسجيل الحضور للفعاليات
+- 📊 عرض سجل الحضور الشخصي
+- 👤 تعديل الملف الشخصي والصورة
+- 🔔 إشعارات فورية للفعاليات الجديدة
+- 🌐 دعم اللغتين العربية والإنجليزية
+
+### للمسؤولين (Admins)
+- 👥 إدارة كاملة للمارشالات (إضافة، تعديل، حذف، تفعيل/تعطيل)
+- 📅 إدارة الفعاليات (إنشاء، تعديل، حذف)
+- 📋 متابعة الحضور والغياب لكل فعالية
+- 🖨️ طباعة قوائم الحضور
+- 📊 تقارير وإحصائيات شاملة
+- 🔔 إشعارات تلقائية عند التسجيل أو الحضور
+
+## 🛠️ التقنيات المستخدمة
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Database**: Prisma ORM with SQLite
+- **Authentication**: NextAuth.js
+- **Styling**: Tailwind CSS v4
+- **Animations**: Framer Motion
+- **UI**: React 19
+
+## 🚀 التثبيت والتشغيل
+
+### المتطلبات
+- Node.js 18+
+- npm, yarn, pnpm, or bun
+
+### الخطوات
 
 ```bash
+# 1. استنساخ المشروع
+git clone https://github.com/your-username/kmt.git
+cd kmt
+
+# 2. تثبيت المكتبات
+npm install
+
+# 3. إعداد المتغيرات البيئية
+cp .env.example .env
+
+# 4. تطبيق قاعدة البيانات
+npx prisma migrate dev
+
+# 5. إضافة بيانات تجريبية (اختياري)
+npx tsx prisma/seed.ts
+
+# 6. تشغيل المشروع
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+افتح [http://localhost:3000](http://localhost:3000) في المتصفح.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### حسابات تجريبية
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Admin:**
+- Email: admin@kmt.kw
+- Password: admin123
 
-## Learn More
+**Marshal:**
+- Email: marshal@kmt.kw
+- Password: marshal123
 
-To learn more about Next.js, take a look at the following resources:
+## 📦 النشر
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+راجع [DEPLOYMENT.md](./DEPLOYMENT.md) للحصول على دليل شامل للنشر على:
+- ✅ Vercel (مجاني وموصى به)
+- ✅ Railway
+- ✅ VPS/Server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### نشر سريع على Vercel
 
-## Deploy on Vercel
+1. اربط المشروع بـ GitHub
+2. اذهب إلى [vercel.com/new](https://vercel.com/new)
+3. اختر المشروع وأضف المتغيرات البيئية
+4. Deploy!
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+⚠️ **ملاحظة**: استخدم قاعدة بيانات خارجية (Turso/Neon/PlanetScale) بدلاً من SQLite للإنتاج.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 الأوامر
+
+```bash
+npm run dev      # التطوير
+npm run build    # البناء
+npm start        # التشغيل
+
+npx prisma studio        # Prisma Studio
+npx prisma migrate dev   # تطبيق مايجريشن
+npx tsx prisma/seed.ts   # بيانات تجريبية
+```
+
+## 📁 هيكل المشروع
+
+```
+kmt/
+├── app/           # Next.js pages & API
+├── components/    # React components
+├── contexts/      # Context providers
+├── lib/           # Utilities & helpers
+├── prisma/        # Database schema
+├── public/        # Static files
+└── types/         # TypeScript types
+```
+
+## 🔐 الأمان
+
+- 🔒 تشفير كلمات المرور (bcrypt)
+- 🔑 JWT authentication (NextAuth)
+- 🛡️ حماية المسارات حسب الصلاحيات
+- ✅ التحقق من الإدخالات
+
+## 🌐 دعم اللغات
+
+- 🇸🇦 العربية
+- 🇬🇧 الإنجليزية
+
+## 📝 الترخيص
+
+MIT License
+
+---
+
+**صنع بـ ❤️ في الكويت 🇰🇼**
+
