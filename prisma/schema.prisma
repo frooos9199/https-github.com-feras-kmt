@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  employeeId    String   @unique // KMT-100, KMT-101, etc.
+  name          String
+  email         String   @unique
+  password      String
+  phone         String
+  civilId       String
+  dateOfBirth   DateTime
+  nationality   String? // Nationality field
+  image         String?
+  isActive      Boolean  @default(true) // Active/Suspended status
+  marshalTypes  String   @default("") // Comma-separated: "drag-race,drift,circuit"
+  role          String   @default("marshal") // "marshal" or "admin"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  attendances   Attendance[]
+  notifications Notification[]
+}
+
+model Event {
+  id            String   @id @default(cuid())
+  titleEn       String
+  titleAr       String
+  descriptionEn String
+  descriptionAr String
+  date          DateTime // Start date
+  endDate       DateTime? // End date for multi-day events
+  time          String
+  endTime       String? // End time for the event
+  location      String
+  image         String?
+  marshalTypes  String   @default("") // Comma-separated: "drag-race,drift,circuit"
+  maxMarshals   Int
+  status        String   @default("active") // "active", "cancelled", "completed"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  attendances Attendance[]
+}
+
+model Attendance {
+  id           String   @id @default(cuid())
+  userId       String
+  eventId      String
+  status       String   @default("pending") // "pending", "approved", "rejected"
+  registeredAt DateTime @default(now())
+  notes        String?
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "NEW_EVENT", "REGISTRATION_APPROVED", "REGISTRATION_REJECTED", "EVENT_REMINDER", "EVENT_UPDATED", "EVENT_CANCELLED"
+  titleEn   String
+  titleAr   String
+  messageEn String
+  messageAr String
+  eventId   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}

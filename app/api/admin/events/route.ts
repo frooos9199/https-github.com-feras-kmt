@@ -1,0 +1,173 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "../../auth/[...nextauth]/route"
+import { prisma } from "@/lib/prisma"
+import { notifyMatchingMarshalsAboutNewEvent } from "@/lib/notifications"
+
+// GET - Fetch all events
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Fetch all events
+    const events = await prisma.event.findMany({
+      include: {
+        _count: {
+          select: { attendances: true }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    })
+
+    return NextResponse.json(events)
+  } catch (error) {
+    console.error("Error fetching events:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+// POST - Create new event
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const {
+      titleEn,
+      titleAr,
+      descriptionEn,
+      descriptionAr,
+      date,
+      endDate,
+      time,
+      endTime,
+      location,
+      marshalTypes,
+      maxMarshals
+    } = body
+
+    // Validate required fields
+    if (!titleEn || !titleAr || !descriptionEn || !descriptionAr || 
+        !date || !time || !location || !marshalTypes || !maxMarshals) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    const event = await prisma.event.create({
+      data: {
+        titleEn,
+        titleAr,
+        descriptionEn,
+        descriptionAr,
+        date: new Date(date),
+        endDate: endDate ? new Date(endDate) : null,
+        time,
+        endTime,
+        location,
+        marshalTypes,
+        maxMarshals: parseInt(maxMarshals),
+        status: "active"
+      }
+    })
+
+    // Send notifications to matching marshals
+    await notifyMatchingMarshalsAboutNewEvent(
+      event.id,
+      event.titleEn,
+      event.titleAr,
+      event.marshalTypes
+    )
+
+    return NextResponse.json(event, { status: 201 })
+  } catch (error) {
+    console.error("Error creating event:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+// PUT - Update event  
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { id, titleEn, titleAr, descriptionEn, descriptionAr, date, endDate, time, endTime, location, marshalTypes, maxMarshals, status } = body
+
+    if (!id) {
+      return NextResponse.json({ error: "Event ID required" }, { status: 400 })
+    }
+
+    const updateData: any = {}
+    if (titleEn) updateData.titleEn = titleEn
+    if (titleAr) updateData.titleAr = titleAr
+    if (descriptionEn) updateData.descriptionEn = descriptionEn
+    if (descriptionAr) updateData.descriptionAr = descriptionAr
+    if (date) updateData.date = new Date(date)
+    if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null
+    if (time) updateData.time = time
+    if (endTime !== undefined) updateData.endTime = endTime || null
+    if (location) updateData.location = location
+    if (marshalTypes !== undefined) updateData.marshalTypes = marshalTypes
+    if (maxMarshals) updateData.maxMarshals = parseInt(maxMarshals)
+    if (status) updateData.status = status
+
+    const event = await prisma.event.update({
+      where: { id },
+      data: updateData,
+    })
+
+    return NextResponse.json(event)
+  } catch (error) {
+    console.error("Error updating event:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+// PATCH - Update event (same as PUT)
+export async function PATCH(request: NextRequest) {
+  return PUT(request)
+}
+
+// DELETE - Delete event
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+
+    if (!id) {
+      return NextResponse.json({ error: "Event ID required" }, { status: 400 })
+    }
+
+    // Delete all attendances first
+    await prisma.attendance.deleteMany({
+      where: { eventId: id }
+    })
+
+    // Delete the event
+    await prisma.event.delete({
+      where: { id }
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting event:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
