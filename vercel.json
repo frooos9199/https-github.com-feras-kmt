@@ -1,10 +1,4 @@
 {
   "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "NEXTAUTH_URL": "@nextauth_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret"
-  }
+  "installCommand": "npm install"
 }
