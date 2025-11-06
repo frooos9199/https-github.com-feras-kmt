@@ -24,7 +24,7 @@ export async function GET() {
             date: true,
             time: true,
             location: true,
-            type: true,
+            marshalTypes: true,
           }
         }
       },
