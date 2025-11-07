@@ -83,7 +83,7 @@ export default function ReportsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/admin" className="flex items-center gap-3">
-              <img src="/kmt-logo-main.png" alt="KMT" className="h-12 w-auto border-2 border-white/30 rounded px-2 py-1" />
+              <img src="/kmt-logo-main.png" alt="KMT" className="h-12 w-auto rounded px-2 py-1" />
               <span className="text-yellow-500 font-bold text-sm">👑 ADMIN</span>
             </Link>
             <Link
