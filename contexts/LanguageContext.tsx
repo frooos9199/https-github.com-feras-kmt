@@ -20,6 +20,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       setLanguage(saved)
       document.documentElement.lang = saved
       document.documentElement.dir = saved === "ar" ? "rtl" : "ltr"
+    } else {
+      // Set default to English
+      document.documentElement.lang = "en"
+      document.documentElement.dir = "ltr"
     }
   }, [])
 

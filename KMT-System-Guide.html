@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل نظام إدارة المارشلات - نادي الكويت للسيارات</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm 2cm;
+        }
+        
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .page-break {
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            
+            h1, h2, h3, h4 {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+            
+            .feature-box, .info-box, .warning-box, .success-box {
+                page-break-inside: avoid;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #fff;
+            direction: rtl;
+        }
+        
+        .cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cover-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/kmt-logo-white.png') no-repeat center center;
+            background-size: 40%;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .cover-page > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cover-page h1 {
+            font-size: 3em;
+            margin-bottom: 0.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .cover-page h2 {
+            font-size: 2em;
+            margin-bottom: 2em;
+            font-weight: 300;
+        }
+        
+        .cover-page .logo {
+            width: 300px;
+            height: auto;
+            margin-bottom: 2em;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+        
+        .cover-page .date {
+            font-size: 1.2em;
+            margin-top: 2em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #dc2626;
+            font-size: 2.5em;
+            margin: 1em 0 0.5em;
+            padding-bottom: 0.3em;
+            border-bottom: 3px solid #dc2626;
+        }
+        
+        h2 {
+            color: #991b1b;
+            font-size: 2em;
+            margin: 1.5em 0 0.8em;
+            padding-right: 15px;
+            border-right: 5px solid #991b1b;
+        }
+        
+        h3 {
+            color: #555;
+            font-size: 1.5em;
+            margin: 1.2em 0 0.6em;
+        }
+        
+        h4 {
+            color: #666;
+            font-size: 1.2em;
+            margin: 1em 0 0.5em;
+        }
+        
+        p {
+            margin: 0.8em 0;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin: 1em 0;
+            padding-right: 2em;
+        }
+        
+        li {
+            margin: 0.5em 0;
+        }
+        
+        .feature-box {
+            background: #f8f9fa;
+            border-right: 4px solid #dc2626;
+            padding: 20px;
+            margin: 1.5em 0;
+            border-radius: 5px;
+        }
+        
+        .feature-box h3 {
+            color: #dc2626;
+            margin-top: 0;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border: 2px solid #2196F3;
+            padding: 15px;
+            margin: 1em 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            margin: 1em 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 15px;
+            margin: 1em 0;
+            border-radius: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: right;
+        }
+        
+        th {
+            background: #dc2626;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .page-break {
+            page-break-after: always;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2em;
+            color: #888;
+            border-top: 2px solid #eee;
+            margin-top: 3em;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- صفحة الغلاف -->
+    <div class="cover-page">
+        <img src="file:///Users/mac/Documents/GitHub/kmt/kmt-logo-white.png" alt="KMT Logo" class="logo">
+        <div style="background: white; color: black; padding: 30px 60px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 20px;">
+            <h1 style="color: black; border: none; font-size: 2.5em; margin: 0; text-shadow: none;">دليل نظام إدارة المارشلات</h1>
+        </div>
+        <div style="background: white; color: black; padding: 20px 50px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 20px;">
+            <h2 style="color: black; border: none; margin: 0; text-shadow: none;">نادي الكويت للسيارات</h2>
+        </div>
+        <p style="font-size: 1.3em;">Kuwait Motor Town - Marshal Management System</p>
+        <div class="date">نوفمبر 2025</div>
+    </div>
+    
+    <div class="container">
+        
+        <!-- المحتوى -->
+        <h1>📋 نظرة عامة على النظام</h1>
+        
+        <div class="feature-box">
+            <h3>ما هو النظام؟</h3>
+            <p>نظام شامل لإدارة المارشلات في فعاليات نادي الكويت للسيارات (KMT)، يوفر إدارة مركزية لجميع المارشلات، تسجيل الحضور والانصراف إلكترونياً، إدارة الفعاليات والتقويم، تقارير وإحصائيات تفصيلية، ونظام إشعارات فوري.</p>
+        </div>
+        
+        <h2>🎯 لماذا نحتاج هذا النظام؟</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>المشاكل الحالية</th>
+                    <th>الحلول المقدمة</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>📝 التسجيل الورقي يستغرق وقت طويل</td>
+                    <td>⚡ تسجيل فوري بضغطة زر</td>
+                </tr>
+                <tr>
+                    <td>📊 صعوبة متابعة حضور المارشلات</td>
+                    <td>📊 متابعة لحظية لجميع البيانات</td>
+                </tr>
+                <tr>
+                    <td>📱 عدم وجود طريقة سريعة للتواصل</td>
+                    <td>🔔 إشعارات فورية لجميع المارشلات</td>
+                </tr>
+                <tr>
+                    <td>📈 صعوبة عمل التقارير والإحصائيات</td>
+                    <td>📈 تقارير تلقائية ومفصلة</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="page-break"></div>
+        
+        <h1>✨ المميزات الرئيسية</h1>
+        
+        <h2>👨‍💼 للأدمن (الإدارة)</h2>
+        
+        <div class="feature-box">
+            <h4>1. لوحة التحكم الرئيسية</h4>
+            <ul>
+                <li>عرض إحصائيات شاملة للنظام</li>
+                <li>عدد المارشلات النشطين</li>
+                <li>الفعاليات القادمة والحالية</li>
+                <li>نسبة الحضور العامة</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>2. إدارة المارشلات</h4>
+            <ul>
+                <li>✅ إضافة مارشال جديد بكامل بياناته</li>
+                <li>✅ تعديل بيانات المارشلات</li>
+                <li>✅ رفع صور الملفات الشخصية</li>
+                <li>✅ تحديد أنواع المارشال (Drag Race, Drift, Circuit)</li>
+                <li>✅ تفعيل/إيقاف حسابات المارشلات</li>
+                <li>✅ عرض سجل حضور كل مارشال</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>3. إدارة الفعاليات</h4>
+            <ul>
+                <li>✅ إنشاء فعالية جديدة</li>
+                <li>✅ تحديد نوع الفعالية والمتطلبات</li>
+                <li>✅ تحديد الحد الأقصى للمارشلات</li>
+                <li>✅ تحديد تاريخ البداية والنهاية</li>
+                <li>✅ رفع صور الفعالية</li>
+                <li>✅ إلغاء أو إتمام الفعاليات</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>4. إدارة الحضور</h4>
+            <ul>
+                <li>✅ عرض قائمة المسجلين لكل فعالية</li>
+                <li>✅ الموافقة أو رفض طلبات التسجيل</li>
+                <li>✅ إضافة ملاحظات على الحضور</li>
+                <li>✅ طباعة سجلات الحضور</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>5. التقارير والإحصائيات</h4>
+            <ul>
+                <li>📊 تقرير حضور المارشلات</li>
+                <li>📊 تقرير الفعاليات</li>
+                <li>📊 تقرير الأداء الشهري</li>
+                <li>📊 إحصائيات مفصلة بالرسوم البيانية</li>
+                <li>🖨️ طباعة وتصدير التقارير</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h2>👨‍🔧 للمارشال</h2>
+        
+        <div class="feature-box">
+            <h4>1. لوحة المعلومات الشخصية</h4>
+            <ul>
+                <li>عرض البيانات الشخصية</li>
+                <li>عرض نوع المارشال المسجل</li>
+                <li>عدد الفعاليات المشارك فيها</li>
+                <li>آخر الإشعارات</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>2. الملف الشخصي</h4>
+            <ul>
+                <li>✅ عرض جميع البيانات الشخصية</li>
+                <li>✅ تعديل البيانات (الاسم، الجوال، إلخ)</li>
+                <li>✅ رفع صورة شخصية</li>
+                <li>✅ تغيير كلمة المرور</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>3. الفعاليات</h4>
+            <ul>
+                <li>📅 عرض جميع الفعاليات القادمة</li>
+                <li>📅 عرض تفاصيل كل فعالية</li>
+                <li>✅ التسجيل في الفعاليات المناسبة</li>
+                <li>❌ إلغاء التسجيل قبل الموعد</li>
+                <li>📋 عرض حالة التسجيل (معلق، مقبول، مرفوض)</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>4. سجل الحضور</h4>
+            <ul>
+                <li>📊 عرض جميع الفعاليات السابقة</li>
+                <li>📊 حالة الحضور لكل فعالية</li>
+                <li>📊 ملاحظات الإدارة</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>5. الإشعارات</h4>
+            <ul>
+                <li>🔔 إشعار بإضافة فعالية جديدة</li>
+                <li>🔔 إشعار بقبول التسجيل</li>
+                <li>🔔 إشعار بأي تغييرات في الفعالية</li>
+                <li>🔔 تذكير قبل موعد الفعالية</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>📱 دليل الاستخدام - الأدمن</h1>
+        
+        <h2>🔐 تسجيل الدخول</h2>
+        <ol>
+            <li>افتح الموقع</li>
+            <li>اضغط على <strong>تسجيل الدخول</strong></li>
+            <li>أدخل البريد الإلكتروني وكلمة المرور</li>
+            <li>اضغط <strong>دخول</strong></li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>البريد الإلكتروني الافتراضي:</strong> admin@kmt.kw
+        </div>
+        
+        <h2>👥 إضافة مارشال جديد</h2>
+        <ol>
+            <li>من القائمة الجانبية، اختر <strong>إدارة المارشلات</strong></li>
+            <li>اضغط <strong>إضافة مارشال</strong></li>
+            <li>املأ البيانات المطلوبة:
+                <ul>
+                    <li><strong>رقم الموظف:</strong> KMT-XXX (مثال: KMT-101)</li>
+                    <li><strong>الاسم الكامل</strong></li>
+                    <li><strong>البريد الإلكتروني</strong></li>
+                    <li><strong>رقم الجوال</strong></li>
+                    <li><strong>الرقم المدني</strong></li>
+                    <li><strong>تاريخ الميلاد</strong></li>
+                    <li><strong>الجنسية</strong></li>
+                    <li><strong>نوع المارشال:</strong> اختر واحد أو أكثر</li>
+                </ul>
+            </li>
+            <li>اضغط <strong>إضافة</strong></li>
+        </ol>
+        
+        <div class="warning-box">
+            <strong>ملاحظة:</strong> سيتم إرسال بريد إلكتروني للمارشال ببيانات الدخول.
+        </div>
+        
+        <h2>📸 رفع صورة لمارشال</h2>
+        <ol>
+            <li>من قائمة المارشلات، اضغط على المارشال المطلوب</li>
+            <li>اضغط <strong>تعديل</strong></li>
+            <li>اضغط على أيقونة الكاميرا</li>
+            <li>اختر الصورة من جهازك</li>
+            <li>اضغط <strong>حفظ</strong></li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>المواصفات المطلوبة:</strong>
+            <ul>
+                <li>الحجم الأقصى: 5 MB</li>
+                <li>الصيغ المدعومة: JPG, PNG, GIF, WEBP</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h2>🎪 إنشاء فعالية جديدة</h2>
+        <ol>
+            <li>من القائمة الجانبية، اختر <strong>إدارة الفعاليات</strong></li>
+            <li>اضغط <strong>إضافة فعالية</strong></li>
+            <li>املأ جميع البيانات المطلوبة</li>
+            <li>ارفع صورة للفعالية (اختياري)</li>
+            <li>اضغط <strong>إنشاء الفعالية</strong></li>
+        </ol>
+        
+        <div class="success-box">
+            <strong>نتيجة:</strong> سيتم إرسال إشعار تلقائي لجميع المارشلات المناسبين.
+        </div>
+        
+        <h2>✅ إدارة طلبات التسجيل</h2>
+        <ol>
+            <li>اختر <strong>إدارة الحضور</strong> من القائمة</li>
+            <li>اختر الفعالية المطلوبة</li>
+            <li>ستظهر قائمة بجميع المسجلين وحالاتهم</li>
+            <li>لكل مارشال، يمكنك:
+                <ul>
+                    <li>اضغط <strong>✓ موافقة</strong> لقبول التسجيل</li>
+                    <li>اضغط <strong>✗ رفض</strong> لرفض التسجيل</li>
+                    <li>أضف ملاحظة في خانة الملاحظات</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>الحالة</th>
+                    <th>الوصف</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🟡 معلق</td>
+                    <td>في انتظار الموافقة</td>
+                    <td>يتطلب قرار من الأدمن</td>
+                </tr>
+                <tr>
+                    <td>🟢 مقبول</td>
+                    <td>تمت الموافقة</td>
+                    <td>تم إرسال إشعار للمارشال</td>
+                </tr>
+                <tr>
+                    <td>🔴 مرفوض</td>
+                    <td>تم الرفض</td>
+                    <td>تم إرسال إشعار للمارشال</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="page-break"></div>
+        
+        <h1>📱 دليل الاستخدام - المارشال</h1>
+        
+        <h2>🆕 التسجيل في النظام (أول مرة)</h2>
+        
+        <div class="warning-box">
+            <strong>ملاحظة مهمة:</strong> الأدمن هو من يضيف حسابك أولاً.
+        </div>
+        
+        <ol>
+            <li>ستستلم بريد إلكتروني يحتوي على بيانات الدخول</li>
+            <li>افتح الموقع</li>
+            <li>اضغط <strong>تسجيل الدخول</strong></li>
+            <li>أدخل البريد وكلمة المرور المرسلة</li>
+            <li><strong>يُنصح بتغيير كلمة المرور</strong> من الإعدادات</li>
+        </ol>
+        
+        <h2>📝 التسجيل في فعالية</h2>
+        <ol>
+            <li>من الصفحة الرئيسية أو <strong>الفعاليات</strong></li>
+            <li>ستظهر جميع الفعاليات القادمة</li>
+            <li>اضغط على الفعالية المطلوبة</li>
+            <li>اقرأ التفاصيل جيداً</li>
+            <li>إذا كانت الفعالية مناسبة، اضغط <strong>سجل الآن</strong></li>
+            <li>ستظهر رسالة تأكيد</li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>ملاحظات:</strong>
+            <ul>
+                <li>لن تتمكن من التسجيل إذا كانت الفعالية ممتلئة</li>
+                <li>لن تتمكن من التسجيل إذا كان نوعك لا يتطابق مع المطلوب</li>
+            </ul>
+        </div>
+        
+        <h2>❌ إلغاء التسجيل</h2>
+        <ol>
+            <li>اذهب إلى <strong>الفعاليات</strong></li>
+            <li>ابحث عن الفعالية التي سجلت فيها</li>
+            <li>اضغط على الفعالية</li>
+            <li>اضغط <strong>إلغاء التسجيل</strong></li>
+            <li>أكد الإلغاء</li>
+        </ol>
+        
+        <div class="warning-box">
+            <strong>تنبيه:</strong> لا يمكن الإلغاء بعد موافقة الإدارة إلا بالتواصل مع الأدمن.
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>🛠️ التقنيات المستخدمة</h1>
+        
+        <h2>البنية التقنية</h2>
+        
+        <div class="feature-box">
+            <h4>الواجهة الأمامية (Frontend)</h4>
+            <ul>
+                <li><strong>Next.js 16</strong> - إطار عمل React متقدم</li>
+                <li><strong>React 19</strong> - مكتبة بناء الواجهات</li>
+                <li><strong>Tailwind CSS</strong> - تصميم عصري وسريع</li>
+                <li><strong>Framer Motion</strong> - حركات وانتقالات سلسة</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>الخادم (Backend)</h4>
+            <ul>
+                <li><strong>Next.js API Routes</strong> - واجهات برمجية آمنة</li>
+                <li><strong>NextAuth.js</strong> - نظام مصادقة متقدم</li>
+                <li><strong>Prisma ORM</strong> - إدارة قاعدة البيانات</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>قاعدة البيانات</h4>
+            <ul>
+                <li><strong>PostgreSQL</strong> - قاعدة بيانات موثوقة</li>
+                <li><strong>Neon</strong> - استضافة سحابية آمنة</li>
+                <li><strong>نسخ احتياطي تلقائي</strong></li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>التخزين السحابي</h4>
+            <ul>
+                <li><strong>Cloudinary</strong> - تخزين الصور</li>
+                <li><strong>25 GB مساحة مجانية</strong></li>
+                <li><strong>ضغط تلقائي للصور</strong></li>
+                <li><strong>CDN عالمي سريع</strong></li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>الاستضافة</h4>
+            <ul>
+                <li><strong>Vercel</strong> - استضافة عالمية</li>
+                <li><strong>HTTPS آمن</strong></li>
+                <li><strong>تحديثات تلقائية</strong></li>
+                <li><strong>99.9% وقت تشغيل</strong></li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>🔒 الأمان والخصوصية</h1>
+        
+        <h2>إجراءات الأمان</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>الإجراء الأمني</th>
+                    <th>التفاصيل</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🔐 تشفير البيانات</td>
+                    <td>جميع كلمات المرور مشفرة بخوارزمية bcrypt</td>
+                </tr>
+                <tr>
+                    <td>🔒 HTTPS/SSL</td>
+                    <td>جميع الاتصالات مشفرة وآمنة</td>
+                </tr>
+                <tr>
+                    <td>👤 صلاحيات الوصول</td>
+                    <td>كل مستخدم له صلاحيات محددة</td>
+                </tr>
+                <tr>
+                    <td>💾 النسخ الاحتياطي</td>
+                    <td>نسخ احتياطي يومي تلقائي</td>
+                </tr>
+                <tr>
+                    <td>🛡️ حماية من الاختراق</td>
+                    <td>حماية من SQL Injection و XSS</td>
+                </tr>
+                <tr>
+                    <td>🔑 إدارة الجلسات</td>
+                    <td>انتهاء الجلسة التلقائي بعد فترة</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="success-box">
+            <h4>الخصوصية</h4>
+            <ul>
+                <li>✅ البيانات الشخصية سرية ومحمية</li>
+                <li>✅ لا يتم مشاركة البيانات مع جهات خارجية</li>
+                <li>✅ الصور محمية ولا يمكن الوصول لها إلا بصلاحية</li>
+                <li>✅ لا يمكن للمارشال رؤية بيانات مارشلات آخرين</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>📊 الإحصائيات والأداء</h1>
+        
+        <h2>سعة النظام الحالية</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>المورد</th>
+                    <th>السعة</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>المستخدمين</td>
+                    <td>غير محدود</td>
+                </tr>
+                <tr>
+                    <td>الفعاليات</td>
+                    <td>غير محدود</td>
+                </tr>
+                <tr>
+                    <td>الصور</td>
+                    <td>25 GB (~50,000 صورة)</td>
+                </tr>
+                <tr>
+                    <td>قاعدة البيانات</td>
+                    <td>500 MB (~100,000 سجل)</td>
+                </tr>
+                <tr>
+                    <td>السرعة</td>
+                    <td>< 1 ثانية</td>
+                </tr>
+                <tr>
+                    <td>وقت التشغيل</td>
+                    <td>99.9%</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>الأداء المتوقع</h2>
+        
+        <div class="feature-box">
+            <ul>
+                <li><strong>سرعة التحميل:</strong> أقل من ثانية واحدة</li>
+                <li><strong>سرعة معالجة البيانات:</strong> فورية</li>
+                <li><strong>رفع الصور:</strong> 3-5 ثواني</li>
+                <li><strong>الإشعارات:</strong> فورية</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>💰 التكلفة</h1>
+        
+        <div class="success-box">
+            <h2 style="margin: 0; color: #28a745;">التكلفة الحالية: 0 دينار/شهر</h2>
+            <p style="margin-top: 1em;">النظام يعمل بالكامل على خطط مجانية!</p>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>الخدمة</th>
+                    <th>التكلفة</th>
+                    <th>الاستخدام</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Vercel (الاستضافة)</td>
+                    <td>مجاني</td>
+                    <td>استضافة الموقع + SSL</td>
+                </tr>
+                <tr>
+                    <td>Neon (قاعدة البيانات)</td>
+                    <td>مجاني</td>
+                    <td>500 MB تخزين</td>
+                </tr>
+                <tr>
+                    <td>Cloudinary (الصور)</td>
+                    <td>مجاني</td>
+                    <td>25 GB / شهر</td>
+                </tr>
+                <tr>
+                    <td><strong>الإجمالي</strong></td>
+                    <td><strong>0 دينار</strong></td>
+                    <td>يكفي لأكثر من 10 سنوات</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="info-box">
+            <h4>كافية لـ:</h4>
+            <ul>
+                <li>✅ 600+ مارشال</li>
+                <li>✅ 100+ فعالية/سنة</li>
+                <li>✅ 50,000 صورة</li>
+                <li>✅ 10+ سنوات استخدام</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>🚀 التحديثات المستقبلية</h1>
+        
+        <h2>خارطة الطريق</h2>
+        
+        <div class="feature-box">
+            <h3>المرحلة 1 (الحالية) ✅</h3>
+            <ul>
+                <li>نظام إدارة المارشلات</li>
+                <li>نظام الفعاليات</li>
+                <li>نظام الحضور</li>
+                <li>التقارير الأساسية</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>المرحلة 2 (قريباً)</h3>
+            <ul>
+                <li>📱 تطبيق الجوال (iOS & Android)</li>
+                <li>🔔 إشعارات فورية Push</li>
+                <li>📊 تقارير متقدمة</li>
+                <li>💬 نظام محادثة داخلي</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>المرحلة 3 (المستقبل)</h3>
+            <ul>
+                <li>🎯 نظام نقاط وتقييم</li>
+                <li>📜 شهادات إلكترونية</li>
+                <li>📧 بريد إلكتروني جماعي</li>
+                <li>📅 تصدير للتقويم</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>📞 الدعم الفني</h1>
+        
+        <h2>في حال واجهتك مشكلة</h2>
+        
+        <div class="feature-box">
+            <h4>مشاكل تسجيل الدخول</h4>
+            <ul>
+                <li>تأكد من البريد الإلكتروني وكلمة المرور</li>
+                <li>جرب "نسيت كلمة المرور"</li>
+                <li>تواصل مع الأدمن</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>مشاكل رفع الصور</h4>
+            <ul>
+                <li>تأكد من حجم الصورة (أقل من 5 MB)</li>
+                <li>استخدم صيغة JPG أو PNG</li>
+                <li>جرب من متصفح آخر</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>مشاكل في الأداء</h4>
+            <ul>
+                <li>تأكد من اتصال الإنترنت</li>
+                <li>امسح الكاش والكوكيز</li>
+                <li>جرب من جهاز آخر</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h4>للدعم الفني:</h4>
+            <ul>
+                <li><strong>البريد الإلكتروني:</strong> admin@kmt.kw</li>
+                <li><strong>الموقع:</strong> [رابط الموقع]</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>✅ الخلاصة</h1>
+        
+        <div class="success-box">
+            <h2 style="margin-top: 0;">نظام متكامل وجاهز للاستخدام الفوري!</h2>
+            <p>نظام إدارة المارشلات في نادي الكويت للسيارات هو الحل الشامل والعصري لإدارة جميع عمليات المارشلات والفعاليات بكفاءة عالية.</p>
+        </div>
+        
+        <h2>للإدارة (الأدمن)</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td>✅ إدارة كاملة للمارشلات</td>
+                    <td>✅ إدارة الفعاليات والجدولة</td>
+                </tr>
+                <tr>
+                    <td>✅ قبول/رفض طلبات التسجيل</td>
+                    <td>✅ تقارير مفصلة وإحصائيات</td>
+                </tr>
+                <tr>
+                    <td>✅ طباعة سجلات الحضور</td>
+                    <td>✅ إرسال إشعارات</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>للمارشلات</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td>✅ التسجيل في الفعاليات بسهولة</td>
+                    <td>✅ متابعة حالة التسجيل</td>
+                </tr>
+                <tr>
+                    <td>✅ عرض سجل الحضور</td>
+                    <td>✅ تعديل الملف الشخصي</td>
+                </tr>
+                <tr>
+                    <td>✅ استقبال الإشعارات الفورية</td>
+                    <td>✅ واجهة سهلة وبسيطة</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>للنظام</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td>✅ سريع وآمن وموثوق</td>
+                    <td>✅ سهل الاستخدام</td>
+                </tr>
+                <tr>
+                    <td>✅ يعمل على جميع الأجهزة</td>
+                    <td>✅ مجاني بالكامل</td>
+                </tr>
+                <tr>
+                    <td>✅ دعم فني متاح</td>
+                    <td>✅ تحديثات مستمرة</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="page-break"></div>
+        
+        <div class="footer">
+            <h2>🏁 نادي الكويت للسيارات 🏁</h2>
+            <h3>Kuwait Motor Town</h3>
+            <p style="margin: 2em 0;">نظام إدارة المارشلات</p>
+            <p><strong>الإصدار:</strong> 1.0.0</p>
+            <p><strong>تاريخ الإطلاق:</strong> نوفمبر 2025</p>
+            <p style="margin-top: 2em; font-size: 0.9em; color: #999;">
+                تم تطويره بكل حب وعناية لخدمة نادي الكويت للسيارات 🏎️
+            </p>
+        </div>
+        
+    </div>
+    
+</body>
+</html>

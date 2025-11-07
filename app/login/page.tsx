@@ -139,6 +139,11 @@ export default function LoginPage() {
         <div className="absolute -top-4 -left-4 w-24 h-24 bg-red-600/20 rounded-full blur-3xl" />
         <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-red-600/20 rounded-full blur-3xl" />
       </motion.div>
+
+      {/* Footer */}
+      <div className="absolute bottom-4 left-0 right-0 text-center text-gray-600 text-xs">
+        <p>© 2025 Feras Alotaibi | +965 5054 0999</p>
+      </div>
     </div>
   )
 }

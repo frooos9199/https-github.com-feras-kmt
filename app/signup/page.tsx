@@ -201,6 +201,11 @@ export default function SignupPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Footer */}
+      <div className="absolute bottom-4 left-0 right-0 text-center text-gray-600 text-xs">
+        <p>© 2025 Feras Alotaibi | +965 5054 0999</p>
+      </div>
     </div>
   )
 }

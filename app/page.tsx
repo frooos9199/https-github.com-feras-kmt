@@ -5,10 +5,26 @@ import Link from "next/link"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function Home() {
-  const { t, language } = useLanguage()
+  const { t, language, setLanguage } = useLanguage()
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Language Toggle Button */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed top-6 right-6 z-50"
+      >
+        <button
+          onClick={() => setLanguage(language === "ar" ? "en" : "ar")}
+          className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg transition-all backdrop-blur-sm border border-white/20 shadow-lg"
+        >
+          <span className="text-lg">🌐</span>
+          <span>{language === "ar" ? "English" : "العربية"}</span>
+        </button>
+      </motion.div>
+
       {/* Hero Section with Video Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Video Background */}
@@ -189,6 +205,35 @@ export default function Home() {
           </Link>
         </motion.div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-6 px-4 bg-black border-t border-gray-800">
+        <div className="max-w-7xl mx-auto text-center text-gray-500 text-sm">
+          <p className="mb-1">
+            {language === "ar" ? "© 2025 جميع الحقوق محفوظة" : "© 2025 All Rights Reserved"}
+          </p>
+          <p>
+            {language === "ar" ? "تصميم وتطوير: " : "Designed & Developed by: "}
+            <a 
+              href="https://wa.me/96550540999" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-red-500 hover:text-red-400 transition-colors"
+            >
+              Feras Alotaibi
+            </a>
+            {" | "}
+            <a 
+              href="https://wa.me/96550540999" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-gray-300 transition-colors"
+            >
+              +965 5054 0999
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
