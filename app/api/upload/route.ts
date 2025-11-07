@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../auth/[...nextauth]/route"
-import { writeFile, mkdir } from "fs/promises"
-import { existsSync } from "fs"
-import path from "path"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
@@ -32,24 +29,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File too large. Max 5MB." }, { status: 400 })
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "profiles")
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true })
-    }
-
-    // Generate unique filename
+    // Convert file to base64 for Cloudinary
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const fileExt = file.name.split(".").pop()
-    const fileName = `${session.user.id}-${Date.now()}.${fileExt}`
-    const filePath = path.join(uploadsDir, fileName)
+    const base64File = `data:${file.type};base64,${buffer.toString('base64')}`
 
-    // Save file
-    await writeFile(filePath, buffer)
+    // Upload to Cloudinary
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`
+    
+    const cloudinaryFormData = new FormData()
+    cloudinaryFormData.append('file', base64File)
+    cloudinaryFormData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'kmt_profiles')
+    cloudinaryFormData.append('folder', 'kmt/profiles')
+
+    const cloudinaryResponse = await fetch(cloudinaryUrl, {
+      method: 'POST',
+      body: cloudinaryFormData
+    })
+
+    if (!cloudinaryResponse.ok) {
+      throw new Error('Failed to upload to Cloudinary')
+    }
+
+    const cloudinaryData = await cloudinaryResponse.json()
+    const imageUrl = cloudinaryData.secure_url
 
     // Update user image in database
-    const imageUrl = `/uploads/profiles/${fileName}`
     await prisma.user.update({
       where: { id: session.user.id },
       data: { image: imageUrl }
