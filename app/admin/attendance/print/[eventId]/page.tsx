@@ -192,16 +192,16 @@ export default function PrintAttendancePage() {
             <thead>
               <tr className="bg-gray-200">
                 <th className="border-2 border-black p-3 text-center font-bold">
-                  Signature<br/>التوقيع
-                </th>
-                <th className="border-2 border-black p-3 text-center font-bold">
-                  Marshal Number<br/>مارشال نمبر
+                  #<br/>الرقم
                 </th>
                 <th className="border-2 border-black p-3 text-center font-bold">
                   Marshal Name<br/>اسم المارشال
                 </th>
                 <th className="border-2 border-black p-3 text-center font-bold">
-                  #<br/>الرقم
+                  Marshal Number<br/>مارشال نمبر
+                </th>
+                <th className="border-2 border-black p-3 text-center font-bold">
+                  Signature<br/>التوقيع
                 </th>
               </tr>
             </thead>
@@ -215,17 +215,17 @@ export default function PrintAttendancePage() {
               ) : (
                 attendances.map((attendance, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="border-2 border-black p-3">
-                      {/* Empty cell for signature */}
-                    </td>
-                    <td className="border-2 border-black p-3 font-mono font-bold text-center">
-                      {attendance.user.employeeId}
+                    <td className="border-2 border-black p-3 text-center font-semibold">
+                      {index + 1}
                     </td>
                     <td className="border-2 border-black p-3 font-semibold text-center">
                       {attendance.user.name}
                     </td>
-                    <td className="border-2 border-black p-3 text-center font-semibold">
-                      {index + 1}
+                    <td className="border-2 border-black p-3 font-mono font-bold text-center">
+                      {attendance.user.employeeId}
+                    </td>
+                    <td className="border-2 border-black p-3">
+                      {/* Empty cell for signature */}
                     </td>
                   </tr>
                 ))
