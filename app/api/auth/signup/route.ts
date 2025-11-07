@@ -20,21 +20,22 @@ export async function POST(req: Request) {
     }
 
     // Generate employee ID
-    // Get all users and find the highest employee number
-    const allUsers = await prisma.user.findMany({
+    // Get all marshals and find the highest employee number
+    const allMarshals = await prisma.user.findMany({
+      where: { role: 'marshal' },
       select: { employeeId: true }
     })
 
     let nextEmployeeNumber = 100
-    if (allUsers.length > 0) {
-      const employeeNumbers = allUsers
+    if (allMarshals.length > 0) {
+      const employeeNumbers = allMarshals
         .map(u => {
           if (u.employeeId && u.employeeId.startsWith('KMT-')) {
             return parseInt(u.employeeId.split('-')[1])
           }
           return 0
         })
-        .filter(num => !isNaN(num))
+        .filter(num => !isNaN(num) && num >= 100)
       
       if (employeeNumbers.length > 0) {
         const maxNumber = Math.max(...employeeNumbers)

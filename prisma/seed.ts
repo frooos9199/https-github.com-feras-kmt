@@ -39,7 +39,7 @@ async function main() {
       civilId: '123456789012',
       dateOfBirth: new Date('1995-05-15'),
       role: 'marshal',
-      employeeId: 'KMT-001',
+      employeeId: 'KMT-100',
       marshalTypes: 'drift,circuit,rescue',
     },
   })
