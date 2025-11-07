@@ -79,7 +79,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <img src="/kmt-logo-main.png" alt="KMT" className="h-12 w-auto bg-white px-2 py-1 rounded" />
+              <img src="/kmt-logo-main.png" alt="KMT" className="h-12 w-auto border-2 border-white/30 rounded px-2 py-1" />
             </div>
 
             {/* User Menu */}
