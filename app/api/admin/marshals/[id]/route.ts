@@ -63,7 +63,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await req.json()
-    const { isActive, name, email, phone, nationality, marshalTypes } = body
+    const { isActive, name, email, phone, nationality, marshalTypes, employeeId } = body
 
     const updateData: any = {}
     if (typeof isActive === "boolean") updateData.isActive = isActive
@@ -72,6 +72,23 @@ export async function PATCH(
     if (phone) updateData.phone = phone
     if (nationality !== undefined) updateData.nationality = nationality
     if (marshalTypes !== undefined) updateData.marshalTypes = marshalTypes
+    if (employeeId !== undefined) {
+      // Validate employeeId format
+      if (!employeeId.startsWith('KMT-')) {
+        return NextResponse.json({ error: "Employee ID must start with KMT-" }, { status: 400 })
+      }
+      // Check if employeeId is already used by another marshal
+      const existingMarshal = await prisma.user.findFirst({
+        where: {
+          employeeId,
+          id: { not: id }
+        }
+      })
+      if (existingMarshal) {
+        return NextResponse.json({ error: "Employee ID already in use" }, { status: 400 })
+      }
+      updateData.employeeId = employeeId
+    }
 
     const marshal = await prisma.user.update({
       where: { 

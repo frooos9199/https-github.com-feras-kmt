@@ -40,6 +40,7 @@ export default function MarshalDetails() {
     email: "",
     phone: "",
     nationality: "",
+    employeeId: "",
     marshalTypes: [] as string[]
   })
 
@@ -76,6 +77,7 @@ export default function MarshalDetails() {
           email: data.email,
           phone: data.phone,
           nationality: data.nationality || "",
+          employeeId: data.employeeId || "",
           marshalTypes: data.marshalTypes ? data.marshalTypes.split(',').filter((t: string) => t) : []
         })
       } else {
@@ -466,6 +468,21 @@ export default function MarshalDetails() {
                       onChange={(e) => setEditForm({...editForm, nationality: e.target.value})}
                       className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-blue-600 focus:outline-none"
                     />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-gray-400 text-sm mb-2">
+                      🏷️ {language === "ar" ? "الرقم الوظيفي" : "Employee ID"}
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.employeeId}
+                      onChange={(e) => setEditForm({...editForm, employeeId: e.target.value})}
+                      placeholder="KMT-100"
+                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-blue-600 focus:outline-none font-mono"
+                    />
+                    <p className="text-gray-500 text-xs mt-1">
+                      {language === "ar" ? "مثال: KMT-100, KMT-101, KMT-102..." : "Example: KMT-100, KMT-101, KMT-102..."}
+                    </p>
                   </div>
                 </div>
 

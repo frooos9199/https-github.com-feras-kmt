@@ -20,16 +20,26 @@ export async function POST(req: Request) {
     }
 
     // Generate employee ID
-    // Get the last user to determine the next employee number
-    const lastUser = await prisma.user.findFirst({
-      orderBy: { createdAt: 'desc' },
+    // Get all users and find the highest employee number
+    const allUsers = await prisma.user.findMany({
       select: { employeeId: true }
     })
 
     let nextEmployeeNumber = 100
-    if (lastUser && lastUser.employeeId) {
-      const lastNumber = parseInt(lastUser.employeeId.split('-')[1])
-      nextEmployeeNumber = lastNumber + 1
+    if (allUsers.length > 0) {
+      const employeeNumbers = allUsers
+        .map(u => {
+          if (u.employeeId && u.employeeId.startsWith('KMT-')) {
+            return parseInt(u.employeeId.split('-')[1])
+          }
+          return 0
+        })
+        .filter(num => !isNaN(num))
+      
+      if (employeeNumbers.length > 0) {
+        const maxNumber = Math.max(...employeeNumbers)
+        nextEmployeeNumber = maxNumber + 1
+      }
     }
 
     const employeeId = `KMT-${nextEmployeeNumber}`
