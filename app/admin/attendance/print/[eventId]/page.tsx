@@ -91,14 +91,18 @@ export default function PrintAttendancePage() {
   return (
     <>
       <style jsx global>{`
+        * {
+          overflow: visible !important;
+        }
         @media print {
           @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 1cm;
           }
           body {
             print-color-adjust: exact;
             -webkit-print-color-adjust: exact;
+            overflow: visible !important;
           }
           .no-print {
             display: none !important;
@@ -106,10 +110,15 @@ export default function PrintAttendancePage() {
           table {
             page-break-inside: auto;
             width: 100%;
+            overflow: visible !important;
           }
           tr {
             page-break-inside: avoid;
             page-break-after: auto;
+            overflow: visible !important;
+          }
+          tbody, thead {
+            overflow: visible !important;
           }
           thead {
             display: table-header-group;
@@ -122,6 +131,7 @@ export default function PrintAttendancePage() {
             padding: 0 !important;
             margin: 0 !important;
             box-shadow: none !important;
+            overflow: visible !important;
           }
         }
         @media screen {
@@ -210,6 +220,12 @@ export default function PrintAttendancePage() {
 
         {/* Attendances Table */}
         <div className="mb-8">
+          <div className="mb-4 text-center bg-yellow-100 p-3 border-2 border-yellow-500 rounded">
+            <p className="text-lg font-bold">
+              Total Registered: {attendances.length} Marshals / 
+              إجمالي المسجلين: {attendances.length} مارشال
+            </p>
+          </div>
           <table className="w-full border-collapse border-2 border-black">
             <thead>
               <tr className="bg-gray-200">
