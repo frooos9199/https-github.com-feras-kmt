@@ -142,7 +142,18 @@ export default function LoginPage() {
 
       {/* Footer */}
       <div className="absolute bottom-4 left-0 right-0 text-center text-gray-600 text-xs">
-        <p>© 2025 Feras Alotaibi | +965 5054 0999</p>
+        <p>
+          © 2025 Developed by{" "}
+          <a 
+            href="https://nexdev-portfolio-one.vercel.app/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-red-500 hover:text-red-400 transition-colors"
+          >
+            NexDev
+          </a>
+          {" "}| +965 5054 0999
+        </p>
       </div>
     </div>
   )

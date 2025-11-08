@@ -215,12 +215,12 @@ export default function Home() {
           <p>
             {language === "ar" ? "تصميم وتطوير: " : "Designed & Developed by: "}
             <a 
-              href="https://wa.me/96550540999" 
+              href="https://nexdev-portfolio-one.vercel.app/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-red-500 hover:text-red-400 transition-colors"
             >
-              Feras Alotaibi
+              NexDev
             </a>
             {" | "}
             <a 
