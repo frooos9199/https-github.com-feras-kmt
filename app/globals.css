@@ -44,4 +44,15 @@ h1, h2, h3, h4, h5, h6 {
   background: #b91c1c;
 }
 
+/* Bottom Navigation Spacing */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Add bottom padding to pages when bottom nav is visible */
+@media (max-width: 768px) {
+  main, .min-h-screen {
+    padding-bottom: 5rem;
+  }
+}
 

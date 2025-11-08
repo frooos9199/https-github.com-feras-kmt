@@ -3,6 +3,7 @@ import { Montserrat, Roboto } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import AuthProvider from "@/components/AuthProvider";
+import BottomNav from "@/components/BottomNav";
 
 const montserrat = Montserrat({ 
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
         <AuthProvider>
           <LanguageProvider>
             {children}
+            <BottomNav />
           </LanguageProvider>
         </AuthProvider>
       </body>
