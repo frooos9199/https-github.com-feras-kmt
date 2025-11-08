@@ -56,3 +56,13 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Hide bottom navigation when printing */
+@media print {
+  .fixed.bottom-0 {
+    display: none !important;
+  }
+  main, .min-h-screen {
+    padding-bottom: 0 !important;
+  }
+}
+
