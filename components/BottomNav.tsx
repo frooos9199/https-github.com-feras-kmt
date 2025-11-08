@@ -103,7 +103,10 @@ export default function BottomNav() {
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-lg border-t border-red-600/30 safe-area-bottom">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {links.map((link) => {
-          const isActive = pathname === link.href || pathname?.startsWith(link.href + "/")
+          // Exact match for home pages, starts with for other pages
+          const isActive = link.href === '/admin' || link.href === '/dashboard'
+            ? pathname === link.href
+            : pathname?.startsWith(link.href)
           const Icon = isActive ? link.iconSolid : link.icon
           
           return (
