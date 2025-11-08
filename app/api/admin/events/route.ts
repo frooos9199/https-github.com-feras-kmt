@@ -17,7 +17,13 @@ export async function GET(request: NextRequest) {
     const events = await prisma.event.findMany({
       include: {
         _count: {
-          select: { attendances: true }
+          select: { 
+            attendances: {
+              where: {
+                status: 'approved' // Only count approved attendances
+              }
+            }
+          }
         }
       },
       orderBy: { createdAt: "desc" }
