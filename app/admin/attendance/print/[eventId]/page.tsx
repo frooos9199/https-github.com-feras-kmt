@@ -198,7 +198,7 @@ export default function PrintAttendancePage() {
                   Marshal Name<br/>اسم المارشال
                 </th>
                 <th className="border-2 border-black p-3 text-center font-bold">
-                  Marshal Number<br/>مارشال نمبر
+                  Marshal Number<br/>رقم المارشال
                 </th>
                 <th className="border-2 border-black p-3 text-center font-bold">
                   Signature<br/>التوقيع
