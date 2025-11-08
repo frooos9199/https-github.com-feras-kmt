@@ -13,6 +13,13 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get("file") as File
+    const imageType = formData.get("imageType") as string || "profile" // profile, licenseFront, licenseBack
+    const targetUserId = formData.get("userId") as string || session.user.id // For admin uploads
+    
+    // If uploading for another user, must be admin
+    if (targetUserId !== session.user.id && session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
     
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
@@ -54,10 +61,19 @@ export async function POST(request: NextRequest) {
     const cloudinaryData = await cloudinaryResponse.json()
     const imageUrl = cloudinaryData.secure_url
 
-    // Update user image in database
+    // Update user image in database based on type
+    const updateData: any = {}
+    if (imageType === "licenseFront") {
+      updateData.licenseFrontImage = imageUrl
+    } else if (imageType === "licenseBack") {
+      updateData.licenseBackImage = imageUrl
+    } else {
+      updateData.image = imageUrl
+    }
+
     await prisma.user.update({
-      where: { id: session.user.id },
-      data: { image: imageUrl }
+      where: { id: targetUserId },
+      data: updateData
     })
 
     return NextResponse.json({ 

@@ -17,6 +17,8 @@ interface Marshal {
   dateOfBirth: string
   nationality: string | null
   image: string | null
+  licenseFrontImage: string | null
+  licenseBackImage: string | null
   isActive: boolean
   marshalTypes: string
   createdAt: string
@@ -35,6 +37,8 @@ export default function MarshalDetails() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [marshalId, setMarshalId] = useState<string | null>(null)
+  const [uploadingLicenseFront, setUploadingLicenseFront] = useState(false)
+  const [uploadingLicenseBack, setUploadingLicenseBack] = useState(false)
   const [editForm, setEditForm] = useState({
     name: "",
     email: "",
@@ -138,6 +142,90 @@ export default function MarshalDetails() {
       }
     } catch (error) {
       console.error("Error updating marshal:", error)
+    }
+  }
+
+  const handleLicenseFrontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !marshal) return
+
+    if (!file.type.startsWith("image/")) {
+      alert(language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert(language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB")
+      return
+    }
+
+    setUploadingLicenseFront(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("imageType", "licenseFront")
+      formData.append("userId", marshal.id)
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+
+      if (res.ok) {
+        alert(language === "ar" ? "تم رفع صورة الرخصة (الأمام) بنجاح!" : "License front image uploaded successfully!")
+        fetchMarshal()
+      } else {
+        const data = await res.json()
+        alert(data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image"))
+      }
+    } catch (error) {
+      console.error("Error uploading license front:", error)
+      alert(language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading")
+    } finally {
+      setUploadingLicenseFront(false)
+    }
+  }
+
+  const handleLicenseBackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !marshal) return
+
+    if (!file.type.startsWith("image/")) {
+      alert(language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert(language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB")
+      return
+    }
+
+    setUploadingLicenseBack(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("imageType", "licenseBack")
+      formData.append("userId", marshal.id)
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+
+      if (res.ok) {
+        alert(language === "ar" ? "تم رفع صورة الرخصة (الخلف) بنجاح!" : "License back image uploaded successfully!")
+        fetchMarshal()
+      } else {
+        const data = await res.json()
+        alert(data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image"))
+      }
+    } catch (error) {
+      console.error("Error uploading license back:", error)
+      alert(language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading")
+    } finally {
+      setUploadingLicenseBack(false)
     }
   }
 
@@ -259,6 +347,112 @@ export default function MarshalDetails() {
                   {language === "ar" ? "اضغط للعرض بالحجم الكامل" : "Click to view full size"}
                 </p>
               )}
+            </div>
+
+            {/* License Images */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 mt-6">
+              <h2 className="text-xl font-bold text-white mb-4">
+                🪪 {language === "ar" ? "رخصة القيادة" : "Driver License"}
+              </h2>
+              <div className="space-y-4">
+                {/* License Front */}
+                <div>
+                  <p className="text-gray-400 text-sm mb-2">
+                    {language === "ar" ? "الرخصة - الأمام" : "License - Front"}
+                  </p>
+                  {marshal.licenseFrontImage ? (
+                    <div className="relative group">
+                      <img
+                        src={marshal.licenseFrontImage}
+                        alt="License Front"
+                        className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700 cursor-pointer hover:scale-[1.02] transition-transform"
+                        onClick={() => window.open(marshal.licenseFrontImage!, "_blank")}
+                      />
+                      <a
+                        href={marshal.licenseFrontImage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
+                      >
+                        {language === "ar" ? "عرض" : "View"}
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 bg-zinc-800/50 border-2 border-dashed border-zinc-700 rounded-lg flex items-center justify-center text-gray-500">
+                      {language === "ar" ? "لم يتم رفع صورة" : "No image uploaded"}
+                    </div>
+                  )}
+                  <label className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white transition-colors cursor-pointer">
+                    {uploadingLicenseFront ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm">{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📤</span>
+                        <span className="text-sm">{language === "ar" ? "رفع صورة الأمام" : "Upload Front Image"}</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLicenseFrontUpload}
+                      disabled={uploadingLicenseFront}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* License Back */}
+                <div>
+                  <p className="text-gray-400 text-sm mb-2">
+                    {language === "ar" ? "الرخصة - الخلف" : "License - Back"}
+                  </p>
+                  {marshal.licenseBackImage ? (
+                    <div className="relative group">
+                      <img
+                        src={marshal.licenseBackImage}
+                        alt="License Back"
+                        className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700 cursor-pointer hover:scale-[1.02] transition-transform"
+                        onClick={() => window.open(marshal.licenseBackImage!, "_blank")}
+                      />
+                      <a
+                        href={marshal.licenseBackImage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
+                      >
+                        {language === "ar" ? "عرض" : "View"}
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 bg-zinc-800/50 border-2 border-dashed border-zinc-700 rounded-lg flex items-center justify-center text-gray-500">
+                      {language === "ar" ? "لم يتم رفع صورة" : "No image uploaded"}
+                    </div>
+                  )}
+                  <label className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white transition-colors cursor-pointer">
+                    {uploadingLicenseBack ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm">{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📤</span>
+                        <span className="text-sm">{language === "ar" ? "رفع صورة الخلف" : "Upload Back Image"}</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLicenseBackUpload}
+                      disabled={uploadingLicenseBack}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
           </motion.div>
 

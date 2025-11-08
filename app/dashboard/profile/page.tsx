@@ -17,6 +17,8 @@ interface UserProfile {
   dateOfBirth: string | null
   nationality: string | null
   image: string | null
+  licenseFrontImage: string | null
+  licenseBackImage: string | null
   role: string
 }
 
@@ -28,6 +30,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadingLicenseFront, setUploadingLicenseFront] = useState(false)
+  const [uploadingLicenseBack, setUploadingLicenseBack] = useState(false)
   const [editing, setEditing] = useState(true) // مفعّل دائماً
   const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null)
 
@@ -132,6 +136,126 @@ export default function ProfilePage() {
       })
     } finally {
       setUploading(false)
+    }
+  }
+
+  const handleLicenseFrontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file"
+      })
+      return
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB"
+      })
+      return
+    }
+
+    setUploadingLicenseFront(true)
+    setMessage(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("imageType", "licenseFront")
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage({
+          type: "success",
+          text: language === "ar" ? "تم رفع صورة الرخصة (الأمام) بنجاح!" : "License front image uploaded successfully!"
+        })
+        fetchProfile() // Refresh profile to show new image
+      } else {
+        setMessage({
+          type: "error",
+          text: data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image")
+        })
+      }
+    } catch (error) {
+      console.error("Error uploading license front:", error)
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading"
+      })
+    } finally {
+      setUploadingLicenseFront(false)
+    }
+  }
+
+  const handleLicenseBackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file"
+      })
+      return
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB"
+      })
+      return
+    }
+
+    setUploadingLicenseBack(true)
+    setMessage(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("imageType", "licenseBack")
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage({
+          type: "success",
+          text: language === "ar" ? "تم رفع صورة الرخصة (الخلف) بنجاح!" : "License back image uploaded successfully!"
+        })
+        fetchProfile() // Refresh profile to show new image
+      } else {
+        setMessage({
+          type: "error",
+          text: data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image")
+        })
+      }
+    } catch (error) {
+      console.error("Error uploading license back:", error)
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading"
+      })
+    } finally {
+      setUploadingLicenseBack(false)
     }
   }
 
@@ -342,6 +466,107 @@ export default function ProfilePage() {
                 disabled
                 className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed font-bold"
               />
+            </div>
+
+            {/* License Images */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white border-b border-zinc-700 pb-2">
+                {language === "ar" ? "رخصة القيادة (اختياري)" : "Driver License (Optional)"}
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* License Front */}
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">
+                    {language === "ar" ? "الرخصة - الأمام" : "License - Front"}
+                  </label>
+                  <div className="space-y-3">
+                    {profile.licenseFrontImage && (
+                      <div className="relative group">
+                        <img
+                          src={profile.licenseFrontImage}
+                          alt="License Front"
+                          className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700"
+                        />
+                        <a
+                          href={profile.licenseFrontImage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
+                        >
+                          {language === "ar" ? "عرض" : "View"}
+                        </a>
+                      </div>
+                    )}
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white hover:bg-zinc-800 transition-colors cursor-pointer">
+                      {uploadingLicenseFront ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xl">📄</span>
+                          <span>{language === "ar" ? "رفع صورة الأمام" : "Upload Front Image"}</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLicenseFrontUpload}
+                        disabled={uploadingLicenseFront}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* License Back */}
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">
+                    {language === "ar" ? "الرخصة - الخلف" : "License - Back"}
+                  </label>
+                  <div className="space-y-3">
+                    {profile.licenseBackImage && (
+                      <div className="relative group">
+                        <img
+                          src={profile.licenseBackImage}
+                          alt="License Back"
+                          className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700"
+                        />
+                        <a
+                          href={profile.licenseBackImage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
+                        >
+                          {language === "ar" ? "عرض" : "View"}
+                        </a>
+                      </div>
+                    )}
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white hover:bg-zinc-800 transition-colors cursor-pointer">
+                      {uploadingLicenseBack ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xl">📄</span>
+                          <span>{language === "ar" ? "رفع صورة الخلف" : "Upload Back Image"}</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLicenseBackUpload}
+                        disabled={uploadingLicenseBack}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Name */}

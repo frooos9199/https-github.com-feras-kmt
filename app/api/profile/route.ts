@@ -24,6 +24,8 @@ export async function GET() {
         dateOfBirth: true,
         nationality: true,
         image: true,
+        licenseFrontImage: true,
+        licenseBackImage: true,
         role: true,
       }
     })

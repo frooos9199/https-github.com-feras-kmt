@@ -11,21 +11,23 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  employeeId    String   @unique // KMT-100, KMT-101, etc.
-  name          String
-  email         String   @unique
-  password      String
-  phone         String
-  civilId       String
-  dateOfBirth   DateTime
-  nationality   String? // Nationality field
-  image         String?
-  isActive      Boolean  @default(true) // Active/Suspended status
-  marshalTypes  String   @default("") // Comma-separated: "drag-race,drift,circuit"
-  role          String   @default("marshal") // "marshal" or "admin"
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  employeeId         String   @unique // KMT-100, KMT-101, etc.
+  name               String
+  email              String   @unique
+  password           String
+  phone              String
+  civilId            String
+  dateOfBirth        DateTime
+  nationality        String? // Nationality field
+  image              String?
+  licenseFrontImage  String? // Driver license front image
+  licenseBackImage   String? // Driver license back image
+  isActive           Boolean  @default(true) // Active/Suspended status
+  marshalTypes       String   @default("") // Comma-separated: "drag-race,drift,circuit"
+  role               String   @default("marshal") // "marshal" or "admin"
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   attendances   Attendance[]
   notifications Notification[]
