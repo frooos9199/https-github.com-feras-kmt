@@ -19,6 +19,9 @@ export async function GET(
       where: { id },
       include: {
         attendances: {
+          where: {
+            status: 'approved' // Only show approved attendances
+          },
           include: {
             user: {
               select: {
@@ -33,7 +36,13 @@ export async function GET(
           }
         },
         _count: {
-          select: { attendances: true }
+          select: { 
+            attendances: {
+              where: {
+                status: 'approved' // Only count approved attendances
+              }
+            }
+          }
         }
       }
     })
