@@ -133,7 +133,7 @@ export default function PrintAttendancePage() {
             <img src="/kmt-logo-main.png" alt="KMT" className="h-16 w-auto" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Kuwait Motor Town</h1>
-          <h2 className="text-xl font-semibold">قائمة حضور المارشالات</h2>
+          <h2 className="text-xl font-semibold">قائمة حضور المارشال</h2>
           <p className="text-lg">Marshals Attendance List</p>
         </div>
 
