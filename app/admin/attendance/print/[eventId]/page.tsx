@@ -94,7 +94,7 @@ export default function PrintAttendancePage() {
         @media print {
           @page {
             size: A4;
-            margin: 2cm;
+            margin: 1.5cm;
           }
           body {
             print-color-adjust: exact;
@@ -105,6 +105,7 @@ export default function PrintAttendancePage() {
           }
           table {
             page-break-inside: auto;
+            width: 100%;
           }
           tr {
             page-break-inside: avoid;
@@ -113,8 +114,14 @@ export default function PrintAttendancePage() {
           thead {
             display: table-header-group;
           }
-          tfoot {
-            display: table-footer-group;
+          tbody {
+            display: table-row-group;
+          }
+          .print-container {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
           }
         }
         @media screen {
