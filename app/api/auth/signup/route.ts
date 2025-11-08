@@ -62,6 +62,26 @@ export async function POST(req: Request) {
       }
     })
 
+    // Create notification for admin
+    const admins = await prisma.user.findMany({
+      where: { role: 'admin' },
+      select: { id: true }
+    })
+
+    if (admins.length > 0) {
+      await prisma.notification.createMany({
+        data: admins.map(admin => ({
+          userId: admin.id,
+          type: 'new_marshal',
+          titleEn: 'New Marshal Registration',
+          titleAr: 'تسجيل مارشال جديد',
+          messageEn: `${user.name} (${user.employeeId}) has registered as a new marshal`,
+          messageAr: `${user.name} (${user.employeeId}) قام بالتسجيل كمارشال جديد`,
+          isRead: false
+        }))
+      })
+    }
+
     return NextResponse.json(
       { message: "User created successfully", userId: user.id, employeeId: user.employeeId },
       { status: 201 }
