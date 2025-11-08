@@ -47,6 +47,8 @@ export default function PrintAttendancePage() {
       // Fetch approved attendances for this specific event
       const attendanceRes = await fetch(`/api/admin/attendance?eventId=${eventId}&status=approved`)
       const attendanceData = await attendanceRes.json()
+      console.log('Total attendances fetched:', attendanceData.length)
+      console.log('Attendances:', attendanceData)
       setAttendances(attendanceData)
       
       setLoading(false)
