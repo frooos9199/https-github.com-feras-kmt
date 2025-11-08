@@ -67,7 +67,7 @@ export default function LoginPage() {
         <div className="bg-black/80 backdrop-blur-lg border border-red-600/30 rounded-2xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">KMT</h1>
+            <img src="/kmt-logo-main.png" alt="KMT" className="h-20 w-auto mx-auto mb-3 rounded" />
             <p className="text-red-500 text-sm tracking-widest">MARSHAL SYSTEM</p>
           </div>
 

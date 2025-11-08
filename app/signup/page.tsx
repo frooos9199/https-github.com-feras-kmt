@@ -76,7 +76,7 @@ export default function SignupPage() {
         <div className="bg-black/80 backdrop-blur-lg border border-red-600/30 rounded-2xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-white mb-2">KMT</h1>
+            <img src="/kmt-logo-main.png" alt="KMT" className="h-16 w-auto mx-auto mb-3 rounded" />
             <p className="text-red-500 text-sm tracking-widest">MARSHAL REGISTRATION</p>
           </div>
 
