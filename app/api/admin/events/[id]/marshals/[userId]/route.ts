@@ -40,15 +40,7 @@ export async function DELETE(
       }
     })
 
-    // Delete the attendance record
-    await prisma.attendance.deleteMany({
-      where: {
-        eventId: id,
-        userId: userId
-      }
-    })
-
-    // Send removal notification email
+    // Send removal notification email BEFORE deletion
     if (attendance?.user.email) {
       await sendEmail({
         to: attendance.user.email,
@@ -62,6 +54,14 @@ export async function DELETE(
         )
       })
     }
+
+    // Delete the attendance record AFTER sending email
+    await prisma.attendance.deleteMany({
+      where: {
+        eventId: id,
+        userId: userId
+      }
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
