@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { sendEmail, welcomeEmailTemplate } from "@/lib/email"
 
 export async function POST(req: Request) {
   try {
@@ -79,6 +80,15 @@ export async function POST(req: Request) {
           messageAr: `${user.name} (${user.employeeId}) قام بالتسجيل كمارشال جديد`,
           isRead: false
         }))
+      })
+    }
+
+    // Send welcome email
+    if (user.email) {
+      await sendEmail({
+        to: user.email,
+        subject: '🎉 Welcome to KMT - Kuwait Motorsport Town',
+        html: welcomeEmailTemplate(user.name)
       })
     }
 

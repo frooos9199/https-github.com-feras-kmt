@@ -49,8 +49,7 @@ export async function DELETE(
           attendance.user.name,
           attendance.event.titleEn,
           new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-          null, // notes - can be added later if needed
-          'en'
+          undefined // notes - can be added later if needed
         )
       })
     }

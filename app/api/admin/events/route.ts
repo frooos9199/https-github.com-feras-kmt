@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { notifyMatchingMarshalsAboutNewEvent } from "@/lib/notifications"
+import { sendEmail, newEventEmailTemplate } from "@/lib/email"
 
 // GET - Fetch all events
 export async function GET(request: NextRequest) {
@@ -90,6 +91,37 @@ export async function POST(request: NextRequest) {
       event.titleAr,
       event.marshalTypes
     )
+
+    // Send email to all marshals about new event
+    const allMarshals = await prisma.user.findMany({
+      where: {
+        role: 'marshal',
+      },
+      select: {
+        name: true,
+        email: true,
+      }
+    })
+
+    // Send emails to all marshals
+    for (const marshal of allMarshals) {
+      if (marshal.email) {
+        await sendEmail({
+          to: marshal.email,
+          subject: `🏁 New Event Available - ${event.titleEn}`,
+          html: newEventEmailTemplate(
+            marshal.name,
+            event.titleEn,
+            new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            event.time,
+            event.location,
+            event.descriptionEn,
+            event.endDate ? new Date(event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
+            event.endTime || undefined
+          )
+        })
+      }
+    }
 
     return NextResponse.json(event, { status: 201 })
   } catch (error) {

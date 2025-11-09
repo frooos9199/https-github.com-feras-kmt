@@ -172,20 +172,18 @@ export async function PUT(request: NextRequest) {
             new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
             attendance.event.time,
             attendance.event.location,
-            'en',
-            attendance.event.endDate ? new Date(attendance.event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null,
-            attendance.event.endTime
+            attendance.event.endDate ? new Date(attendance.event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
+            attendance.event.endTime || undefined
           )
         })
       } else if (status === "rejected") {
         await sendEmail({
           to: attendance.user.email,
-          subject: `Request Status Update - ${attendance.event.titleEn}`,
+          subject: `📋 Request Status Update - ${attendance.event.titleEn}`,
           html: rejectionEmailTemplate(
             attendance.user.name,
             attendance.event.titleEn,
-            notes,
-            'en'
+            notes || undefined
           )
         })
       }
