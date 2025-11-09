@@ -31,7 +31,9 @@ export function registrationEmailTemplate(
   eventTitle: string,
   eventDate: string,
   eventTime: string,
-  language: 'en' | 'ar' = 'ar'
+  language: 'en' | 'ar' = 'ar',
+  endDate?: string | null,
+  endTime?: string | null
 ) {
   if (language === 'ar') {
     return `
@@ -108,8 +110,10 @@ export function registrationEmailTemplate(
         <div class="event-details">
             <h3>📋 تفاصيل الفعالية:</h3>
             <p><strong>الفعالية:</strong> ${eventTitle}</p>
-            <p><strong>التاريخ:</strong> ${eventDate}</p>
-            <p><strong>الوقت:</strong> ${eventTime}</p>
+            <p><strong>تاريخ البداية:</strong> ${eventDate}</p>
+            ${endDate ? `<p><strong>تاريخ النهاية:</strong> ${endDate}</p>` : ''}
+            <p><strong>وقت البداية:</strong> ${eventTime}</p>
+            ${endTime ? `<p><strong>وقت النهاية:</strong> ${endTime}</p>` : ''}
         </div>
         
         <p><strong>حالة الطلب:</strong> قيد المراجعة ⏳</p>
@@ -192,8 +196,10 @@ export function registrationEmailTemplate(
         <div class="event-details">
             <h3>📋 Event Details:</h3>
             <p><strong>Event:</strong> ${eventTitle}</p>
-            <p><strong>Date:</strong> ${eventDate}</p>
-            <p><strong>Time:</strong> ${eventTime}</p>
+            <p><strong>Start Date:</strong> ${eventDate}</p>
+            ${endDate ? `<p><strong>End Date:</strong> ${endDate}</p>` : ''}
+            <p><strong>Start Time:</strong> ${eventTime}</p>
+            ${endTime ? `<p><strong>End Time:</strong> ${endTime}</p>` : ''}
         </div>
         
         <p><strong>Status:</strong> Pending Review ⏳</p>
@@ -220,7 +226,9 @@ export function approvalEmailTemplate(
   eventDate: string,
   eventTime: string,
   eventLocation: string,
-  language: 'en' | 'ar' = 'ar'
+  language: 'en' | 'ar' = 'ar',
+  endDate?: string | null,
+  endTime?: string | null
 ) {
   if (language === 'ar') {
     return `
@@ -301,8 +309,10 @@ export function approvalEmailTemplate(
         <div class="event-details">
             <h3>📋 تفاصيل الفعالية:</h3>
             <p><strong>الفعالية:</strong> ${eventTitle}</p>
-            <p><strong>التاريخ:</strong> ${eventDate}</p>
-            <p><strong>الوقت:</strong> ${eventTime}</p>
+            <p><strong>تاريخ البداية:</strong> ${eventDate}</p>
+            ${endDate ? `<p><strong>تاريخ النهاية:</strong> ${endDate}</p>` : ''}
+            <p><strong>وقت البداية:</strong> ${eventTime}</p>
+            ${endTime ? `<p><strong>وقت النهاية:</strong> ${endTime}</p>` : ''}
             <p><strong>الموقع:</strong> ${eventLocation}</p>
         </div>
         
@@ -403,8 +413,10 @@ export function approvalEmailTemplate(
         <div class="event-details">
             <h3>📋 Event Details:</h3>
             <p><strong>Event:</strong> ${eventTitle}</p>
-            <p><strong>Date:</strong> ${eventDate}</p>
-            <p><strong>Time:</strong> ${eventTime}</p>
+            <p><strong>Start Date:</strong> ${eventDate}</p>
+            ${endDate ? `<p><strong>End Date:</strong> ${endDate}</p>` : ''}
+            <p><strong>Start Time:</strong> ${eventTime}</p>
+            ${endTime ? `<p><strong>End Time:</strong> ${endTime}</p>` : ''}
             <p><strong>Location:</strong> ${eventLocation}</p>
         </div>
         

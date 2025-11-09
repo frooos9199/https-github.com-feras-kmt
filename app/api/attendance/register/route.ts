@@ -98,7 +98,9 @@ export async function POST(req: Request) {
           attendance.event.titleEn,
           new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
           attendance.event.time,
-          'en'
+          'en',
+          attendance.event.endDate ? new Date(attendance.event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null,
+          attendance.event.endTime
         )
       })
     }

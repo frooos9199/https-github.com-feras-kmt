@@ -153,6 +153,8 @@ export async function PUT(request: NextRequest) {
             date: true,
             time: true,
             location: true,
+            endDate: true,
+            endTime: true,
           }
         }
       }
@@ -170,7 +172,9 @@ export async function PUT(request: NextRequest) {
             new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
             attendance.event.time,
             attendance.event.location,
-            'en'
+            'en',
+            attendance.event.endDate ? new Date(attendance.event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null,
+            attendance.event.endTime
           )
         })
       } else if (status === "rejected") {
