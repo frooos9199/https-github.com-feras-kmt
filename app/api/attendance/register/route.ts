@@ -14,6 +14,41 @@ export async function POST(req: Request) {
 
     const { eventId } = await req.json()
 
+    // Get event details with max marshals
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: {
+        id: true,
+        maxMarshals: true,
+        _count: {
+          select: {
+            attendances: {
+              where: {
+                status: "approved"
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 })
+    }
+
+    // Check if event is full (only approved attendances count)
+    if (event._count.attendances >= event.maxMarshals) {
+      return NextResponse.json(
+        { 
+          error: "Event is full - Cannot register more marshals",
+          errorAr: "الفعالية مكتملة - لا يمكن التسجيل",
+          currentCount: event._count.attendances,
+          maxMarshals: event.maxMarshals
+        },
+        { status: 400 }
+      )
+    }
+
     // Check if already registered
     const existing = await prisma.attendance.findUnique({
       where: {
