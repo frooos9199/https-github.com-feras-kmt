@@ -84,7 +84,18 @@ export default function AttendanceManagement() {
           : `Request ${newStatus} successfully!`
         )
       } else {
-        alert(language === "ar" ? "حدث خطأ" : "An error occurred")
+        const errorData = await res.json()
+        
+        // Show detailed error message if event is full
+        if (res.status === 400 && errorData.errorAr) {
+          const message = language === "ar" 
+            ? `❌ ${errorData.errorAr}\n\n📊 العدد الحالي: ${errorData.currentApproved} / ${errorData.maxMarshals}\n📍 الفعالية: ${errorData.eventTitle || ""}`
+            : `❌ ${errorData.error}\n\n📊 Current: ${errorData.currentApproved} / ${errorData.maxMarshals}\n📍 Event: ${errorData.eventTitle || ""}`
+          
+          alert(message)
+        } else {
+          alert(language === "ar" ? "حدث خطأ" : "An error occurred")
+        }
       }
     } catch (error) {
       console.error("Error updating attendance:", error)
