@@ -106,7 +106,7 @@ export default function MarshalsManagement() {
             👥 {language === "ar" ? "إدارة المارشالات" : "Marshals Management"}
           </h1>
           <p className="text-gray-400">
-            {language === "ar" ? "عرض ومراجعة بيانات المارشالات" : "View and review marshal information"}
+            {language === "ar" ? "إدارة المارشال" : "Marshal Management"}
           </p>
         </motion.div>
 
