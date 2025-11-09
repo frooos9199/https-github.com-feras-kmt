@@ -163,25 +163,25 @@ export async function PUT(request: NextRequest) {
       if (status === "approved") {
         await sendEmail({
           to: attendance.user.email,
-          subject: `✅ تم قبول طلبك - ${attendance.event.titleAr} | Request Approved - ${attendance.event.titleEn}`,
+          subject: `✅ Request Approved - ${attendance.event.titleEn}`,
           html: approvalEmailTemplate(
             attendance.user.name,
-            attendance.event.titleAr,
-            new Date(attendance.event.date).toLocaleDateString('ar-EG'),
+            attendance.event.titleEn,
+            new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
             attendance.event.time,
             attendance.event.location,
-            'ar'
+            'en'
           )
         })
       } else if (status === "rejected") {
         await sendEmail({
           to: attendance.user.email,
-          subject: `تحديث حالة الطلب - ${attendance.event.titleAr} | Request Status Update - ${attendance.event.titleEn}`,
+          subject: `Request Status Update - ${attendance.event.titleEn}`,
           html: rejectionEmailTemplate(
             attendance.user.name,
-            attendance.event.titleAr,
+            attendance.event.titleEn,
             notes,
-            'ar'
+            'en'
           )
         })
       }

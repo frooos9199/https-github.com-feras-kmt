@@ -92,13 +92,13 @@ export async function POST(req: Request) {
     if (attendance.user.email) {
       await sendEmail({
         to: attendance.user.email,
-        subject: `تأكيد التسجيل - ${attendance.event.titleAr} | Registration Confirmation - ${attendance.event.titleEn}`,
+        subject: `Registration Confirmation - ${attendance.event.titleEn}`,
         html: registrationEmailTemplate(
           attendance.user.name,
-          attendance.event.titleAr,
-          new Date(attendance.event.date).toLocaleDateString('ar-EG'),
+          attendance.event.titleEn,
+          new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
           attendance.event.time,
-          'ar'
+          'en'
         )
       })
     }
