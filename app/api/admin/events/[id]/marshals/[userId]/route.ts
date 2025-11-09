@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { sendEmail, removalEmailTemplate } from "@/lib/email"
 
 // DELETE - Remove marshal from event
 export async function DELETE(
@@ -16,12 +17,51 @@ export async function DELETE(
 
     const { id, userId } = await params
 
+    // Get attendance details before deletion for email
+    const attendance = await prisma.attendance.findFirst({
+      where: {
+        eventId: id,
+        userId: userId
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          }
+        },
+        event: {
+          select: {
+            titleEn: true,
+            titleAr: true,
+            date: true,
+          }
+        }
+      }
+    })
+
+    // Delete the attendance record
     await prisma.attendance.deleteMany({
       where: {
         eventId: id,
         userId: userId
       }
     })
+
+    // Send removal notification email
+    if (attendance?.user.email) {
+      await sendEmail({
+        to: attendance.user.email,
+        subject: `⚠️ Removed from Event - ${attendance.event.titleEn}`,
+        html: removalEmailTemplate(
+          attendance.user.name,
+          attendance.event.titleEn,
+          new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          null, // notes - can be added later if needed
+          'en'
+        )
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

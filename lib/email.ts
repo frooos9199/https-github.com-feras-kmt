@@ -610,3 +610,176 @@ export function rejectionEmailTemplate(
     `
   }
 }
+
+// قالب إيميل الإزالة من الفعالية
+export function removalEmailTemplate(
+  userName: string,
+  eventTitle: string,
+  eventDate: string,
+  notes: string | null,
+  language: 'en' | 'ar' = 'ar'
+) {
+  if (language === 'ar') {
+    return `
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+        .info-box {
+            background: #fff7ed;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-right: 4px solid #f59e0b;
+        }
+        .footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            font-size: 14px;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 15px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
+        <h1>⚠️ تحديث مهم</h1>
+        <p>تم إزالتك من الفعالية</p>
+    </div>
+    
+    <div class="content">
+        <h2>عزيزي ${userName},</h2>
+        
+        <p>نود إبلاغك بأنه تم إزالتك من الفعالية التالية:</p>
+        
+        <div class="info-box">
+            <p><strong>الفعالية:</strong> ${eventTitle}</p>
+            <p><strong>التاريخ:</strong> ${eventDate}</p>
+            ${notes ? `<p><strong>السبب:</strong> ${notes}</p>` : ''}
+        </div>
+        
+        <p>نعتذر عن أي إزعاج. يمكنك التسجيل في فعاليات أخرى من خلال لوحة التحكم.</p>
+        
+        <p>شكراً لتفهمك، ونتطلع لرؤيتك في فعاليات قادمة.</p>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 مدينة الكويت لرياضة السيارات - KMT</p>
+        <p>جميع الحقوق محفوظة</p>
+    </div>
+</body>
+</html>
+    `
+  } else {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+        .info-box {
+            background: #fff7ed;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        .footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            font-size: 14px;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin: 0 auto 15px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
+        <h1>⚠️ Important Update</h1>
+        <p>You Have Been Removed from Event</p>
+    </div>
+    
+    <div class="content">
+        <h2>Dear ${userName},</h2>
+        
+        <p>We would like to inform you that you have been removed from the following event:</p>
+        
+        <div class="info-box">
+            <p><strong>Event:</strong> ${eventTitle}</p>
+            <p><strong>Date:</strong> ${eventDate}</p>
+            ${notes ? `<p><strong>Reason:</strong> ${notes}</p>` : ''}
+        </div>
+        
+        <p>We apologize for any inconvenience. You can register for other events through your dashboard.</p>
+        
+        <p>Thank you for your understanding, and we look forward to seeing you at future events.</p>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 Kuwait Motorsport Town - KMT</p>
+        <p>All Rights Reserved</p>
+    </div>
+</body>
+</html>
+    `
+  }
+}
