@@ -31,7 +31,7 @@ export function registrationEmailTemplate(
   eventTitle: string,
   eventDate: string,
   eventTime: string,
-  language: 'en' | 'ar' = 'ar',
+  language: 'en' | 'ar' = 'en',
   endDate?: string | null,
   endTime?: string | null
 ) {
@@ -226,7 +226,7 @@ export function approvalEmailTemplate(
   eventDate: string,
   eventTime: string,
   eventLocation: string,
-  language: 'en' | 'ar' = 'ar',
+  language: 'en' | 'ar' = 'en',
   endDate?: string | null,
   endTime?: string | null
 ) {
@@ -446,7 +446,7 @@ export function rejectionEmailTemplate(
   userName: string,
   eventTitle: string,
   notes: string | null,
-  language: 'en' | 'ar' = 'ar'
+  language: 'en' | 'ar' = 'en'
 ) {
   if (language === 'ar') {
     return `
@@ -617,7 +617,7 @@ export function removalEmailTemplate(
   eventTitle: string,
   eventDate: string,
   notes: string | null,
-  language: 'en' | 'ar' = 'ar'
+  language: 'en' | 'ar' = 'en'
 ) {
   if (language === 'ar') {
     return `
