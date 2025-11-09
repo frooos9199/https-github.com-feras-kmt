@@ -228,7 +228,7 @@ export default function AdminDashboard() {
               href="/admin/marshals"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              👥 {language === "ar" ? "إدارة المارشالات" : "Manage Marshals"}
+              👥 {language === "ar" ? "إدارة المارشال" : "Manage Marshals"}
             </Link>
             <Link
               href="/admin/reports"

@@ -103,7 +103,7 @@ export default function MarshalsManagement() {
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-white mb-2">
-            👥 {language === "ar" ? "إدارة المارشالات" : "Marshals Management"}
+            👥 {language === "ar" ? "إدارة المارشال" : "Marshals Management"}
           </h1>
           <p className="text-gray-400">
             {language === "ar" ? "إدارة المارشال" : "Marshal Management"}
