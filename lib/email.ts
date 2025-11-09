@@ -85,10 +85,16 @@ export function registrationEmailTemplate(
             border-radius: 5px;
             margin: 10px 0;
         }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
         <h1>🏁 مدينة الكويت لرياضة السيارات</h1>
         <p>نظام إدارة المارشالات</p>
     </div>
@@ -162,10 +168,16 @@ export function registrationEmailTemplate(
             border-radius: 0 0 10px 10px;
             font-size: 14px;
         }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
         <h1>🏁 Kuwait Motorsport Town</h1>
         <p>Marshal Management System</p>
     </div>
@@ -260,10 +272,16 @@ export function approvalEmailTemplate(
             border-radius: 0 0 10px 10px;
             font-size: 14px;
         }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
         <h1>✅ تهانينا!</h1>
         <p>تم قبول طلبك</p>
     </div>
@@ -355,10 +373,16 @@ export function approvalEmailTemplate(
             border-radius: 0 0 10px 10px;
             font-size: 14px;
         }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
         <h1>✅ Congratulations!</h1>
         <p>Your Request Has Been Approved</p>
     </div>
@@ -451,10 +475,16 @@ export function rejectionEmailTemplate(
             border-radius: 0 0 10px 10px;
             font-size: 14px;
         }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
         <h1>تنبيه من النظام</h1>
         <p>تحديث حالة الطلب</p>
     </div>
@@ -524,10 +554,16 @@ export function rejectionEmailTemplate(
             border-radius: 0 0 10px 10px;
             font-size: 14px;
         }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
+        <img src="https://https-github-com-feras-kmt.vercel.app/kmt-logo.png" alt="KMT Logo" class="logo" />
         <h1>System Notification</h1>
         <p>Request Status Update</p>
     </div>
