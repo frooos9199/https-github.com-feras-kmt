@@ -88,7 +88,8 @@ export function registrationEmailTemplate(
         .logo {
             max-width: 150px;
             height: auto;
-            margin-bottom: 15px;
+            margin: 0 auto 15px auto;
+            display: block;
         }
     </style>
 </head>
@@ -171,7 +172,8 @@ export function registrationEmailTemplate(
         .logo {
             max-width: 150px;
             height: auto;
-            margin-bottom: 15px;
+            margin: 0 auto 15px auto;
+            display: block;
         }
     </style>
 </head>
@@ -275,7 +277,8 @@ export function approvalEmailTemplate(
         .logo {
             max-width: 150px;
             height: auto;
-            margin-bottom: 15px;
+            margin: 0 auto 15px auto;
+            display: block;
         }
     </style>
 </head>
@@ -376,7 +379,8 @@ export function approvalEmailTemplate(
         .logo {
             max-width: 150px;
             height: auto;
-            margin-bottom: 15px;
+            margin: 0 auto 15px auto;
+            display: block;
         }
     </style>
 </head>
@@ -478,7 +482,8 @@ export function rejectionEmailTemplate(
         .logo {
             max-width: 150px;
             height: auto;
-            margin-bottom: 15px;
+            margin: 0 auto 15px auto;
+            display: block;
         }
     </style>
 </head>
@@ -557,7 +562,8 @@ export function rejectionEmailTemplate(
         .logo {
             max-width: 150px;
             height: auto;
-            margin-bottom: 15px;
+            margin: 0 auto 15px auto;
+            display: block;
         }
     </style>
 </head>
