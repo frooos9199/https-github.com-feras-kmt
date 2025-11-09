@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../auth/[...nextauth]/route"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { sendEmail, approvalEmailTemplate, rejectionEmailTemplate } from "@/lib/email"
 
 // GET - Fetch all attendance requests
 export async function GET(request: NextRequest) {
@@ -149,10 +150,42 @@ export async function PUT(request: NextRequest) {
           select: {
             titleEn: true,
             titleAr: true,
+            date: true,
+            time: true,
+            location: true,
           }
         }
       }
     })
+
+    // Send email notification to user
+    if (attendance.user.email) {
+      if (status === "approved") {
+        await sendEmail({
+          to: attendance.user.email,
+          subject: `✅ تم قبول طلبك - ${attendance.event.titleAr} | Request Approved - ${attendance.event.titleEn}`,
+          html: approvalEmailTemplate(
+            attendance.user.name,
+            attendance.event.titleAr,
+            new Date(attendance.event.date).toLocaleDateString('ar-EG'),
+            attendance.event.time,
+            attendance.event.location,
+            'ar'
+          )
+        })
+      } else if (status === "rejected") {
+        await sendEmail({
+          to: attendance.user.email,
+          subject: `تحديث حالة الطلب - ${attendance.event.titleAr} | Request Status Update - ${attendance.event.titleEn}`,
+          html: rejectionEmailTemplate(
+            attendance.user.name,
+            attendance.event.titleAr,
+            notes,
+            'ar'
+          )
+        })
+      }
+    }
 
     return NextResponse.json(attendance)
   } catch (error) {

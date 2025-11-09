@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { notifyAdminsAboutNewRegistration } from "@/lib/notifications"
+import { sendEmail, registrationEmailTemplate } from "@/lib/email"
 
 export async function POST(req: Request) {
   try {
@@ -86,6 +87,21 @@ export async function POST(req: Request) {
       attendance.event.titleAr,
       eventId
     )
+
+    // Send confirmation email to user
+    if (attendance.user.email) {
+      await sendEmail({
+        to: attendance.user.email,
+        subject: `تأكيد التسجيل - ${attendance.event.titleAr} | Registration Confirmation - ${attendance.event.titleEn}`,
+        html: registrationEmailTemplate(
+          attendance.user.name,
+          attendance.event.titleAr,
+          new Date(attendance.event.date).toLocaleDateString('ar-EG'),
+          attendance.event.time,
+          'ar'
+        )
+      })
+    }
 
     return NextResponse.json(attendance, { status: 201 })
   } catch (error) {
