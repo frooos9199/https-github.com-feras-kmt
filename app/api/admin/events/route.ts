@@ -103,11 +103,12 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Send emails to all marshals
-    for (const marshal of allMarshals) {
-      if (marshal.email) {
-        await sendEmail({
-          to: marshal.email,
+    // Send emails to all marshals (in parallel, continue even if some fail)
+    const emailPromises = allMarshals
+      .filter(marshal => marshal.email) // Only marshals with email
+      .map(marshal => 
+        sendEmail({
+          to: marshal.email!,
           subject: `🏁 New Event Available - ${event.titleEn}`,
           html: newEventEmailTemplate(
             marshal.name,
@@ -119,9 +120,16 @@ export async function POST(request: NextRequest) {
             event.endDate ? new Date(event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
             event.endTime || undefined
           )
+        }).catch(error => {
+          console.error(`Failed to send email to ${marshal.email}:`, error)
+          return { success: false, error }
         })
-      }
-    }
+      )
+
+    // Wait for all emails to be sent (or fail)
+    const emailResults = await Promise.allSettled(emailPromises)
+    const successCount = emailResults.filter(r => r.status === 'fulfilled').length
+    console.log(`Sent new event emails: ${successCount}/${allMarshals.length} successful`)
 
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
