@@ -464,3 +464,58 @@ export function newEventEmailTemplate(
 </html>
   `
 }
+
+// 7. Broadcast Message Email
+export function broadcastEmailTemplate(
+  userName: string,
+  subject: string,
+  message: string,
+  priority: 'normal' | 'high' | 'urgent' = 'normal'
+) {
+  const headerClass = priority === 'urgent' ? 'header-danger' : priority === 'high' ? 'header-warning' : 'header-default'
+  const priorityBadge = priority === 'urgent' ? '🔴 URGENT' : priority === 'high' ? '⚠️ IMPORTANT' : '📢 ANNOUNCEMENT'
+  
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>${emailStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header ${headerClass}">
+      <img src="${LOGO_URL}" alt="KMT Logo" class="logo" />
+      <h1>${priorityBadge}</h1>
+      <p>Message from KMT Administration</p>
+    </div>
+    
+    <div class="content">
+      <h2>Hello ${userName}!</h2>
+      
+      <div class="event-details">
+        <h3>${subject}</h3>
+        <p style="white-space: pre-wrap;">${message}</p>
+      </div>
+      
+      ${priority === 'urgent' ? `
+      <div class="instructions">
+        <strong>⚠️ This is an urgent message that requires your immediate attention.</strong>
+      </div>
+      ` : ''}
+      
+      <p>If you have any questions, please contact the administration team.</p>
+      
+      <p>Best regards,<br>KMT Administration Team</p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 Kuwait Motorsport Town - KMT</p>
+      <p>All Rights Reserved</p>
+    </div>
+  </div>
+</body>
+</html>
+  `
+}

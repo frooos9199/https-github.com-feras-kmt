@@ -84,3 +84,20 @@ model Notification {
 
   @@index([userId, isRead])
 }
+
+model BroadcastMessage {
+  id               String   @id @default(cuid())
+  subject          String
+  message          String
+  recipientFilter  String   // "all", "approved", "pending", "by-type", "by-event"
+  marshalTypes     String?  // For filtering by type: "drag-race,drift,circuit"
+  eventId          String?  // For filtering by event
+  sendEmail        Boolean  @default(true)
+  sendNotification Boolean  @default(true)
+  priority         String   @default("normal") // "normal", "high", "urgent"
+  sentBy           String   // Admin user ID
+  sentAt           DateTime @default(now())
+  recipientCount   Int      @default(0)
+  
+  @@index([sentAt])
+}

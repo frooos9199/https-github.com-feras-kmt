@@ -231,6 +231,12 @@ export default function AdminDashboard() {
               👥 {language === "ar" ? "إدارة المارشال" : "Manage Marshals"}
             </Link>
             <Link
+              href="/admin/broadcast"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
+            >
+              📢 {language === "ar" ? "رسائل جماعية" : "Broadcast Message"}
+            </Link>
+            <Link
               href="/admin/reports"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
