@@ -237,6 +237,12 @@ export default function AdminDashboard() {
               📢 {language === "ar" ? "رسائل جماعية" : "Broadcast Message"}
             </Link>
             <Link
+              href="/admin/backup"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
+            >
+              🗄️ {language === "ar" ? "النسخ الاحتياطي" : "Database Backup"}
+            </Link>
+            <Link
               href="/admin/reports"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
