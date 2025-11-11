@@ -150,8 +150,8 @@ export default function BackupPage() {
                 <strong>{language === 'en' ? 'Email Delivery:' : 'التسليم عبر البريد:'}</strong>
                 <p className="text-sm text-gray-400">
                   {language === 'en' 
-                    ? 'Backup is sent to summit_kw@hotmail.com with all database data'
-                    : 'يتم إرسال النسخة الاحتياطية إلى summit_kw@hotmail.com مع جميع بيانات قاعدة البيانات'}
+                    ? 'Backup is sent to su****_kw@hotmail.com with all database data'
+                    : 'يتم إرسال النسخة الاحتياطية إلى su****_kw@hotmail.com مع جميع بيانات قاعدة البيانات'}
                 </p>
               </div>
             </div>
