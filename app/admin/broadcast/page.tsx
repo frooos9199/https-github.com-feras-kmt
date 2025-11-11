@@ -1,12 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/contexts/LanguageContext"
+import NotificationBell from "@/components/NotificationBell"
+import Link from "next/link"
 
 export default function BroadcastPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { language, setLanguage } = useLanguage()
   
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
@@ -142,12 +146,16 @@ export default function BroadcastPage() {
     }
   }
 
+  const handleLogout = () => {
+    signOut({ callbackUrl: "/login" })
+  }
+
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-400">Loading...</p>
         </div>
       </div>
     )
@@ -158,11 +166,56 @@ export default function BroadcastPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
+      {/* Header */}
+      <header className="bg-black/50 backdrop-blur-lg border-b border-red-600/30 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <Link href="/admin">
+                <img src="/kmt-logo-main.png" alt="KMT" className="h-12 w-auto rounded px-2 py-1 cursor-pointer" />
+              </Link>
+              <span className="text-yellow-500 font-bold text-sm">👑 ADMIN</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <NotificationBell />
+              <button
+                onClick={() => setLanguage(language === "ar" ? "en" : "ar")}
+                className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm"
+              >
+                {language === "ar" ? "EN" : "ع"}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
+              >
+                {language === "ar" ? "تسجيل خروج" : "Logout"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Link href="/admin">
+            <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors">
+              <span>←</span>
+              <span>{language === "ar" ? "رجوع" : "Back"}</span>
+            </button>
+          </Link>
+        </div>
+
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-md p-6">
-          <h1 className="text-3xl font-bold text-white mb-2">📢 Broadcast Message</h1>
-          <p className="text-gray-400 mb-6">Send messages to marshals via email and/or in-app notifications</p>
+          <h1 className="text-3xl font-bold text-white mb-2">📢 {language === "ar" ? "رسائل جماعية" : "Broadcast Message"}</h1>
+          <p className="text-gray-400 mb-6">
+            {language === "ar" 
+              ? "إرسال رسائل للمارشالات عبر البريد الإلكتروني و/أو الإشعارات" 
+              : "Send messages to marshals via email and/or in-app notifications"
+            }
+          </p>
 
           {/* Quick Templates */}
           <div className="mb-6 p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg">
@@ -368,11 +421,24 @@ export default function BroadcastPage() {
                   : "bg-red-600 hover:bg-red-700"
               }`}
             >
-              {loading ? "Sending..." : "📤 Send Broadcast"}
+              {loading 
+                ? (language === "ar" ? "جاري الإرسال..." : "Sending...") 
+                : (language === "ar" ? "📤 إرسال" : "📤 Send Broadcast")
+              }
             </button>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="mt-16 border-t border-zinc-800 bg-black/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center text-gray-400 text-sm">
+            <p>© 2025 Kuwait Motor Town - KMT</p>
+            <p className="mt-1">{language === "ar" ? "نظام إدارة المارشال" : "Marshal Management System"}</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
