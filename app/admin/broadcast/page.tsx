@@ -157,39 +157,39 @@ export default function BroadcastPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-black py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">📢 Broadcast Message</h1>
-          <p className="text-gray-600 mb-6">Send messages to marshals via email and/or in-app notifications</p>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-md p-6">
+          <h1 className="text-3xl font-bold text-white mb-2">📢 Broadcast Message</h1>
+          <p className="text-gray-400 mb-6">Send messages to marshals via email and/or in-app notifications</p>
 
           {/* Quick Templates */}
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-6 p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               📝 Quick Templates
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <button
                 onClick={() => applyTemplate("event_postponed")}
-                className="px-3 py-2 bg-white border border-blue-200 rounded hover:bg-blue-100 text-sm"
+                className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-white rounded hover:bg-zinc-700 text-sm"
               >
                 Event Postponed
               </button>
               <button
                 onClick={() => applyTemplate("event_cancelled")}
-                className="px-3 py-2 bg-white border border-blue-200 rounded hover:bg-blue-100 text-sm"
+                className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-white rounded hover:bg-zinc-700 text-sm"
               >
                 Event Cancelled
               </button>
               <button
                 onClick={() => applyTemplate("important_announcement")}
-                className="px-3 py-2 bg-white border border-blue-200 rounded hover:bg-blue-100 text-sm"
+                className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-white rounded hover:bg-zinc-700 text-sm"
               >
                 Announcement
               </button>
               <button
                 onClick={() => applyTemplate("reminder")}
-                className="px-3 py-2 bg-white border border-blue-200 rounded hover:bg-blue-100 text-sm"
+                className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-white rounded hover:bg-zinc-700 text-sm"
               >
                 Reminder
               </button>
@@ -198,13 +198,13 @@ export default function BroadcastPage() {
 
           {/* Recipients */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               👥 Recipients
             </label>
             <select
               value={recipientFilter}
               onChange={(e) => setRecipientFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
             >
               <option value="all">All Active Marshals</option>
               <option value="approved">Marshals with Approved Events</option>
@@ -216,8 +216,8 @@ export default function BroadcastPage() {
 
           {/* Marshal Types Filter */}
           {recipientFilter === "by-type" && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mb-6 p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Select Marshal Types
               </label>
               <div className="space-y-2">
@@ -227,9 +227,9 @@ export default function BroadcastPage() {
                       type="checkbox"
                       checked={marshalTypes.includes(type)}
                       onChange={() => handleMarshalTypeToggle(type)}
-                      className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                      className="w-4 h-4 text-red-600 bg-zinc-800 border-zinc-700 rounded focus:ring-red-500"
                     />
-                    <span className="capitalize">{type.replace("-", " ")}</span>
+                    <span className="capitalize text-white">{type.replace("-", " ")}</span>
                   </label>
                 ))}
               </div>
@@ -239,13 +239,13 @@ export default function BroadcastPage() {
           {/* Event Filter */}
           {recipientFilter === "by-event" && (
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Select Event
               </label>
               <select
                 value={selectedEvent}
                 onChange={(e) => setSelectedEvent(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               >
                 <option value="">-- Select Event --</option>
                 {events.map((event) => (
@@ -259,7 +259,7 @@ export default function BroadcastPage() {
 
           {/* Subject */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Subject *
             </label>
             <input
@@ -267,14 +267,14 @@ export default function BroadcastPage() {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Enter message subject"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               required
             />
           </div>
 
           {/* Message */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Message *
             </label>
             <textarea
@@ -282,14 +282,14 @@ export default function BroadcastPage() {
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Enter your message here..."
               rows={8}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               required
             />
           </div>
 
           {/* Delivery Method */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-6 p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               📬 Delivery Method
             </label>
             <div className="space-y-2">
@@ -298,25 +298,25 @@ export default function BroadcastPage() {
                   type="checkbox"
                   checked={sendEmail}
                   onChange={(e) => setSendEmail(e.target.checked)}
-                  className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                  className="w-4 h-4 text-red-600 bg-zinc-800 border-zinc-700 rounded focus:ring-red-500"
                 />
-                <span>📧 Send Email</span>
+                <span className="text-white">📧 Send Email</span>
               </label>
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={sendNotification}
                   onChange={(e) => setSendNotification(e.target.checked)}
-                  className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                  className="w-4 h-4 text-red-600 bg-zinc-800 border-zinc-700 rounded focus:ring-red-500"
                 />
-                <span>🔔 Send In-App Notification</span>
+                <span className="text-white">🔔 Send In-App Notification</span>
               </label>
             </div>
           </div>
 
           {/* Priority */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Priority Level
             </label>
             <div className="flex space-x-4">
@@ -327,9 +327,9 @@ export default function BroadcastPage() {
                   value="normal"
                   checked={priority === "normal"}
                   onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-4 h-4 text-red-600 focus:ring-red-500"
+                  className="w-4 h-4 text-red-600 bg-zinc-800 border-zinc-700 focus:ring-red-500"
                 />
-                <span>📢 Normal</span>
+                <span className="text-white">📢 Normal</span>
               </label>
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
@@ -338,9 +338,9 @@ export default function BroadcastPage() {
                   value="high"
                   checked={priority === "high"}
                   onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-4 h-4 text-orange-600 focus:ring-orange-500"
+                  className="w-4 h-4 text-orange-600 bg-zinc-800 border-zinc-700 focus:ring-orange-500"
                 />
-                <span>⚠️ High</span>
+                <span className="text-white">⚠️ High</span>
               </label>
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
@@ -349,9 +349,9 @@ export default function BroadcastPage() {
                   value="urgent"
                   checked={priority === "urgent"}
                   onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-4 h-4 text-red-600 focus:ring-red-500"
+                  className="w-4 h-4 text-red-600 bg-zinc-800 border-zinc-700 focus:ring-red-500"
                 />
-                <span>🔴 Urgent</span>
+                <span className="text-white">🔴 Urgent</span>
               </label>
             </div>
           </div>
@@ -363,7 +363,7 @@ export default function BroadcastPage() {
               disabled={loading || !subject.trim() || !message.trim()}
               className={`px-6 py-3 rounded-lg font-semibold text-white ${
                 loading || !subject.trim() || !message.trim()
-                  ? "bg-gray-400 cursor-not-allowed"
+                  ? "bg-gray-600 cursor-not-allowed"
                   : "bg-red-600 hover:bg-red-700"
               }`}
             >
