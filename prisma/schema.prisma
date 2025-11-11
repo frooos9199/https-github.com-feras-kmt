@@ -55,12 +55,14 @@ model Event {
 }
 
 model Attendance {
-  id           String   @id @default(cuid())
-  userId       String
-  eventId      String
-  status       String   @default("pending") // "pending", "approved", "rejected"
-  registeredAt DateTime @default(now())
-  notes        String?
+  id              String    @id @default(cuid())
+  userId          String
+  eventId         String
+  status          String    @default("pending") // "pending", "approved", "rejected", "cancelled"
+  registeredAt    DateTime  @default(now())
+  notes           String?
+  cancelledAt     DateTime? // When marshal cancelled their registration
+  cancellationReason String? // Why marshal cancelled
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)

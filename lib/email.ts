@@ -519,3 +519,66 @@ export function broadcastEmailTemplate(
 </html>
   `
 }
+
+// 8. Marshal Cancellation Notification to Admin
+export function marshalCancellationEmailTemplate(
+  adminName: string,
+  marshalName: string,
+  marshalEmail: string,
+  eventTitle: string,
+  eventDate: string,
+  cancellationReason: string
+): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>${emailStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header header-warning">
+      <img src="${LOGO_URL}" alt="KMT Logo" class="logo" />
+      <h1>⚠️ MARSHAL CANCELLATION</h1>
+      <p>Registration Cancelled</p>
+    </div>
+    
+    <div class="content">
+      <h2>Hello ${adminName}!</h2>
+      
+      <p>A marshal has cancelled their registration for an upcoming event.</p>
+      
+      <div class="event-details">
+        <h3>Marshal Information</h3>
+        <p><strong>Name:</strong> ${marshalName}</p>
+        <p><strong>Email:</strong> ${marshalEmail}</p>
+      </div>
+      
+      <div class="event-details">
+        <h3>Event Information</h3>
+        <p><strong>Event:</strong> ${eventTitle}</p>
+        <p><strong>Date:</strong> ${eventDate}</p>
+      </div>
+      
+      <div class="instructions">
+        <h3>Cancellation Reason</h3>
+        <p style="white-space: pre-wrap;">${cancellationReason || 'No reason provided'}</p>
+      </div>
+      
+      <p>Please review the marshal assignments for this event and make any necessary adjustments.</p>
+      
+      <p>Best regards,<br>KMT System</p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 Kuwait Motorsport Town - KMT</p>
+      <p>All Rights Reserved</p>
+    </div>
+  </div>
+</body>
+</html>
+  `
+}
+

@@ -32,6 +32,10 @@ export default function MyAttendancePage() {
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all")
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [selectedAttendance, setSelectedAttendance] = useState<AttendanceRecord | null>(null)
+  const [cancellationReason, setCancellationReason] = useState("")
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -65,7 +69,49 @@ export default function MyAttendancePage() {
     total: attendances.length,
     approved: attendances.filter(a => a.status === "approved").length,
     pending: attendances.filter(a => a.status === "pending").length,
-    rejected: attendances.filter(a => a.status === "rejected").length,
+    rejected: attendances.filter(a => a.status === "rejected").length
+  }
+
+  const handleCancelClick = (attendance: AttendanceRecord) => {
+    setSelectedAttendance(attendance)
+    setCancellationReason("")
+    setShowCancelModal(true)
+  }
+
+  const handleCancelConfirm = async () => {
+    if (!selectedAttendance || !cancellationReason.trim()) {
+      alert(language === "ar" ? "الرجاء إدخال سبب الإلغاء" : "Please enter a cancellation reason")
+      return
+    }
+
+    setCancellingId(selectedAttendance.id)
+
+    try {
+      const res = await fetch("/api/attendance/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          attendanceId: selectedAttendance.id,
+          reason: cancellationReason
+        })
+      })
+
+      if (res.ok) {
+        alert(language === "ar" ? "تم إلغاء التسجيل بنجاح" : "Registration cancelled successfully")
+        setShowCancelModal(false)
+        setSelectedAttendance(null)
+        setCancellationReason("")
+        fetchAttendances() // Refresh the list
+      } else {
+        const data = await res.json()
+        alert(data.error || (language === "ar" ? "فشل إلغاء التسجيل" : "Failed to cancel registration"))
+      }
+    } catch (error) {
+      console.error("Cancel error:", error)
+      alert(language === "ar" ? "حدث خطأ" : "An error occurred")
+    } finally {
+      setCancellingId(null)
+    }
   }
 
   if (status === "loading" || loading) {
@@ -268,12 +314,29 @@ export default function MyAttendancePage() {
                         ? "bg-green-600/20 text-green-500 border border-green-600/30"
                         : attendance.status === "pending"
                         ? "bg-yellow-600/20 text-yellow-500 border border-yellow-600/30"
+                        : attendance.status === "cancelled"
+                        ? "bg-gray-600/20 text-gray-500 border border-gray-600/30"
                         : "bg-red-600/20 text-red-500 border border-red-600/30"
                     }`}>
                       {attendance.status === "approved" && (language === "ar" ? "✅ مقبول" : "✅ Approved")}
                       {attendance.status === "pending" && (language === "ar" ? "⏳ معلق" : "⏳ Pending")}
                       {attendance.status === "rejected" && (language === "ar" ? "❌ مرفوض" : "❌ Rejected")}
+                      {attendance.status === "cancelled" && (language === "ar" ? "🚫 ملغي" : "🚫 Cancelled")}
                     </div>
+
+                    {/* Cancel Button - Show only for approved registrations for future events */}
+                    {attendance.status === "approved" && !isPast && (
+                      <button
+                        onClick={() => handleCancelClick(attendance)}
+                        disabled={cancellingId === attendance.id}
+                        className="mt-4 w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                      >
+                        {cancellingId === attendance.id 
+                          ? (language === "ar" ? "جاري الإلغاء..." : "Cancelling...")
+                          : (language === "ar" ? "إلغاء التسجيل" : "Cancel Registration")
+                        }
+                      </button>
+                    )}
 
                     {/* Notes */}
                     {attendance.notes && (
@@ -291,6 +354,76 @@ export default function MyAttendancePage() {
           </div>
         )}
       </main>
+
+      {/* Cancellation Modal */}
+      {showCancelModal && selectedAttendance && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-md w-full"
+          >
+            <h3 className="text-xl font-bold text-white mb-4">
+              {language === "ar" ? "إلغاء التسجيل" : "Cancel Registration"}
+            </h3>
+            
+            <div className="mb-4 p-4 bg-zinc-800/50 rounded-lg">
+              <p className="text-gray-400 text-sm mb-1">
+                {language === "ar" ? "الحدث:" : "Event:"}
+              </p>
+              <p className="text-white font-medium">
+                {language === "ar" ? selectedAttendance.event.titleAr : selectedAttendance.event.titleEn}
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                {language === "ar" ? "سبب الإلغاء *" : "Cancellation Reason *"}
+              </label>
+              <textarea
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                placeholder={language === "ar" ? "الرجاء توضيح سبب الإلغاء..." : "Please explain why you need to cancel..."}
+                rows={4}
+                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-lg p-4 mb-6">
+              <p className="text-yellow-500 text-sm">
+                {language === "ar" 
+                  ? "⚠️ سيتم إشعار الإدارة بإلغائك. لن تتمكن من التراجع عن هذا الإجراء."
+                  : "⚠️ Administration will be notified of your cancellation. This action cannot be undone."
+                }
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false)
+                  setSelectedAttendance(null)
+                  setCancellationReason("")
+                }}
+                className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-medium transition-colors"
+              >
+                {language === "ar" ? "رجوع" : "Back"}
+              </button>
+              <button
+                onClick={handleCancelConfirm}
+                disabled={!cancellationReason.trim() || cancellingId === selectedAttendance.id}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+              >
+                {cancellingId === selectedAttendance.id
+                  ? (language === "ar" ? "جاري الإلغاء..." : "Cancelling...")
+                  : (language === "ar" ? "تأكيد الإلغاء" : "Confirm Cancel")
+                }
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
