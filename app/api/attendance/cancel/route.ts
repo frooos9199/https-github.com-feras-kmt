@@ -113,14 +113,15 @@ export async function POST(req: NextRequest) {
     await Promise.allSettled(emailPromises)
 
     // Create in-app notifications for all admins
+    const reasonText = reason || "No reason provided"
     const notificationPromises = admins.map((admin: any) =>
       createNotification({
         userId: admin.id,
         type: "EVENT_UPDATED",
         titleEn: `Marshal Cancelled: ${attendance.event.titleEn}`,
         titleAr: `مارشال ألغى: ${attendance.event.titleAr}`,
-        messageEn: `${attendance.user.name} cancelled their registration for ${attendance.event.titleEn}`,
-        messageAr: `${attendance.user.name} ألغى تسجيله في ${attendance.event.titleAr}`
+        messageEn: `${attendance.user.name} cancelled their registration for ${attendance.event.titleEn}.\n\nReason: ${reasonText}`,
+        messageAr: `${attendance.user.name} ألغى تسجيله في ${attendance.event.titleAr}.\n\nالسبب: ${reasonText}`
       })
     )
 

@@ -241,7 +241,7 @@ export default function NotificationsPage() {
                     <h3 className="font-bold text-white mb-1">
                       {language === "ar" ? notification.titleAr : notification.titleEn}
                     </h3>
-                    <p className="text-gray-400 text-sm mb-2">
+                    <p className="text-gray-400 text-sm mb-2 whitespace-pre-wrap">
                       {language === "ar" ? notification.messageAr : notification.messageEn}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-gray-500">
