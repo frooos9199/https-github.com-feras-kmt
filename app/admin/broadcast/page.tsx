@@ -22,7 +22,8 @@ export default function BroadcastPage() {
 
   // Redirect if not admin
   useEffect(() => {
-    if (status === "unauthenticated" || (session?.user?.role !== "admin")) {
+    if (status === "loading") return
+    if (status === "unauthenticated" || session?.user?.role !== "admin") {
       router.push("/")
     }
   }, [session, status, router])

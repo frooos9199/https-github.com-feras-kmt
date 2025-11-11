@@ -102,21 +102,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No recipients found matching the criteria" }, { status: 400 })
     }
 
-    // Save broadcast message to database
-    const broadcast = await prisma.broadcastMessage.create({
-      data: {
-        subject,
-        message,
-        recipientFilter,
-        marshalTypes: marshalTypes || null,
-        eventId: eventId || null,
-        sendEmail: shouldSendEmail,
-        sendNotification: shouldSendNotification,
-        priority: priority || 'normal',
-        sentBy: session.user.id,
-        recipientCount: recipients.length
-      }
-    })
+    // Save broadcast message to database (optional - skip if table doesn't exist)
+    try {
+      await prisma.broadcastMessage.create({
+        data: {
+          subject,
+          message,
+          recipientFilter,
+          marshalTypes: marshalTypes || null,
+          eventId: eventId || null,
+          sendEmail: shouldSendEmail,
+          sendNotification: shouldSendNotification,
+          priority: priority || 'normal',
+          sentBy: session.user.id,
+          recipientCount: recipients.length
+        }
+      })
+    } catch (error) {
+      console.error("Failed to save broadcast to database (table may not exist):", error)
+      // Continue anyway - the broadcast can still be sent
+    }
 
     // Send emails (if enabled)
     if (shouldSendEmail) {
@@ -162,7 +167,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      broadcastId: broadcast.id,
       recipientCount: recipients.length,
       message: `Message sent to ${recipients.length} marshal(s)`
     })
@@ -173,7 +177,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Fetch broadcast history
+// GET - Fetch broadcast history  
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -182,12 +186,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const broadcasts = await prisma.broadcastMessage.findMany({
-      orderBy: { sentAt: 'desc' },
-      take: 50
-    })
-
-    return NextResponse.json(broadcasts)
+    try {
+      const broadcasts = await prisma.broadcastMessage.findMany({
+        orderBy: { sentAt: 'desc' },
+        take: 50
+      })
+      return NextResponse.json(broadcasts)
+    } catch (dbError) {
+      // Table doesn't exist yet - return empty array
+      console.log("BroadcastMessage table not found, returning empty array")
+      return NextResponse.json([])
+    }
+    
   } catch (error) {
     console.error("Error fetching broadcasts:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
