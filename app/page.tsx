@@ -76,7 +76,7 @@ export default function Home() {
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-lg transition-colors shadow-lg shadow-red-600/50"
                 >
-                  🏁 {language === "ar" ? "انضم كمارشال" : "Join as Marshal"}
+                  {language === "ar" ? "تسجيل جديد" : "Sign Up"}
                 </motion.button>
               </Link>
               <Link href="/login">
@@ -85,7 +85,7 @@ export default function Home() {
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg text-lg transition-colors backdrop-blur-sm border border-white/20"
                 >
-                  {t("login")}
+                  {language === "ar" ? "تسجيل دخول" : "Login"}
                 </motion.button>
               </Link>
             </div>
