@@ -48,12 +48,13 @@ function HomeScreen({ navigation }: any) {
         return;
       }
       let data: any = {};
+      const rawText = await response.text();
       try {
-        data = await response.json();
+        data = JSON.parse(rawText);
       } catch (e) {
         Alert.alert('Login Error',
-          'لم يتم استقبال رد من السيرفر.\n' +
-          'تفاصيل الخطأ: ' + (e?.message || JSON.stringify(e))
+          'لم يتم استقبال رد بصيغة JSON من السيرفر.\n' +
+          'نص الرد الخام:\n' + rawText
         );
         setLoading(false);
         return;
