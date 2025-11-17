@@ -12,11 +12,11 @@ import en from './locales/en.json';
 import ar from './locales/ar.json';
 
 const i18n = new I18n({ en, ar });
-i18n.fallbacks = true;
+ (i18n as any).fallbacks = true;
 i18n.locale = RNLocalize.getLocales()[0]?.languageCode === 'ar' ? 'ar' : 'en';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaView, Text, View, StyleSheet, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
+import { SafeAreaView, Text, View, StyleSheet, TouchableOpacity, Image, TextInput, Alert, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 // Type declaration for react-native-linear-gradient
 import type { LinearGradientProps } from 'react-native-linear-gradient';
@@ -34,30 +34,64 @@ function HomeScreen({ navigation }: any) {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://https-github-com-feras-kmt.vercel.app/api/login', {
+  const response = await fetch('https://kmtsys.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
-      const data = await response.json();
-      if (response.ok && data.id) {
-        // تسجيل دخول ناجح
-        if (data.role === 'admin') {
-          navigation.navigate('Settings'); // يمكنك تغيير اسم الشاشة لاحقاً لصفحة الأدمن
-        } else if (data.role === 'user') {
-          navigation.navigate('Details'); // يمكنك تغيير اسم الشاشة لاحقاً لصفحة المستخدم
-        } else {
-          Alert.alert('Login Successful', `Welcome ${data.name}`);
-        }
-      } else if (data.error) {
-        Alert.alert('Login Failed', data.error);
-      } else {
-        Alert.alert('Login Failed', 'Invalid credentials');
+      // NextAuth.js expects POST only, never GET
+      if (response.status === 405) {
+        Alert.alert('Login Error', 'يجب استخدام POST وليس GET.');
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      Alert.alert('Error', 'Network error');
+      let data: any = {};
+      try {
+        data = await response.json();
+      } catch (e) {
+        Alert.alert('Login Error',
+          'لم يتم استقبال رد من السيرفر.\n' +
+          'تفاصيل الخطأ: ' + (e?.message || JSON.stringify(e))
+        );
+        setLoading(false);
+        return;
+      }
+      // Debug: Show full response data for troubleshooting
+      if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+        Alert.alert('Login Error', 'لم يتم استقبال أي بيانات من السيرفر. تأكد من صحة الرابط أو جرب من متصفح أو Postman.');
+        setLoading(false);
+        return;
+      }
+      // تحقق من الحقول الصحيحة حسب الرد المتوقع من NextAuth
+      // إذا كان الرد يحتوي على error
+      if (data.error) {
+        Alert.alert('Login Failed', data.error);
+        setLoading(false);
+        return;
+      }
+      // إذا كان الرد يحتوي على user أو token أو أي بيانات أخرى
+      if (response.ok && (data.user || data.token || data.accessToken)) {
+        Alert.alert('Login Successful', 'تم تسجيل الدخول بنجاح!');
+        // التنقل حسب دور المستخدم إذا وجد
+        if (data.user && data.user.role === 'admin') {
+          navigation.navigate('Settings');
+        } else if (data.user && data.user.role === 'user') {
+          navigation.navigate('Details');
+        } else {
+          // إذا لم يوجد دور، فقط عرض رسالة نجاح
+          // يمكنك هنا حفظ التوكن أو بيانات المستخدم حسب الحاجة
+        }
+      } else {
+        Alert.alert('Login Failed', 'الرد من السيرفر: ' + JSON.stringify(data));
+      }
+    } catch (error: any) {
+      // عرض الخطأ الكامل
+      Alert.alert('Error',
+        'رسالة الخطأ: ' + (error?.message || 'Network error') +
+        '\nتفاصيل الخطأ: ' + JSON.stringify(error)
+      );
     }
     setLoading(false);
   };
@@ -86,16 +120,34 @@ function HomeScreen({ navigation }: any) {
             secureTextEntry
           />
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-            <Text style={styles.loginText}>{loading ? '...' : i18n.t('login')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Image source={require('./assests/icon1.png')} style={{ width: 24, height: 24, marginRight: 8 }} />
+              <Text style={styles.loginText}>{loading ? '...' : i18n.t('login')}</Text>
+            </View>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('Details')}>
-          <Text style={styles.registerText}>{i18n.t('signup')}</Text>
+              <Text style={styles.registerText}>{i18n.t('signup')}</Text>
         </TouchableOpacity>
+            {/* Website Link */}
+            <TouchableOpacity style={styles.linkButton} onPress={() => Linking.openURL('https://kmtsys.com')}>
+              <Text style={styles.linkText}>الموقع الرسمي</Text>
+            </TouchableOpacity>
       </SafeAreaView>
     </LinearGradient>
   );
 // ...existing code...
+// API Endpoints
+const API_BASE = 'https://kmtsys.com/api';
+const API_ENDPOINTS = {
+  login: API_BASE + '/auth/[...nextauth]',
+  signup: API_BASE + '/auth/signup',
+  attendance: API_BASE + '/admin/attendance',
+  upload: API_BASE + '/upload',
+  notifications: API_BASE + '/notifications',
+  events: API_BASE + '/events',
+  profile: API_BASE + '/profile',
+};
 }
 
 function SettingsScreen() {
@@ -203,6 +255,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     fontFamily: 'System',
+  },
+  linkButton: {
+    marginTop: 16,
+    padding: 10,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 8,
+  },
+  linkText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 });
 
