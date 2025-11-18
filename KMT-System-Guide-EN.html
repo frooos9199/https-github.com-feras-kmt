@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marshal Management System Guide - Kuwait Motor Town</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm 2cm;
+        }
+        
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .page-break {
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            
+            h1, h2, h3, h4 {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+            
+            .feature-box, .info-box, .warning-box, .success-box {
+                page-break-inside: avoid;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #fff;
+        }
+        
+        .cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cover-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/kmt-logo-white.png') no-repeat center center;
+            background-size: 40%;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .cover-page > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cover-page h1 {
+            font-size: 3em;
+            margin-bottom: 0.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .cover-page h2 {
+            font-size: 2em;
+            margin-bottom: 2em;
+            font-weight: 300;
+        }
+        
+        .cover-page .logo {
+            width: 300px;
+            height: auto;
+            margin-bottom: 2em;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+        
+        .cover-page .date {
+            font-size: 1.2em;
+            margin-top: 2em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #dc2626;
+            font-size: 2.5em;
+            margin: 1em 0 0.5em;
+            padding-bottom: 0.3em;
+            border-bottom: 3px solid #dc2626;
+        }
+        
+        h2 {
+            color: #991b1b;
+            font-size: 2em;
+            margin: 1.5em 0 0.8em;
+            padding-left: 15px;
+            border-left: 5px solid #991b1b;
+        }
+        
+        h3 {
+            color: #555;
+            font-size: 1.5em;
+            margin: 1.2em 0 0.6em;
+        }
+        
+        h4 {
+            color: #666;
+            font-size: 1.2em;
+            margin: 1em 0 0.5em;
+        }
+        
+        p {
+            margin: 0.8em 0;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+        
+        li {
+            margin: 0.5em 0;
+        }
+        
+        .feature-box {
+            background: #f8f9fa;
+            border-left: 4px solid #dc2626;
+            padding: 20px;
+            margin: 1.5em 0;
+            border-radius: 5px;
+        }
+        
+        .feature-box h3 {
+            color: #dc2626;
+            margin-top: 0;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border: 2px solid #2196F3;
+            padding: 15px;
+            margin: 1em 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            margin: 1em 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 15px;
+            margin: 1em 0;
+            border-radius: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #dc2626;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .page-break {
+            page-break-after: always;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2em;
+            color: #888;
+            border-top: 2px solid #eee;
+            margin-top: 3em;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Cover Page -->
+    <div class="cover-page">
+        <img src="file:///Users/mac/Documents/GitHub/kmt/kmt-logo-white.png" alt="KMT Logo" class="logo">
+        <div style="background: white; color: black; padding: 30px 60px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 20px;">
+            <h1 style="color: black; border: none; font-size: 2.5em; margin: 0; text-shadow: none;">Marshal Management System Guide</h1>
+        </div>
+        <div style="background: white; color: black; padding: 20px 50px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 20px;">
+            <h2 style="color: black; border: none; margin: 0; text-shadow: none;">Kuwait Motor Town</h2>
+        </div>
+        <p style="font-size: 1.3em;">KMT - Marshal Management System</p>
+        <div class="date">November 2025</div>
+    </div>
+    
+    <div class="container">
+        
+        <!-- Content -->
+        <h1>📋 System Overview</h1>
+        
+        <div class="feature-box">
+            <h3>What is the System?</h3>
+            <p>A comprehensive system for managing marshals in Kuwait Motor Town (KMT) events, providing centralized management for all marshals, electronic attendance registration, event and calendar management, detailed reports and statistics, and instant notification system.</p>
+        </div>
+        
+        <h2>🎯 Why Do We Need This System?</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Current Problems</th>
+                    <th>Solutions Provided</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>📝 Paper registration takes a long time</td>
+                    <td>⚡ Instant registration with a click</td>
+                </tr>
+                <tr>
+                    <td>📊 Difficulty tracking marshal attendance</td>
+                    <td>📊 Real-time tracking of all data</td>
+                </tr>
+                <tr>
+                    <td>📱 No quick communication method</td>
+                    <td>🔔 Instant notifications for all marshals</td>
+                </tr>
+                <tr>
+                    <td>📈 Difficulty creating reports and statistics</td>
+                    <td>📈 Automatic and detailed reports</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="page-break"></div>
+        
+        <h1>✨ Key Features</h1>
+        
+        <h2>👨‍💼 For Admin (Management)</h2>
+        
+        <div class="feature-box">
+            <h4>1. Main Dashboard</h4>
+            <ul>
+                <li>Display comprehensive system statistics</li>
+                <li>Number of active marshals</li>
+                <li>Upcoming and current events</li>
+                <li>Overall attendance rate</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>2. Marshal Management</h4>
+            <ul>
+                <li>✅ Add new marshal with complete information</li>
+                <li>✅ Edit marshal data</li>
+                <li>✅ Upload profile pictures</li>
+                <li>✅ Specify marshal types (Drag Race, Drift, Circuit)</li>
+                <li>✅ Activate/deactivate marshal accounts</li>
+                <li>✅ View attendance record for each marshal</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>3. Event Management</h4>
+            <ul>
+                <li>✅ Create new event</li>
+                <li>✅ Specify event type and requirements</li>
+                <li>✅ Set maximum number of marshals</li>
+                <li>✅ Set start and end dates</li>
+                <li>✅ Upload event images</li>
+                <li>✅ Cancel or complete events</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>4. Attendance Management</h4>
+            <ul>
+                <li>✅ View list of registrants for each event</li>
+                <li>✅ Approve or reject registration requests</li>
+                <li>✅ Add notes on attendance</li>
+                <li>✅ Print attendance records</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>5. Reports and Statistics</h4>
+            <ul>
+                <li>📊 Marshal attendance report</li>
+                <li>📊 Events report</li>
+                <li>📊 Monthly performance report</li>
+                <li>📊 Detailed statistics with charts</li>
+                <li>🖨️ Print and export reports</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h2>👨‍🔧 For Marshals</h2>
+        
+        <div class="feature-box">
+            <h4>1. Personal Dashboard</h4>
+            <ul>
+                <li>View personal information</li>
+                <li>View registered marshal type</li>
+                <li>Number of events participated in</li>
+                <li>Latest notifications</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>2. Profile</h4>
+            <ul>
+                <li>✅ View all personal information</li>
+                <li>✅ Edit data (name, phone, etc.)</li>
+                <li>✅ Upload profile picture</li>
+                <li>✅ Change password</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>3. Events</h4>
+            <ul>
+                <li>📅 View all upcoming events</li>
+                <li>📅 View details of each event</li>
+                <li>✅ Register for suitable events</li>
+                <li>❌ Cancel registration before deadline</li>
+                <li>📋 View registration status (pending, approved, rejected)</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>4. Attendance Record</h4>
+            <ul>
+                <li>📊 View all past events</li>
+                <li>📊 Attendance status for each event</li>
+                <li>📊 Management notes</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>5. Notifications</h4>
+            <ul>
+                <li>🔔 Notification for new event added</li>
+                <li>🔔 Notification for registration approval</li>
+                <li>🔔 Notification for any event changes</li>
+                <li>🔔 Reminder before event time</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>📱 User Guide - Admin</h1>
+        
+        <h2>🔐 Login</h2>
+        <ol>
+            <li>Open the website</li>
+            <li>Click on <strong>Login</strong></li>
+            <li>Enter email and password</li>
+            <li>Click <strong>Login</strong></li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>Default email:</strong> admin@kmt.kw
+        </div>
+        
+        <h2>👥 Add New Marshal</h2>
+        <ol>
+            <li>From the sidebar, select <strong>Marshal Management</strong></li>
+            <li>Click <strong>Add Marshal</strong></li>
+            <li>Fill in the required information:
+                <ul>
+                    <li><strong>Employee ID:</strong> KMT-XXX (example: KMT-101)</li>
+                    <li><strong>Full Name</strong></li>
+                    <li><strong>Email</strong></li>
+                    <li><strong>Phone Number</strong></li>
+                    <li><strong>Civil ID</strong></li>
+                    <li><strong>Date of Birth</strong></li>
+                    <li><strong>Nationality</strong></li>
+                    <li><strong>Marshal Type:</strong> Select one or more</li>
+                </ul>
+            </li>
+            <li>Click <strong>Add</strong></li>
+        </ol>
+        
+        <div class="warning-box">
+            <strong>Note:</strong> An email will be sent to the marshal with login credentials.
+        </div>
+        
+        <h2>📸 Upload Marshal Picture</h2>
+        <ol>
+            <li>From the marshal list, click on the desired marshal</li>
+            <li>Click <strong>Edit</strong></li>
+            <li>Click on the camera icon</li>
+            <li>Select the image from your device</li>
+            <li>Click <strong>Save</strong></li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>Required Specifications:</strong>
+            <ul>
+                <li>Maximum size: 5 MB</li>
+                <li>Supported formats: JPG, PNG, GIF, WEBP</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h2>🎪 Create New Event</h2>
+        <ol>
+            <li>From the sidebar, select <strong>Event Management</strong></li>
+            <li>Click <strong>Add Event</strong></li>
+            <li>Fill in all required information</li>
+            <li>Upload event image (optional)</li>
+            <li>Click <strong>Create Event</strong></li>
+        </ol>
+        
+        <div class="success-box">
+            <strong>Result:</strong> An automatic notification will be sent to all suitable marshals.
+        </div>
+        
+        <h2>✅ Manage Registration Requests</h2>
+        <ol>
+            <li>Select <strong>Attendance Management</strong> from the menu</li>
+            <li>Select the desired event</li>
+            <li>A list of all registrants and their statuses will appear</li>
+            <li>For each marshal, you can:
+                <ul>
+                    <li>Click <strong>✓ Approve</strong> to accept registration</li>
+                    <li>Click <strong>✗ Reject</strong> to reject registration</li>
+                    <li>Add a note in the notes field</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🟡 Pending</td>
+                    <td>Awaiting approval</td>
+                    <td>Requires admin decision</td>
+                </tr>
+                <tr>
+                    <td>🟢 Approved</td>
+                    <td>Approved</td>
+                    <td>Notification sent to marshal</td>
+                </tr>
+                <tr>
+                    <td>🔴 Rejected</td>
+                    <td>Rejected</td>
+                    <td>Notification sent to marshal</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="page-break"></div>
+        
+        <h1>📱 User Guide - Marshal</h1>
+        
+        <h2>🆕 System Registration (First Time)</h2>
+        
+        <div class="warning-box">
+            <strong>Important Note:</strong> The admin adds your account first.
+        </div>
+        
+        <ol>
+            <li>You will receive an email containing login credentials</li>
+            <li>Open the website</li>
+            <li>Click <strong>Login</strong></li>
+            <li>Enter the email and password sent</li>
+            <li><strong>It is recommended to change the password</strong> from settings</li>
+        </ol>
+        
+        <h2>📝 Register for an Event</h2>
+        <ol>
+            <li>From the home page or <strong>Events</strong></li>
+            <li>All upcoming events will appear</li>
+            <li>Click on the desired event</li>
+            <li>Read the details carefully</li>
+            <li>If the event is suitable, click <strong>Register Now</strong></li>
+            <li>A confirmation message will appear</li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>Notes:</strong>
+            <ul>
+                <li>You cannot register if the event is full</li>
+                <li>You cannot register if your type does not match the requirement</li>
+            </ul>
+        </div>
+        
+        <h2>❌ Cancel Registration</h2>
+        <ol>
+            <li>Go to <strong>Events</strong></li>
+            <li>Find the event you registered for</li>
+            <li>Click on the event</li>
+            <li>Click <strong>Cancel Registration</strong></li>
+            <li>Confirm cancellation</li>
+        </ol>
+        
+        <div class="warning-box">
+            <strong>Alert:</strong> Cancellation is not possible after admin approval except by contacting the admin.
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>🛠️ Technologies Used</h1>
+        
+        <h2>Technical Architecture</h2>
+        
+        <div class="feature-box">
+            <h4>Frontend</h4>
+            <ul>
+                <li><strong>Next.js 16</strong> - Advanced React framework</li>
+                <li><strong>React 19</strong> - UI building library</li>
+                <li><strong>Tailwind CSS</strong> - Modern and fast design</li>
+                <li><strong>Framer Motion</strong> - Smooth animations</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Backend</h4>
+            <ul>
+                <li><strong>Next.js API Routes</strong> - Secure APIs</li>
+                <li><strong>NextAuth.js</strong> - Advanced authentication system</li>
+                <li><strong>Prisma ORM</strong> - Database management</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Database</h4>
+            <ul>
+                <li><strong>PostgreSQL</strong> - Reliable database</li>
+                <li><strong>Neon</strong> - Secure cloud hosting</li>
+                <li><strong>Automatic backup</strong></li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Cloud Storage</h4>
+            <ul>
+                <li><strong>Cloudinary</strong> - Image storage</li>
+                <li><strong>25 GB free space</strong></li>
+                <li><strong>Automatic image compression</strong></li>
+                <li><strong>Fast global CDN</strong></li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Hosting</h4>
+            <ul>
+                <li><strong>Vercel</strong> - Global hosting</li>
+                <li><strong>Secure HTTPS</strong></li>
+                <li><strong>Automatic updates</strong></li>
+                <li><strong>99.9% uptime</strong></li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>🔒 Security and Privacy</h1>
+        
+        <h2>Security Measures</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Security Measure</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🔐 Data Encryption</td>
+                    <td>All passwords encrypted with bcrypt algorithm</td>
+                </tr>
+                <tr>
+                    <td>🔒 HTTPS/SSL</td>
+                    <td>All connections encrypted and secure</td>
+                </tr>
+                <tr>
+                    <td>👤 Access Permissions</td>
+                    <td>Each user has specific permissions</td>
+                </tr>
+                <tr>
+                    <td>💾 Backup</td>
+                    <td>Automatic daily backup</td>
+                </tr>
+                <tr>
+                    <td>🛡️ Intrusion Protection</td>
+                    <td>Protection from SQL Injection and XSS</td>
+                </tr>
+                <tr>
+                    <td>🔑 Session Management</td>
+                    <td>Automatic session expiration after period</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="success-box">
+            <h4>Privacy</h4>
+            <ul>
+                <li>✅ Personal data is confidential and protected</li>
+                <li>✅ Data is not shared with external parties</li>
+                <li>✅ Images are protected and accessible only with permission</li>
+                <li>✅ Marshals cannot view other marshals' data</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>📊 Statistics and Performance</h1>
+        
+        <h2>Current System Capacity</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Resource</th>
+                    <th>Capacity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Users</td>
+                    <td>Unlimited</td>
+                </tr>
+                <tr>
+                    <td>Events</td>
+                    <td>Unlimited</td>
+                </tr>
+                <tr>
+                    <td>Images</td>
+                    <td>25 GB (~50,000 images)</td>
+                </tr>
+                <tr>
+                    <td>Database</td>
+                    <td>500 MB (~100,000 records)</td>
+                </tr>
+                <tr>
+                    <td>Speed</td>
+                    <td>< 1 second</td>
+                </tr>
+                <tr>
+                    <td>Uptime</td>
+                    <td>99.9%</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Expected Performance</h2>
+        
+        <div class="feature-box">
+            <ul>
+                <li><strong>Loading Speed:</strong> Less than one second</li>
+                <li><strong>Data Processing Speed:</strong> Instant</li>
+                <li><strong>Image Upload:</strong> 3-5 seconds</li>
+                <li><strong>Notifications:</strong> Instant</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>💰 Cost</h1>
+        
+        <div class="success-box">
+            <h2 style="margin: 0; color: #28a745;">Current Cost: $0/month</h2>
+            <p style="margin-top: 1em;">The system operates entirely on free plans!</p>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Cost</th>
+                    <th>Usage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Vercel (Hosting)</td>
+                    <td>Free</td>
+                    <td>Website hosting + SSL</td>
+                </tr>
+                <tr>
+                    <td>Neon (Database)</td>
+                    <td>Free</td>
+                    <td>500 MB storage</td>
+                </tr>
+                <tr>
+                    <td>Cloudinary (Images)</td>
+                    <td>Free</td>
+                    <td>25 GB / month</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>$0</strong></td>
+                    <td>Sufficient for 10+ years</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="info-box">
+            <h4>Sufficient for:</h4>
+            <ul>
+                <li>✅ 600+ marshals</li>
+                <li>✅ 100+ events/year</li>
+                <li>✅ 50,000 images</li>
+                <li>✅ 10+ years of usage</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>🚀 Future Updates</h1>
+        
+        <h2>Roadmap</h2>
+        
+        <div class="feature-box">
+            <h3>Phase 1 (Current) ✅</h3>
+            <ul>
+                <li>Marshal management system</li>
+                <li>Event system</li>
+                <li>Attendance system</li>
+                <li>Basic reports</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>Phase 2 (Soon)</h3>
+            <ul>
+                <li>📱 Mobile app (iOS & Android)</li>
+                <li>🔔 Push notifications</li>
+                <li>📊 Advanced reports</li>
+                <li>💬 Internal chat system</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>Phase 3 (Future)</h3>
+            <ul>
+                <li>🎯 Points and rating system</li>
+                <li>📜 Electronic certificates</li>
+                <li>📧 Mass email</li>
+                <li>📅 Calendar export</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>📞 Technical Support</h1>
+        
+        <h2>In Case of a Problem</h2>
+        
+        <div class="feature-box">
+            <h4>Login Issues</h4>
+            <ul>
+                <li>Check email and password</li>
+                <li>Try "Forgot Password"</li>
+                <li>Contact the admin</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Image Upload Issues</h4>
+            <ul>
+                <li>Check image size (less than 5 MB)</li>
+                <li>Use JPG or PNG format</li>
+                <li>Try from another browser</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Performance Issues</h4>
+            <ul>
+                <li>Check internet connection</li>
+                <li>Clear cache and cookies</li>
+                <li>Try from another device</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h4>For Technical Support:</h4>
+            <ul>
+                <li><strong>Email:</strong> admin@kmt.kw</li>
+                <li><strong>Website:</strong> [Website Link]</li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <h1>✅ Summary</h1>
+        
+        <div class="success-box">
+            <h2 style="margin-top: 0;">Complete System Ready for Immediate Use!</h2>
+            <p>The Marshal Management System at Kuwait Motor Town is a comprehensive and modern solution for efficiently managing all marshal and event operations.</p>
+        </div>
+        
+        <h2>For Management (Admin)</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td>✅ Complete marshal management</td>
+                    <td>✅ Event and scheduling management</td>
+                </tr>
+                <tr>
+                    <td>✅ Accept/reject registration requests</td>
+                    <td>✅ Detailed reports and statistics</td>
+                </tr>
+                <tr>
+                    <td>✅ Print attendance records</td>
+                    <td>✅ Send notifications</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>For Marshals</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td>✅ Easy event registration</td>
+                    <td>✅ Track registration status</td>
+                </tr>
+                <tr>
+                    <td>✅ View attendance record</td>
+                    <td>✅ Edit profile</td>
+                </tr>
+                <tr>
+                    <td>✅ Receive instant notifications</td>
+                    <td>✅ Easy and simple interface</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>For the System</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td>✅ Fast, secure, and reliable</td>
+                    <td>✅ Easy to use</td>
+                </tr>
+                <tr>
+                    <td>✅ Works on all devices</td>
+                    <td>✅ Completely free</td>
+                </tr>
+                <tr>
+                    <td>✅ Technical support available</td>
+                    <td>✅ Continuous updates</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="page-break"></div>
+        
+        <div class="footer">
+            <h2>🏁 Kuwait Motor Town 🏁</h2>
+            <h3>Kuwait Motor Town</h3>
+            <p style="margin: 2em 0;">Marshal Management System</p>
+            <p><strong>Version:</strong> 1.0.0</p>
+            <p><strong>Release Date:</strong> November 2025</p>
+            <p style="margin-top: 2em; font-size: 0.9em; color: #999;">
+                Developed with love and care to serve Kuwait Motor Town 🏎️
+            </p>
+        </div>
+        
+    </div>
+    
+</body>
+</html>
