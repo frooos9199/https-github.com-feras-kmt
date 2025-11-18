@@ -20,6 +20,9 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "KMT Marshal System | Kuwait Motor Town",
   description: "Marshal Management System for Kuwait Motor Town",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
