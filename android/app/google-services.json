@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1055500708425",
+    "project_id": "eventapp-a421e",
+    "storage_bucket": "eventapp-a421e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1055500708425:android:b2d4921df24f07f590ed98",
+        "android_client_info": {
+          "package_name": "FCMService.js"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3YPqDiyPhHPv8LdWEMM4rLUAx2yHuk30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
