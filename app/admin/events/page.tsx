@@ -257,11 +257,11 @@ export default function EventsManagement() {
                 className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer transform hover:scale-105"
               >
                 <div className="relative h-32 flex items-center justify-center overflow-hidden">
-                  {/* خلفية صورة */}
+                  {/* صورة المارشال كخلفية فقط بدون لون */}
                   <img 
                     src="/marshal-bg.jpg" 
                     alt="marshal background" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none select-none" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none select-none" 
                   />
                   {/* أيقونات المارشال */}
                   <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
