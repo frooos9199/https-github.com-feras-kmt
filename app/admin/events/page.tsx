@@ -256,18 +256,18 @@ export default function EventsManagement() {
                 onClick={() => router.push(`/admin/events/${event.id}`)}
                 className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer transform hover:scale-105"
               >
-                <div 
-                  className="relative h-32 flex items-center justify-center overflow-hidden" 
-                  style={{
-                    backgroundImage: 'url(/marshal-action.jpg)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    opacity: 0.85
-                  }}
-                >
-                  {/* هيدر أحمر أعلى الكرت */}
-                  <div className="absolute top-0 left-0 w-full h-4 rounded-t-xl bg-gradient-to-r from-red-800 via-red-700 to-red-600 z-10" />
+                <div className="relative h-32 flex items-center justify-center overflow-hidden">
+                  {/* صورة الهيدر خلف الشعارات */}
+                  <div
+                    className="absolute inset-0 w-full h-full z-0"
+                    style={{
+                      backgroundImage: 'url(/test.jpg)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      opacity: 0.7
+                    }}
+                  />
                   {/* أيقونات المارشال */}
                   <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
                     {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
@@ -277,7 +277,7 @@ export default function EventsManagement() {
                         'karting': '🏎️',
                         'drift': '💨',
                         'circuit': '🏁',
-                        'rescue': '�'
+                        'rescue': '🚑'
                       }
                       return <span key={type} className="text-3xl">{typeIcons[type] || '�'}</span>
                     })}
