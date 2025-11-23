@@ -318,9 +318,9 @@ export default function EventDetails() {
               <h2 className="text-xl font-bold text-white mb-4">
                 👥 {language === "ar" ? "المارشالات المسجلين" : "Registered Marshals"} ({event.attendances.length}/{event.maxMarshals})
               </h2>
-              <div 
-                className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6 bg-zinc-900/50 border border-zinc-800"
-              >
+              <div className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6 bg-zinc-900/50 border border-zinc-800">
+                {/* هيدر أحمر أعلى الكرت */}
+                <div className="absolute top-0 left-0 w-full h-4 rounded-t-xl bg-gradient-to-r from-red-800 via-red-700 to-red-600" />
                 {/* أيقونات المارشال */}
                 <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
                   {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
