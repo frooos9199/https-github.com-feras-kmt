@@ -1,5 +1,3 @@
-// سطر جديد للتجربة
-// تعديل تجريبي للتأكد من وصول التعديلات إلى Vercel
 "use client"
 
 import { useSession } from "next-auth/react"
@@ -7,7 +5,6 @@ import { useRouter, useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
-import Link from "next/link"
 
 interface Marshal {
   id: string
@@ -28,6 +25,7 @@ interface Marshal {
     attendances: number
   }
 }
+
 export default function MarshalDetails() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -277,6 +275,7 @@ export default function MarshalDetails() {
       {/* باقي الصفحة */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ...existing code... */}
+      </main>
 
       {/* Delete Modal */}
       {showDeleteModal && (
@@ -445,3 +444,5 @@ export default function MarshalDetails() {
     </div>
   )
 }
+
+
