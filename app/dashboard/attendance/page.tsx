@@ -262,15 +262,24 @@ export default function MyAttendancePage() {
                   transition={{ delay: index * 0.05 }}
                   className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-colors"
                 >
-                  {/* Event Image */}
-                  <div className="h-32 bg-gradient-to-br from-red-600/20 to-red-900/20 flex items-center justify-center relative">
-                    <span className="text-5xl">
+                  {/* Event Image: صورة test.jpg مع طبقة داكنة */}
+                  <div
+                    className="h-32 flex items-center justify-center bg-black relative"
+                    style={{
+                      backgroundImage: 'url(/test.jpg)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60" />
+                    <span className="text-5xl relative z-10">
                       {attendance.event.type === "race" && "🏁"}
                       {attendance.event.type === "drift" && "🚗"}
                       {attendance.event.type === "track-day" && "🏎️"}
                     </span>
                     {isPast && (
-                      <div className="absolute top-2 right-2 px-3 py-1 bg-gray-600/80 rounded-full text-xs text-white">
+                      <div className="absolute top-2 right-2 px-3 py-1 bg-gray-600/80 rounded-full text-xs text-white z-20">
                         {language === "ar" ? "منتهي" : "Past"}
                       </div>
                     )}
