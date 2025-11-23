@@ -1,3 +1,4 @@
+import React from "react";
 export default function NotFound() {
   return (
     <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
