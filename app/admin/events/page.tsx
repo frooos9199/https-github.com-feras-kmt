@@ -261,7 +261,7 @@ export default function EventsManagement() {
                   <img 
                     src="/marshal-action.jpg" 
                     alt="marshal background" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none select-none" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none select-none border border-white/60" 
                   />
                   {/* أيقونات المارشال */}
                   <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
