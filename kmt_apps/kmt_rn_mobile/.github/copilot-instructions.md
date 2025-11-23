@@ -1,5 +1,0 @@
-- [x] Project scaffolded: React Native (TypeScript) in 'kmt_rn_mobile' folder.
-- [x] README.md created with setup instructions.
-- [ ] Customize the project as needed (navigation, screens, etc.)
-- [ ] Compile and run on iOS/Android.
-- [ ] Update documentation as features are added.
