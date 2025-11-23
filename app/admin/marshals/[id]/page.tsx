@@ -241,334 +241,36 @@ export default function MarshalDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
-      {/* Header */}
-      <header className="bg-black/50 backdrop-blur-lg border-b border-red-600/30 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/admin" className="flex items-center gap-3">
-              <img src="/kmt-logo-main.png" alt="KMT" className="h-12 w-auto rounded px-2 py-1" />
-              <span className="text-yellow-500 font-bold text-sm">👑 ADMIN</span>
-            </Link>
-            <Link
-              href="/admin/marshals"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              ← {language === "ar" ? "العودة" : "Back"}
-            </Link>
-          </div>
+      {/* صورة الهيدر خلف الشعارات */}
+      <div className="relative w-full flex items-center justify-center h-32 overflow-hidden">
+        <div
+          className="absolute inset-0 w-full h-full z-0"
+          style={{
+            backgroundImage: 'url(/test.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.7
+          }}
+        />
+        {/* أيقونات المارشال */}
+        <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
+          {marshal?.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).map((type) => {
+            const typeIcons: Record<string, string> = {
+              'drag-race': '🏁',
+              'motocross': '🏍️',
+              'karting': '🏎️',
+              'drift': '💨',
+              'circuit': '🏁',
+              'rescue': '🚑'
+            }
+            return <span key={type} className="text-3xl">{typeIcons[type] || '�'}</span>
+          })}
         </div>
-      </header>
-
-      {/* Main Content */}
+      </div>
+      {/* باقي الصفحة */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-white">
-              👤 {language === "ar" ? "تفاصيل المارشال" : "Marshal Details"}
-            </h1>
-            <div className="flex gap-3">
-              <button
-                onClick={handleToggleStatus}
-                className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                  marshal.isActive
-                    ? "bg-yellow-600 hover:bg-yellow-700 text-white"
-                    : "bg-green-600 hover:bg-green-700 text-white"
-                }`}
-              >
-                {marshal.isActive 
-                  ? (language === "ar" ? "⏸️ إيقاف" : "⏸️ Suspend")
-                  : (language === "ar" ? "▶️ تفعيل" : "▶️ Activate")
-                }
-              </button>
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
-              >
-                ✏️ {language === "ar" ? "تعديل" : "Edit"}
-              </button>
-              <button
-                onClick={() => setShowDeleteModal(true)}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all"
-              >
-                🗑️ {language === "ar" ? "حذف" : "Delete"}
-              </button>
-            </div>
-          </div>
-
-          {/* Status Badge */}
-          <div className="mb-6">
-            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
-              marshal.isActive 
-                ? "bg-green-600/20 text-green-500 border border-green-600/50"
-                : "bg-red-600/20 text-red-500 border border-red-600/50"
-            }`}>
-              {marshal.isActive ? "✅" : "⏸️"}
-              {marshal.isActive 
-                ? (language === "ar" ? "نشط" : "Active")
-                : (language === "ar" ? "موقوف" : "Suspended")
-              }
-            </span>
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Image */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-1"
-          >
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                {language === "ar" ? "صورة الملف الشخصي" : "Profile Picture"}
-              </h2>
-              <div className="aspect-square rounded-xl overflow-hidden bg-zinc-800 flex items-center justify-center">
-                {marshal.image ? (
-                  <img
-                    src={marshal.image}
-                    alt={marshal.name}
-                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                    onClick={() => window.open(marshal.image!, "_blank")}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-600 to-red-800">
-                    <span className="text-8xl font-bold text-white">
-                      {marshal.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {marshal.image && (
-                <p className="text-center text-sm text-gray-400 mt-3">
-                  {language === "ar" ? "اضغط للعرض بالحجم الكامل" : "Click to view full size"}
-                </p>
-              )}
-            </div>
-
-            {/* License Images */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 mt-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                🪪 {language === "ar" ? "رخصة القيادة" : "Driver License"}
-              </h2>
-              <div className="space-y-4">
-                {/* License Front */}
-                <div>
-                  <p className="text-gray-400 text-sm mb-2">
-                    {language === "ar" ? "الرخصة - الأمام" : "License - Front"}
-                  </p>
-                  {marshal.licenseFrontImage ? (
-                    <div className="relative group">
-                      <img
-                        src={marshal.licenseFrontImage}
-                        alt="License Front"
-                        className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700 cursor-pointer hover:scale-[1.02] transition-transform"
-                        onClick={() => window.open(marshal.licenseFrontImage!, "_blank")}
-                      />
-                      <a
-                        href={marshal.licenseFrontImage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
-                      >
-                        {language === "ar" ? "عرض" : "View"}
-                      </a>
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 bg-zinc-800/50 border-2 border-dashed border-zinc-700 rounded-lg flex items-center justify-center text-gray-500">
-                      {language === "ar" ? "لم يتم رفع صورة" : "No image uploaded"}
-                    </div>
-                  )}
-                  <label className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white transition-colors cursor-pointer">
-                    {uploadingLicenseFront ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm">{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>📤</span>
-                        <span className="text-sm">{language === "ar" ? "رفع صورة الأمام" : "Upload Front Image"}</span>
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLicenseFrontUpload}
-                      disabled={uploadingLicenseFront}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                {/* License Back */}
-                <div>
-                  <p className="text-gray-400 text-sm mb-2">
-                    {language === "ar" ? "الرخصة - الخلف" : "License - Back"}
-                  </p>
-                  {marshal.licenseBackImage ? (
-                    <div className="relative group">
-                      <img
-                        src={marshal.licenseBackImage}
-                        alt="License Back"
-                        className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700 cursor-pointer hover:scale-[1.02] transition-transform"
-                        onClick={() => window.open(marshal.licenseBackImage!, "_blank")}
-                      />
-                      <a
-                        href={marshal.licenseBackImage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
-                      >
-                        {language === "ar" ? "عرض" : "View"}
-                      </a>
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 bg-zinc-800/50 border-2 border-dashed border-zinc-700 rounded-lg flex items-center justify-center text-gray-500">
-                      {language === "ar" ? "لم يتم رفع صورة" : "No image uploaded"}
-                    </div>
-                  )}
-                  <label className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white transition-colors cursor-pointer">
-                    {uploadingLicenseBack ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm">{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>📤</span>
-                        <span className="text-sm">{language === "ar" ? "رفع صورة الخلف" : "Upload Back Image"}</span>
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLicenseBackUpload}
-                      disabled={uploadingLicenseBack}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Details */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-2 space-y-6"
-          >
-            {/* Personal Info */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                📋 {language === "ar" ? "المعلومات الشخصية" : "Personal Information"}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "الاسم" : "Name"}</p>
-                  <p className="text-white font-medium text-lg">{marshal.name}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "رقم المارشال" : "Marshal Number"}</p>
-                  <p className="text-white font-medium text-lg">{marshal.employeeId}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "الرقم المدني" : "Civil ID"}</p>
-                  <p className="text-white font-medium text-lg">{marshal.civilId}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</p>
-                  <p className="text-white font-medium text-lg">
-                    {new Date(marshal.dateOfBirth).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
-                  </p>
-                </div>
-                {marshal.nationality && (
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "الجنسية" : "Nationality"}</p>
-                    <p className="text-white font-medium text-lg">{marshal.nationality}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Marshal Types */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                🏁 {language === "ar" ? "أنواع الوظائف" : "Marshal Job Types"}
-              </h2>
-              <div className="flex flex-wrap gap-3">
-                {marshal.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).length > 0 ? (
-                  marshal.marshalTypes.split(',').filter(t => t).map((type) => {
-                    const typeLabels: Record<string, {en: string, ar: string, icon: string, color: string}> = {
-                      'drag-race': {en: 'Drag Race Marshal', ar: 'دراق ريس مارشال', icon: '🏁', color: 'bg-red-600'},
-                      'motocross': {en: 'Motocross Marshal', ar: 'موتور كروس مارشال', icon: '🏍️', color: 'bg-orange-600'},
-                      'karting': {en: 'Karting Marshal', ar: 'كارتينق مارشال', icon: '🏎️', color: 'bg-yellow-600'},
-                      'drift': {en: 'Drift Marshal', ar: 'دريفت مارشال', icon: '💨', color: 'bg-purple-600'},
-                      'circuit': {en: 'Circuit Marshal', ar: 'سيركت مارشال', icon: '🏁', color: 'bg-blue-600'},
-                      'rescue': {en: 'Rescue Marshal', ar: 'ريسك يو مارشال', icon: '🚑', color: 'bg-green-600'}
-                    }
-                    const label = typeLabels[type]
-                    if (!label) return null
-                    return (
-                      <span 
-                        key={type}
-                        className={`${label.color} text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2`}
-                      >
-                        <span>{label.icon}</span>
-                        <span>{language === "ar" ? label.ar : label.en}</span>
-                      </span>
-                    )
-                  })
-                ) : (
-                  <p className="text-gray-400">
-                    {language === "ar" ? "لم يتم تحديد أنواع وظائف" : "No job types assigned"}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Contact Info */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                📞 {language === "ar" ? "معلومات الاتصال" : "Contact Information"}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "البريد الإلكتروني" : "Email"}</p>
-                  <p className="text-white font-medium text-lg">{marshal.email}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "رقم الهاتف" : "Phone"}</p>
-                  <p className="text-white font-medium text-lg">{marshal.phone}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                📊 {language === "ar" ? "الإحصائيات" : "Statistics"}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-green-600/10 border border-green-600/30 rounded-xl p-4">
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "إجمالي الحضور" : "Total Attendance"}</p>
-                  <p className="text-green-500 font-bold text-3xl">{marshal._count.attendances}</p>
-                </div>
-                <div className="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4">
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ التسجيل" : "Registered"}</p>
-                  <p className="text-blue-500 font-bold text-lg">
-                    {new Date(marshal.createdAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </main>
+        {/* ...existing code... */}
 
       {/* Delete Modal */}
       {showDeleteModal && (
