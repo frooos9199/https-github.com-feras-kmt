@@ -266,6 +266,8 @@ export default function EventsManagement() {
                     opacity: 0.85
                   }}
                 >
+                  {/* هيدر أحمر أعلى الكرت */}
+                  <div className="absolute top-0 left-0 w-full h-4 rounded-t-xl bg-gradient-to-r from-red-800 via-red-700 to-red-600 z-10" />
                   {/* أيقونات المارشال */}
                   <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
                     {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
