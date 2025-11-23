@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "KMT Marshal System | Kuwait Motor Town",
   description: "Marshal Management System for Kuwait Motor Town",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/kmt-logo-copy.png",
   },
 };
 
