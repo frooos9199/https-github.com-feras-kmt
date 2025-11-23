@@ -259,7 +259,7 @@ export default function EventsManagement() {
                 <div className="relative h-32 flex items-center justify-center overflow-hidden">
                   {/* صورة المارشال كخلفية فقط بدون لون */}
                   <img 
-                    src="/marshal-bg.jpg" 
+                    src="/marshal-action.jpg" 
                     alt="marshal background" 
                     className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none select-none" 
                   />
