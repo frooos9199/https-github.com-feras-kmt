@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { sendEmail, marshalAccountRemovalEmailTemplate } from "@/lib/email"
 
 // GET - Fetch single marshal
 export async function GET(
@@ -139,18 +140,36 @@ export async function DELETE(
 
     const { id } = await params
 
-    // Delete all attendances first
+    // جلب بيانات المارشال قبل الحذف
+    const deletedMarshal = await prisma.user.findUnique({
+      where: { id },
+      select: { name: true, email: true }
+    })
+
+    // حذف جميع الحضور أولاً
     await prisma.attendance.deleteMany({
       where: { userId: id }
     })
 
-    // Delete the marshal
+    // حذف المارشال
     await prisma.user.delete({
       where: { 
         id,
         role: "marshal"
       }
     })
+
+    // إرسال الإيميل بعد الحذف
+    if (deletedMarshal?.email) {
+      // استدعاء دالة الإيميل
+      // استيراد الدوال في أعلى الملف:
+      // import { sendEmail, marshalAccountRemovalEmailTemplate } from "@/lib/email"
+      await sendEmail({
+        to: deletedMarshal.email,
+        subject: "Account Removed",
+        html: marshalAccountRemovalEmailTemplate(deletedMarshal.name)
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

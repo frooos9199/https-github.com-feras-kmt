@@ -571,4 +571,40 @@ export function marshalCancellationEmailTemplate(
 </html>
   `
 }
+// 9. Marshal Account Removal Email
+export function marshalAccountRemovalEmailTemplate(
+  userName: string
+) {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>${emailStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header header-danger">
+      <img src="${LOGO_URL}" alt="KMT Logo" class="logo" />
+      <h1>⚠️ Account Removed</h1>
+      <p>KMT Marshal Management System</p>
+    </div>
+    <div class="content">
+      <h2>Dear ${userName},</h2>
+      <div class="event-details">
+        <h3>Account Removal</h3>
+        <p>Your marshal account has been removed from the Kuwait Motorsport Town system.</p>
+      </div>
+      <p>If you have any questions, please contact the administration team.</p>
+    </div>
+    <div class="footer">
+      <p>© 2025 Kuwait Motorsport Town - KMT</p>
+      <p>All Rights Reserved</p>
+    </div>
+  </div>
+</body>
+</html>
+  `
+}
 

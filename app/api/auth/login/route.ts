@@ -15,27 +15,32 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { email, password } = body;
+  try {
+    const body = await request.json();
+    const { email, password } = body;
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !user.password) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-  }
-
-  const isCorrectPassword = await bcrypt.compare(password, user.password);
-  if (!isCorrectPassword) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-  }
-
-  // يمكنك هنا إنشاء توكن JWT إذا أردت، أو فقط إرجاع بيانات المستخدم
-  return NextResponse.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      name: user.name,
-      image: user.image
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.password) {
+      return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 });
     }
-  });
+
+    const isCorrectPassword = await bcrypt.compare(password, user.password);
+    if (!isCorrectPassword) {
+      return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 });
+    }
+
+    // يمكنك هنا إنشاء توكن JWT إذا أردت، أو فقط إرجاع بيانات المستخدم
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+        image: user.image
+      }
+    });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+  }
 }

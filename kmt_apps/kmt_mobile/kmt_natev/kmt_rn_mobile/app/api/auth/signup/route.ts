@@ -14,10 +14,10 @@ export async function POST(req: Request) {
     })
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Email already registered" },
-        { status: 400 }
-      )
+        return NextResponse.json(
+          { success: false, error: "Email already registered" },
+          { status: 400 }
+        )
     }
 
     // Generate employee ID
@@ -93,13 +93,13 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-      { message: "User created successfully", userId: user.id, employeeId: user.employeeId },
+      { success: true, message: "User created successfully", userId: user.id, employeeId: user.employeeId },
       { status: 201 }
     )
   } catch (error) {
     console.error("Signup error:", error)
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { success: false, error: "Something went wrong" },
       { status: 500 }
     )
   }
