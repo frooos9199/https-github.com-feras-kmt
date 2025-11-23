@@ -258,8 +258,10 @@ export default function MarshalDetails() {
           />
           <div className="absolute inset-0 bg-black/60" />
         </div>
+        {/* مستطيل أحمر شفاف فوق الصورة */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-7 w-[340px] max-w-[90%] h-12 rounded-lg bg-gradient-to-r from-red-900/70 via-red-700/60 to-red-600/60 opacity-70 z-10" />
         {/* أيقونات المارشال */}
-        <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
+        <div className="relative flex flex-wrap gap-2 justify-center px-4 z-20">
           {marshal?.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).map((type) => {
             const typeIcons: Record<string, string> = {
               'drag-race': '🏁',
