@@ -256,13 +256,16 @@ export default function EventsManagement() {
                 onClick={() => router.push(`/admin/events/${event.id}`)}
                 className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer transform hover:scale-105"
               >
-                <div className="relative h-32 flex items-center justify-center overflow-hidden">
-                  {/* صورة المارشال كخلفية فقط بدون لون */}
-                  <img 
-                    src="/marshal-action.jpg" 
-                    alt="marshal background" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none select-none border border-white/60" 
-                  />
+                <div 
+                  className="relative h-32 flex items-center justify-center overflow-hidden" 
+                  style={{
+                    backgroundImage: 'url(/marshal-action.jpg)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    opacity: 0.85
+                  }}
+                >
                   {/* أيقونات المارشال */}
                   <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
                     {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
