@@ -240,8 +240,9 @@ export default function MarshalDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
-      {/* هيدر كرت الفعالية بصورة test.jpg خلف أيقونات المارشال */}
-      <div className="relative w-full flex items-center justify-center h-32 overflow-hidden rounded-xl mb-6">
+      {/* هيدر كرت الفعالية بصورة test.jpg وطبقة داكنة خلف الأيقونات (نفس الأدمن) */}
+      <div className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6 border border-zinc-800">
+        {/* صورة الخلفية */}
         <div className="absolute inset-0 w-full h-full z-0">
           <div
             style={{
@@ -268,7 +269,7 @@ export default function MarshalDetails() {
               'circuit': '🏁',
               'rescue': '🚑'
             }
-            return <span key={type} className="text-3xl">{typeIcons[type] || '�'}</span>
+            return <span key={type} className="text-3xl relative">{typeIcons[type] || '�'}</span>
           })}
         </div>
       </div>
