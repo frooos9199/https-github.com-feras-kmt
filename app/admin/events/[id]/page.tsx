@@ -321,7 +321,7 @@ export default function EventDetails() {
               <div 
                 className="relative h-48 flex items-center justify-center overflow-hidden rounded-xl mb-6 border-2 border-white/30"
                 style={{
-                  backgroundImage: 'url(/marshal-action.jpg)',
+                  backgroundImage: 'url(/test.jpg)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
