@@ -26,7 +26,6 @@ interface Marshal {
     attendances: number
   }
 }
-
 export default function MarshalDetails() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -243,16 +242,21 @@ export default function MarshalDetails() {
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
       {/* صورة الهيدر خلف الشعارات */}
       <div className="relative w-full flex items-center justify-center h-32 overflow-hidden">
-        <div
-          className="absolute inset-0 w-full h-full z-0"
-          style={{
-            backgroundImage: 'url(/test.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: 0.7
-          }}
-        />
+        <div className="absolute inset-0 w-full h-full z-0">
+          <div
+            style={{
+              backgroundImage: 'url(/test.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              inset: 0
+            }}
+          />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
         {/* أيقونات المارشال */}
         <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
           {marshal?.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).map((type) => {
