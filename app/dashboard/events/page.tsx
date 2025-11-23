@@ -146,9 +146,18 @@ export default function EventsPage() {
                   transition={{ delay: index * 0.1 }}
                   className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-colors"
                 >
-                  {/* Event Image Placeholder */}
-                  <div className="h-48 bg-gradient-to-br from-red-600/20 to-red-900/20 flex items-center justify-center">
-                    <span className="text-6xl">
+                  {/* Event Image: صورة test.jpg مع طبقة داكنة */}
+                  <div
+                    className="h-48 flex items-center justify-center bg-black relative"
+                    style={{
+                      backgroundImage: 'url(/test.jpg)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60" />
+                    <span className="text-6xl relative z-10">
                       {event.type === "race" && "🏁"}
                       {event.type === "drift" && "🚗"}
                       {event.type === "track-day" && "🏎️"}
