@@ -319,14 +319,13 @@ export default function EventDetails() {
                 👥 {language === "ar" ? "المارشالات المسجلين" : "Registered Marshals"} ({event.attendances.length}/{event.maxMarshals})
               </h2>
               <div 
-                className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6"
+                className="relative h-48 flex items-center justify-center overflow-hidden rounded-xl mb-6 border-2 border-white/30"
                 style={{
                   backgroundImage: 'url(/marshal-action.jpg)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  opacity: 0.85,
-                  border: '2px solid #fff3',
+                  opacity: 0.95
                 }}
               >
                 {/* أيقونات المارشال */}
