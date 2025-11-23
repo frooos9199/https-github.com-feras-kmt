@@ -318,6 +318,32 @@ export default function EventDetails() {
               <h2 className="text-xl font-bold text-white mb-4">
                 👥 {language === "ar" ? "المارشالات المسجلين" : "Registered Marshals"} ({event.attendances.length}/{event.maxMarshals})
               </h2>
+              <div 
+                className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6"
+                style={{
+                  backgroundImage: 'url(/marshal-action.jpg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.85,
+                  border: '2px solid #fff3',
+                }}
+              >
+                {/* أيقونات المارشال */}
+                <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
+                  {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
+                    const typeIcons: Record<string, string> = {
+                      'drag-race': '🏁',
+                      'motocross': '🏍️',
+                      'karting': '🏎️',
+                      'drift': '💨',
+                      'circuit': '🏁',
+                      'rescue': '🚑'
+                    }
+                    return <span key={type} className="text-3xl">{typeIcons[type] || '�'}</span>
+                  })}
+                </div>
+              </div>
               {event.attendances.length === 0 ? (
                 <p className="text-gray-400 text-center py-8">
                   {language === "ar" ? "لا يوجد مارشالات مسجلين" : "No marshals registered yet"}
