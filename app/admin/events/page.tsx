@@ -271,7 +271,7 @@ export default function EventsManagement() {
                         inset: 0
                       }}
                     />
-                    <div className="absolute inset-0 bg-black/60" />
+                    {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
                   </div>
                 </div>
                 <div className="flex">
