@@ -7,12 +7,15 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 
 const MARSHAL_TYPES = [
-  { value: "drag-race", label: { ar: "سباق الدراج", en: "Drag Race" } },
-  { value: "drift", label: { ar: "دريفت", en: "Drift" } },
-  { value: "circuit", label: { ar: "حلبة", en: "Circuit" } },
-  { value: "pit", label: { ar: "منطقة الصيانة", en: "Pit" } },
-  { value: "grid", label: { ar: "شبكة الانطلاق", en: "Grid" } },
-  { value: "recovery", label: { ar: "الإخلاء", en: "Recovery" } },
+  { value: "karting", label: { ar: "كارتنج", en: "Karting" }, color: "bg-yellow-500", icon: "🏎️" },
+  { value: "motocross", label: { ar: "موتوكروس", en: "Motocross" }, color: "bg-orange-600", icon: "🏍️" },
+  { value: "rescue", label: { ar: "إنقاذ", en: "Rescue" }, color: "bg-red-700", icon: "🚑" },
+  { value: "circuit", label: { ar: "حلبة", en: "Circuit" }, color: "bg-blue-700", icon: "🏁" },
+  { value: "drift", label: { ar: "دريفت", en: "Drift" }, color: "bg-purple-700", icon: "💨" },
+  { value: "drag-race", label: { ar: "سباق الدراج", en: "Drag Race" }, color: "bg-pink-600", icon: "🚦" },
+  { value: "recovery", label: { ar: "الإخلاء", en: "Recovery" }, color: "bg-green-700", icon: "🚚" },
+  { value: "grid", label: { ar: "شبكة الانطلاق", en: "Grid" }, color: "bg-gray-700", icon: "🔢" },
+  { value: "pit", label: { ar: "منطقة الصيانة", en: "Pit" }, color: "bg-teal-700", icon: "🛠️" },
 ]
 
 interface MarshalProfile {
@@ -458,24 +461,30 @@ export default function AdminMarshalProfile() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>
-                <div className="flex flex-wrap gap-2">
-                  {MARSHAL_TYPES.map(type => (
-                    <label key={type.value} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800 text-white border border-zinc-700 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        className="accent-red-600"
-                        checked={formData.marshalTypes.includes(type.value)}
-                        onChange={e => {
-                          if (e.target.checked) {
-                            setFormData(f => ({ ...f, marshalTypes: [...f.marshalTypes, type.value] }))
-                          } else {
-                            setFormData(f => ({ ...f, marshalTypes: f.marshalTypes.filter(t => t !== type.value) }))
-                          }
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                  {MARSHAL_TYPES.map(type => {
+                    const selected = formData.marshalTypes.includes(type.value)
+                    return (
+                      <button
+                        type="button"
+                        key={type.value}
+                        className={`flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-3 font-bold text-white shadow transition-all border-2 focus:outline-none
+                          ${selected ? `${type.color} border-white scale-105` : `bg-zinc-800 border-zinc-700 opacity-60 hover:opacity-100`}`}
+                        onClick={() => {
+                          setFormData(f =>
+                            selected
+                              ? { ...f, marshalTypes: f.marshalTypes.filter(t => t !== type.value) }
+                              : { ...f, marshalTypes: [...f.marshalTypes, type.value] }
+                          )
                         }}
-                      />
-                      <span>{language === "ar" ? type.label.ar : type.label.en}</span>
-                    </label>
-                  ))}
+                        tabIndex={0}
+                        aria-pressed={selected}
+                      >
+                        <span className="text-2xl">{type.icon}</span>
+                        <span className="text-xs mt-1">{language === "ar" ? type.label.ar : type.label.en}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>
