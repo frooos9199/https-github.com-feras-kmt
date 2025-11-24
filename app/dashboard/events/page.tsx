@@ -156,7 +156,7 @@ export default function EventsPage() {
                       backgroundRepeat: 'no-repeat'
                     }}
                   >
-                    <div className="absolute inset-0 bg-black/30" />
+                    {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
                     <span className="text-6xl relative z-10">
                       {event.type === "race" && "🏁"}
                       {event.type === "drift" && "🚗"}
