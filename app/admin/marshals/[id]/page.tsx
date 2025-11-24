@@ -288,7 +288,13 @@ export default function AdminMarshalProfile() {
         {/* زر العودة */}
         <div className="mb-6 flex justify-start">
           <button
-            onClick={() => router.push('/admin/marshals')}
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = '/admin/marshals';
+              } else {
+                router.push('/admin/marshals');
+              }
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-bold shadow transition-colors border border-zinc-700"
           >
             <span className="text-xl">⬅️</span>
