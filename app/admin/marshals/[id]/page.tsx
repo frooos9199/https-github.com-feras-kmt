@@ -275,11 +275,35 @@ export default function MarshalDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
-      {/* تم إزالة هيدر صورة الفعالية - ستظهر بيانات المارشال فقط */}
-      {/* باقي الصفحة */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div style={{color: 'yellow', fontSize: 32, fontWeight: 'bold'}}>TEST DATA VISIBLE</div>
-        {/* ...existing code... */}
+        {/* بيانات المارشال بشكل واضح */}
+        <div style={{background: '#18181b', borderRadius: 16, padding: 32, marginTop: 32, color: '#fff', maxWidth: 600}}>
+          <h2 style={{fontSize: 28, fontWeight: 'bold', marginBottom: 16}}>تفاصيل المارشال</h2>
+          <div><b>الاسم:</b> {marshal.name}</div>
+          <div><b>الرقم الوظيفي:</b> {marshal.employeeId}</div>
+          <div><b>البريد الإلكتروني:</b> {marshal.email}</div>
+          <div><b>رقم الهاتف:</b> {marshal.phone}</div>
+          <div><b>الرقم المدني:</b> {marshal.civilId}</div>
+          <div><b>تاريخ الميلاد:</b> {new Date(marshal.dateOfBirth).toLocaleDateString('ar-EG')}</div>
+          <div><b>الجنسية:</b> {marshal.nationality || '-'}</div>
+          <div><b>أنواع الوظائف:</b> {marshal.marshalTypes}</div>
+          <div><b>الحالة:</b> {marshal.isActive ? 'نشط' : 'موقوف'}</div>
+          <div><b>عدد الحضور:</b> {marshal._count.attendances}</div>
+          <div><b>تاريخ التسجيل:</b> {new Date(marshal.createdAt).toLocaleDateString('ar-EG')}</div>
+          <div style={{marginTop: 16}}>
+            <b>الصورة الشخصية:</b><br/>
+            {marshal.image && <img src={marshal.image} alt={marshal.name} style={{width: 120, height: 120, borderRadius: '50%', marginTop: 8}} />}
+          </div>
+          <div style={{marginTop: 16}}>
+            <b>رخصة القيادة (أمام):</b><br/>
+            {marshal.licenseFrontImage && <img src={marshal.licenseFrontImage} alt="license front" style={{width: 180, marginTop: 8, borderRadius: 8}} />}
+          </div>
+          <div style={{marginTop: 16}}>
+            <b>رخصة القيادة (خلف):</b><br/>
+            {marshal.licenseBackImage && <img src={marshal.licenseBackImage} alt="license back" style={{width: 180, marginTop: 8, borderRadius: 8}} />}
+          </div>
+        </div>
       </main>
 
       {/* Delete Modal */}
