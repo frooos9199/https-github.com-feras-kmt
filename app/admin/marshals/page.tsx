@@ -206,7 +206,10 @@ export default function MarshalsManagement() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: index * 0.03 }}
-                      onClick={() => router.push(`/admin/marshals/${marshal.id}`)}
+                      onClick={() => {
+                        console.log('MarshalsManagement: clicked marshal.id =', marshal.id)
+                        router.push(`/admin/marshals/${marshal.id}`)
+                      }}
                       className="hover:bg-zinc-800/30 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4">
