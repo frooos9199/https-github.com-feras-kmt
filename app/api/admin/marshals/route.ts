@@ -25,6 +25,8 @@ export async function GET() {
         nationality: true,
         image: true,
         createdAt: true,
+        isActive: true,
+        marshalTypes: true,
         _count: {
           select: { attendances: true }
         }
