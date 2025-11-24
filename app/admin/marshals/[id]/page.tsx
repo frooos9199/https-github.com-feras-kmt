@@ -240,41 +240,7 @@ export default function MarshalDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
-      {/* هيدر كرت الفعالية بصورة test.jpg وطبقة داكنة خلف الأيقونات (نفس الأدمن) */}
-      <div className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6 border border-zinc-800">
-        {/* صورة الخلفية */}
-        <div className="absolute inset-0 w-full h-full z-0">
-          <div
-            style={{
-              backgroundImage: 'url(/test.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              width: '100%',
-              height: '100%',
-              position: 'absolute',
-              inset: 0
-            }}
-          />
-          <div className="absolute inset-0 bg-black/60" />
-        </div>
-        {/* مستطيل أحمر شفاف فوق الصورة */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-7 w-[340px] max-w-[90%] h-12 rounded-lg bg-gradient-to-r from-red-900/70 via-red-700/60 to-red-600/60 opacity-70 z-10" />
-        {/* أيقونات المارشال */}
-        <div className="relative flex flex-wrap gap-2 justify-center px-4 z-20">
-          {marshal?.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).map((type) => {
-            const typeIcons: Record<string, string> = {
-              'drag-race': '🏁',
-              'motocross': '🏍️',
-              'karting': '🏎️',
-              'drift': '💨',
-              'circuit': '🏁',
-              'rescue': '🚑'
-            }
-            return <span key={type} className="text-3xl relative">{typeIcons[type] || '�'}</span>
-          })}
-        </div>
-      </div>
+      {/* تم إزالة هيدر صورة الفعالية - ستظهر بيانات المارشال فقط */}
       {/* باقي الصفحة */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ...existing code... */}
