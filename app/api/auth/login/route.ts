@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
         role: user.role,
         name: user.name,
         image: user.image,
-        employeeNumber: user.employeeId
+  employee_number: user.employeeId
       }
     });
   } catch (error) {
