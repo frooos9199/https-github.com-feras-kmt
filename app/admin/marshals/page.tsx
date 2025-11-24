@@ -302,21 +302,7 @@ export default function MarshalsManagement() {
           </div>
         )}
 
-        {/* أنواع الوظائف في البروفايل */}
-        <div className="mt-4">
-          <label className="block text-gray-400 mb-2 text-sm">{isArabic ? "أنواع الوظائف" : "Marshal Types"}</label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {(filteredMarshals[0]?.marshalTypes ? filteredMarshals[0].marshalTypes.split(',').filter(Boolean) : []).map((type: string) => {
-              const t = MARSHAL_TYPES.find(t => t.value === type)
-              return t ? (
-                <div key={t.value} className={`flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-3 font-bold text-white shadow border-2 ${t.color} border-white`}>
-                  <span className="text-2xl">{t.icon}</span>
-                  <span className="text-xs mt-1">{isArabic ? t.label.ar : t.label.en}</span>
-                </div>
-              ) : null
-            })}
-          </div>
-        </div>
+        {/* ...تم حذف قسم أنواع الوظائف أسفل الجدول... */}
       </main>
     </div>
   )
