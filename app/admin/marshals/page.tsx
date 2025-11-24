@@ -75,12 +75,13 @@ export default function MarshalsManagement() {
 
   if (!session || session.user.role !== "admin") return null
 
+  const isArabic = language === "ar";
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
+    <div className={`min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black${isArabic ? ' rtl' : ''}`} dir={isArabic ? "rtl" : "ltr"}>
       {/* Header */}
       <header className="bg-black/50 backdrop-blur-lg border-b border-red-600/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className={`flex items-center justify-between h-16${isArabic ? ' flex-row-reverse' : ''}`}>
             <Link href="/admin" className="flex items-center gap-3">
               <img src="/kmt-logo-main.png" alt="KMT" className="h-12 w-auto rounded px-2 py-1" />
               <span className="text-yellow-500 font-bold text-sm">👑 ADMIN</span>
@@ -89,7 +90,7 @@ export default function MarshalsManagement() {
               href="/admin"
               className="text-gray-400 hover:text-white transition-colors"
             >
-              ← {language === "ar" ? "العودة" : "Back"}
+              {isArabic ? "العودة →" : "← Back"}
             </Link>
           </div>
         </div>
@@ -102,11 +103,11 @@ export default function MarshalsManagement() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-white mb-2">
-            👥 {language === "ar" ? "إدارة المارشال" : "Marshals Management"}
+          <h1 className={`text-3xl font-bold text-white mb-2${isArabic ? ' text-right' : ''}`}>
+            👥 {isArabic ? "إدارة المارشال" : "Marshals Management"}
           </h1>
-          <p className="text-gray-400">
-            {language === "ar" ? "إدارة المارشال" : "Marshal Management"}
+          <p className={`text-gray-400${isArabic ? ' text-right' : ''}`}>
+            {isArabic ? "إدارة المارشال" : "Marshal Management"}
           </p>
         </motion.div>
 
@@ -119,10 +120,10 @@ export default function MarshalsManagement() {
         >
           <input
             type="text"
-            placeholder={language === "ar" ? "بحث بالاسم، البريد، الرقم الوظيفي أو الرقم المدني..." : "Search by name, email, employee ID or civil ID..."}
+            placeholder={isArabic ? "بحث بالاسم، البريد، الرقم الوظيفي أو الرقم المدني..." : "Search by name, email, employee ID or civil ID..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-6 py-4 bg-zinc-900/50 border border-zinc-800 rounded-xl text-white placeholder-gray-500 focus:border-red-600 focus:outline-none"
+            className={`w-full px-6 py-4 bg-zinc-900/50 border border-zinc-800 rounded-xl text-white placeholder-gray-500 focus:border-red-600 focus:outline-none${isArabic ? ' text-right' : ''}`}
           />
         </motion.div>
 
@@ -131,13 +132,13 @@ export default function MarshalsManagement() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+          className={`grid grid-cols-1 md:grid-cols-3 gap-4 mb-8${isArabic ? ' text-right' : ''}`}
         >
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <span className="text-3xl">👥</span>
-              <div className="text-right">
-                <p className="text-gray-400 text-sm">{language === "ar" ? "إجمالي المارشالات" : "Total Marshals"}</p>
+              <div className={`text-right`}>
+                <p className="text-gray-400 text-sm">{isArabic ? "إجمالي المارشالات" : "Total Marshals"}</p>
                 <p className="text-3xl font-bold text-white">{marshals.length}</p>
               </div>
             </div>
@@ -145,8 +146,8 @@ export default function MarshalsManagement() {
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <span className="text-3xl">✅</span>
-              <div className="text-right">
-                <p className="text-gray-400 text-sm">{language === "ar" ? "المسجلين حالياً" : "Active Today"}</p>
+              <div className={`text-right`}>
+                <p className="text-gray-400 text-sm">{isArabic ? "المسجلين حالياً" : "Active Today"}</p>
                 <p className="text-3xl font-bold text-white">{filteredMarshals.length}</p>
               </div>
             </div>
@@ -154,8 +155,8 @@ export default function MarshalsManagement() {
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <span className="text-3xl">🏁</span>
-              <div className="text-right">
-                <p className="text-gray-400 text-sm">{language === "ar" ? "إجمالي الحضور" : "Total Attendance"}</p>
+              <div className={`text-right`}>
+                <p className="text-gray-400 text-sm">{isArabic ? "إجمالي الحضور" : "Total Attendance"}</p>
                 <p className="text-3xl font-bold text-white">
                   {marshals.reduce((sum, m) => sum + m._count.attendances, 0)}
                 </p>
@@ -173,29 +174,29 @@ export default function MarshalsManagement() {
             className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 text-center"
           >
             <p className="text-gray-400 text-lg">
-              {language === "ar" ? "لا توجد نتائج" : "No results found"}
+              {isArabic ? "لا توجد نتائج" : "No results found"}
             </p>
           </motion.div>
         ) : (
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" dir={isArabic ? "rtl" : "ltr"}>
                 <thead className="bg-zinc-800/50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">
-                      {language === "ar" ? "المارشال" : "Marshal"}
+                    <th className={`px-6 py-4 ${isArabic ? 'text-right' : 'text-left'} text-sm font-bold text-gray-400`}>
+                      {isArabic ? "المارشال" : "Marshal"}
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">
-                      {language === "ar" ? "معلومات الاتصال" : "Contact"}
+                    <th className={`px-6 py-4 ${isArabic ? 'text-right' : 'text-left'} text-sm font-bold text-gray-400`}>
+                      {isArabic ? "معلومات الاتصال" : "Contact"}
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">
-                      {language === "ar" ? "البيانات الشخصية" : "Personal Info"}
+                    <th className={`px-6 py-4 ${isArabic ? 'text-right' : 'text-left'} text-sm font-bold text-gray-400`}>
+                      {isArabic ? "البيانات الشخصية" : "Personal Info"}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-bold text-gray-400">
-                      {language === "ar" ? "الحضور" : "Attendance"}
+                      {isArabic ? "الحضور" : "Attendance"}
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">
-                      {language === "ar" ? "تاريخ التسجيل" : "Registered"}
+                    <th className={`px-6 py-4 ${isArabic ? 'text-right' : 'text-left'} text-sm font-bold text-gray-400`}>
+                      {isArabic ? "تاريخ التسجيل" : "Registered"}
                     </th>
                   </tr>
                 </thead>
@@ -207,10 +208,9 @@ export default function MarshalsManagement() {
                       animate={{ opacity: 1 }}
                       transition={{ delay: index * 0.03 }}
                       onClick={() => {
-                        console.log('MarshalsManagement: clicked marshal.id =', marshal.id)
                         router.push(`/admin/marshals/${marshal.id}`)
                       }}
-                      className="hover:bg-zinc-800/30 transition-colors cursor-pointer"
+                      className={`hover:bg-zinc-800/30 transition-colors cursor-pointer${isArabic ? ' text-right' : ''}`}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -241,7 +241,7 @@ export default function MarshalsManagement() {
                         <div className="text-sm">
                           <p className="text-gray-300">🆔 {marshal.civilId}</p>
                           <p className="text-gray-400">
-                            📅 {new Date(marshal.dateOfBirth).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                            📅 {new Date(marshal.dateOfBirth).toLocaleDateString(isArabic ? "ar-EG" : "en-US")}
                           </p>
                           {marshal.nationality && (
                             <p className="text-gray-400">🌍 {marshal.nationality}</p>
@@ -255,7 +255,7 @@ export default function MarshalsManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm text-gray-400">
-                          {new Date(marshal.createdAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                          {new Date(marshal.createdAt).toLocaleDateString(isArabic ? "ar-EG" : "en-US")}
                         </p>
                       </td>
                     </motion.tr>
