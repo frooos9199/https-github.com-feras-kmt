@@ -276,32 +276,90 @@ export default function MarshalDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div style={{color: 'yellow', fontSize: 32, fontWeight: 'bold'}}>TEST DATA VISIBLE</div>
-        {/* بيانات المارشال بشكل واضح */}
-        <div style={{background: '#18181b', borderRadius: 16, padding: 32, marginTop: 32, color: '#fff', maxWidth: 600}}>
-          <h2 style={{fontSize: 28, fontWeight: 'bold', marginBottom: 16}}>تفاصيل المارشال</h2>
-          <div><b>الاسم:</b> {marshal.name}</div>
-          <div><b>الرقم الوظيفي:</b> {marshal.employeeId}</div>
-          <div><b>البريد الإلكتروني:</b> {marshal.email}</div>
-          <div><b>رقم الهاتف:</b> {marshal.phone}</div>
-          <div><b>الرقم المدني:</b> {marshal.civilId}</div>
-          <div><b>تاريخ الميلاد:</b> {new Date(marshal.dateOfBirth).toLocaleDateString('ar-EG')}</div>
-          <div><b>الجنسية:</b> {marshal.nationality || '-'}</div>
-          <div><b>أنواع الوظائف:</b> {marshal.marshalTypes}</div>
-          <div><b>الحالة:</b> {marshal.isActive ? 'نشط' : 'موقوف'}</div>
-          <div><b>عدد الحضور:</b> {marshal._count.attendances}</div>
-          <div><b>تاريخ التسجيل:</b> {new Date(marshal.createdAt).toLocaleDateString('ar-EG')}</div>
-          <div style={{marginTop: 16}}>
-            <b>الصورة الشخصية:</b><br/>
-            {marshal.image && <img src={marshal.image} alt={marshal.name} style={{width: 120, height: 120, borderRadius: '50%', marginTop: 8}} />}
+        {/* تصميم عصري لعرض بيانات المارشال مع زر تفعيل/إيقاف وأنواع الوظائف */}
+        <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl p-8 max-w-3xl mx-auto mt-8 shadow-lg">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            {/* صورة الملف الشخصي */}
+            <div className="flex-shrink-0">
+              {marshal.image ? (
+                <img src={marshal.image} alt={marshal.name} className="w-32 h-32 rounded-full object-cover border-4 border-red-600 shadow" />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-4xl text-white font-bold">
+                  {marshal.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            {/* بيانات أساسية وزر */}
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-4 mb-2">
+                <h2 className="text-2xl font-bold text-white">{marshal.name}</h2>
+                <button
+                  onClick={handleToggleStatus}
+                  className={`px-4 py-2 rounded-lg font-bold transition-all text-sm shadow ${marshal.isActive ? 'bg-yellow-600 hover:bg-yellow-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
+                >
+                  {marshal.isActive ? '⏸️ إيقاف' : '▶️ تفعيل'}
+                </button>
+              </div>
+              <div className="text-gray-400 text-sm">{marshal.employeeId}</div>
+              <div className="text-gray-300">{marshal.email}</div>
+              <div className="text-gray-300">{marshal.phone}</div>
+              <div className="text-gray-400 text-sm">🆔 {marshal.civilId}</div>
+              <div className="text-gray-400 text-sm">📅 {new Date(marshal.dateOfBirth).toLocaleDateString('ar-EG')}</div>
+              <div className="text-gray-400 text-sm">🌍 {marshal.nationality || '-'}</div>
+              {/* أنواع الوظائف */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {marshal.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).length > 0 ? (
+                  marshal.marshalTypes.split(',').filter(t => t).map((type) => {
+                    const typeIcons: Record<string, string> = {
+                      'drag-race': '🏁',
+                      'motocross': '🏍️',
+                      'karting': '�️',
+                      'drift': '💨',
+                      'circuit': '🏁',
+                      'rescue': '🚑'
+                    };
+                    const typeLabels: Record<string, string> = {
+                      'drag-race': 'دراق ريس',
+                      'motocross': 'موتوكروس',
+                      'karting': 'كارتينج',
+                      'drift': 'دريفت',
+                      'circuit': 'سيركت',
+                      'rescue': 'ريسكيو'
+                    };
+                    return (
+                      <span key={type} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-zinc-800 text-white text-xs font-bold border border-zinc-700">
+                        <span>{typeIcons[type] || '🏁'}</span>
+                        <span>{typeLabels[type] || type}</span>
+                      </span>
+                    )
+                  })
+                ) : (
+                  <span className="text-gray-500 text-xs">لا يوجد أنواع وظائف</span>
+                )}
+              </div>
+              <div className="text-gray-400 text-sm mt-2">الحالة: <span className={marshal.isActive ? 'text-green-500' : 'text-red-500'}>{marshal.isActive ? 'نشط' : 'موقوف'}</span></div>
+              <div className="text-gray-400 text-sm">عدد الحضور: <span className="text-white font-bold">{marshal._count.attendances}</span></div>
+              <div className="text-gray-400 text-sm">تاريخ التسجيل: {new Date(marshal.createdAt).toLocaleDateString('ar-EG')}</div>
+            </div>
           </div>
-          <div style={{marginTop: 16}}>
-            <b>رخصة القيادة (أمام):</b><br/>
-            {marshal.licenseFrontImage && <img src={marshal.licenseFrontImage} alt="license front" style={{width: 180, marginTop: 8, borderRadius: 8}} />}
-          </div>
-          <div style={{marginTop: 16}}>
-            <b>رخصة القيادة (خلف):</b><br/>
-            {marshal.licenseBackImage && <img src={marshal.licenseBackImage} alt="license back" style={{width: 180, marginTop: 8, borderRadius: 8}} />}
+          {/* رخص القيادة */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">رخصة القيادة (أمام)</h3>
+              {marshal.licenseFrontImage ? (
+                <img src={marshal.licenseFrontImage} alt="license front" className="w-full h-40 object-cover rounded-lg border-2 border-zinc-700" />
+              ) : (
+                <div className="h-40 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-lg">لا يوجد صورة</div>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">رخصة القيادة (خلف)</h3>
+              {marshal.licenseBackImage ? (
+                <img src={marshal.licenseBackImage} alt="license back" className="w-full h-40 object-cover rounded-lg border-2 border-zinc-700" />
+              ) : (
+                <div className="h-40 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-lg">لا يوجد صورة</div>
+              )}
+            </div>
           </div>
         </div>
       </main>
