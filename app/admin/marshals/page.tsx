@@ -18,6 +18,7 @@ interface Marshal {
   nationality: string | null
   image: string | null
   createdAt: string
+  isActive: boolean
   _count: {
     attendances: number
   }
@@ -193,6 +194,9 @@ export default function MarshalsManagement() {
                       {isArabic ? "البيانات الشخصية" : "Personal Info"}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-bold text-gray-400">
+                      {isArabic ? "الحالة" : "Status"}
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-400">
                       {isArabic ? "الحضور" : "Attendance"}
                     </th>
                     <th className={`px-6 py-4 ${isArabic ? 'text-right' : 'text-left'} text-sm font-bold text-gray-400`}>
@@ -247,6 +251,12 @@ export default function MarshalsManagement() {
                             <p className="text-gray-400">🌍 {marshal.nationality}</p>
                           )}
                         </div>
+                      </td>
+                      {/* الحالة */}
+                      <td className="px-6 py-4 text-center">
+                        <span className={`inline-block px-3 py-1 rounded-full font-bold text-sm ${marshal.isActive ? 'bg-green-600/20 text-green-600 border border-green-600' : 'bg-red-600/20 text-red-600 border border-red-600'}`}>
+                          {marshal.isActive ? (isArabic ? 'نشط' : 'Active') : (isArabic ? 'موقوف' : 'Inactive')}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-600/20 text-green-500 font-bold">
