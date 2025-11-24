@@ -57,6 +57,7 @@ export default function MarshalDetails() {
 
   useEffect(() => {
     if (params.id) {
+      console.log('MarshalDetails: params.id =', params.id)
       setMarshalId(params.id as string)
     }
   }, [params])
@@ -71,9 +72,11 @@ export default function MarshalDetails() {
     if (!marshalId) return
     setLoading(true)
     try {
+      console.log('MarshalDetails: fetching /api/admin/marshals/' + marshalId)
       const res = await fetch(`/api/admin/marshals/${marshalId}`)
       if (res.ok) {
         const data = await res.json()
+        console.log('MarshalDetails: fetched data =', data)
         setMarshal(data)
         setEditForm({
           name: data.name,
@@ -84,6 +87,7 @@ export default function MarshalDetails() {
           marshalTypes: data.marshalTypes ? data.marshalTypes.split(',').filter((t: string) => t) : []
         })
       } else {
+        console.warn('MarshalDetails: API returned status', res.status)
         router.push("/admin/marshals")
       }
     } catch (error) {
