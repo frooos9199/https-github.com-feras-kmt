@@ -240,7 +240,21 @@ export default function MarshalDetails() {
     )
   }
 
-  if (!session || session.user.role !== "admin") return null
+  if (!session || session.user.role !== "admin") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black">
+        <div className="bg-zinc-900/70 border border-yellow-600/40 rounded-2xl p-10 text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">⚠️ {language === "ar" ? "يجب تسجيل الدخول كأدمن" : "Admin login required"}</h2>
+          <button
+            onClick={() => router.push("/login")}
+            className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl font-bold transition-all"
+          >
+            {language === "ar" ? "تسجيل الدخول" : "Login"}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   if (!marshal) {
     return (
@@ -264,6 +278,7 @@ export default function MarshalDetails() {
       {/* تم إزالة هيدر صورة الفعالية - ستظهر بيانات المارشال فقط */}
       {/* باقي الصفحة */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div style={{color: 'yellow', fontSize: 32, fontWeight: 'bold'}}>TEST DATA VISIBLE</div>
         {/* ...existing code... */}
       </main>
 
