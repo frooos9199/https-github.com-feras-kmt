@@ -236,7 +236,24 @@ export default function MarshalDetails() {
     )
   }
 
-  if (!session || session.user.role !== "admin" || !marshal) return null
+  if (!session || session.user.role !== "admin") return null
+
+  if (!marshal) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black">
+        <div className="bg-zinc-900/70 border border-red-600/40 rounded-2xl p-10 text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">⚠️ {language === "ar" ? "لا يوجد بيانات لهذا المارشال" : "No marshal data found"}</h2>
+          <p className="text-gray-400 mb-6">{language === "ar" ? "تأكد من صحة الرابط أو الرجوع لقائمة المارشالات." : "Check the URL or return to the marshals list."}</p>
+          <button
+            onClick={() => router.push("/admin/marshals")}
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all"
+          >
+            {language === "ar" ? "العودة لقائمة المارشالات" : "Back to Marshals List"}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
