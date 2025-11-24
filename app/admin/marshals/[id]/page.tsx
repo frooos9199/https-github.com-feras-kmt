@@ -6,45 +6,44 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 
-interface Marshal {
+interface MarshalProfile {
   id: string
   employeeId: string
   name: string
   email: string
-  phone: string
-  civilId: string
-  dateOfBirth: string
+  phone: string | null
+  civilId: string | null
+  dateOfBirth: string | null
   nationality: string | null
   image: string | null
   licenseFrontImage: string | null
   licenseBackImage: string | null
   isActive: boolean
-  marshalTypes: string
+  marshalTypes: string | null
   createdAt: string
-  _count: {
-    attendances: number
-  }
+  _count?: { attendances: number }
 }
 
-export default function MarshalDetails() {
+export default function AdminMarshalProfile() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const params = useParams()
   const { language } = useLanguage()
-  const [marshal, setMarshal] = useState<Marshal | null>(null)
+  const [profile, setProfile] = useState<MarshalProfile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [marshalId, setMarshalId] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [uploadingLicenseFront, setUploadingLicenseFront] = useState(false)
   const [uploadingLicenseBack, setUploadingLicenseBack] = useState(false)
-  const [editForm, setEditForm] = useState({
+  const [showEdit, setShowEdit] = useState(false)
+  const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null)
+
+  const [formData, setFormData] = useState({
     name: "",
-    email: "",
     phone: "",
+    civilId: "",
+    dateOfBirth: "",
     nationality: "",
-    employeeId: "",
-    marshalTypes: [] as string[]
   })
 
   useEffect(() => {
@@ -57,31 +56,23 @@ export default function MarshalDetails() {
 
   useEffect(() => {
     if (params.id) {
-      setMarshalId(params.id as string)
+      fetchMarshalProfile(params.id as string)
     }
   }, [params])
 
-  useEffect(() => {
-    if (session?.user?.role === "admin" && marshalId) {
-      fetchMarshal()
-    }
-  }, [session, marshalId])
-
-  const fetchMarshal = async () => {
-    if (!marshalId) return
+  const fetchMarshalProfile = async (id: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/marshals/${marshalId}`)
+      const res = await fetch(`/api/admin/marshals/${id}`)
       if (res.ok) {
         const data = await res.json()
-        setMarshal(data)
-        setEditForm({
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
+        setProfile(data)
+        setFormData({
+          name: data.name || "",
+          phone: data.phone || "",
+          civilId: data.civilId || "",
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
           nationality: data.nationality || "",
-          employeeId: data.employeeId || "",
-          marshalTypes: data.marshalTypes ? data.marshalTypes.split(',').filter((t: string) => t) : []
         })
       } else {
         router.push("/admin/marshals")
@@ -93,80 +84,66 @@ export default function MarshalDetails() {
     }
   }
 
-  const handleToggleStatus = async () => {
-    if (!marshal) return
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+    if (!file.type.startsWith("image/")) {
+      setMessage({ type: "error", text: language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file" })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: "error", text: language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB" })
+      return
+    }
+    setUploading(true)
+    setMessage(null)
     try {
-      const res = await fetch(`/api/admin/marshals/${marshal.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: !marshal.isActive })
-      })
+      const formDataObj = new FormData()
+      formDataObj.append("file", file)
+      formDataObj.append("userId", profile.id)
+      const res = await fetch("/api/upload", { method: "POST", body: formDataObj })
+      const data = await res.json()
       if (res.ok) {
-        fetchMarshal()
+        setMessage({ type: "success", text: language === "ar" ? "تم رفع الصورة بنجاح!" : "Image uploaded successfully!" })
+        fetchMarshalProfile(profile.id)
+      } else {
+        setMessage({ type: "error", text: data.error || (language === "ar" ? "فشل رفع الصورة" : "Failed to upload image") })
       }
-    } catch (error) {}
-  }
-
-  const handleDelete = async () => {
-    if (!marshal) return
-    try {
-      const res = await fetch(`/api/admin/marshals/${marshal.id}`, {
-        method: "DELETE"
-      })
-      if (res.ok) {
-        router.push("/admin/marshals")
-      }
-    } catch (error) {}
-  }
-
-  const handleEdit = async () => {
-    if (!marshal) return
-    try {
-      const res = await fetch(`/api/admin/marshals/${marshal.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...editForm,
-          marshalTypes: editForm.marshalTypes.join(',')
-        })
-      })
-      if (res.ok) {
-        setShowEditModal(false)
-        fetchMarshal()
-      }
-    } catch (error) {}
+    } catch (error) {
+      setMessage({ type: "error", text: language === "ar" ? "حدث خطأ أثناء رفع الصورة" : "An error occurred while uploading" })
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleLicenseFrontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !marshal) return
+    if (!file || !profile) return
     if (!file.type.startsWith("image/")) {
-      alert(language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file")
+      setMessage({ type: "error", text: language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file" })
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert(language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB")
+      setMessage({ type: "error", text: language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB" })
       return
     }
     setUploadingLicenseFront(true)
+    setMessage(null)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("imageType", "licenseFront")
-      formData.append("userId", marshal.id)
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData
-      })
+      const formDataObj = new FormData()
+      formDataObj.append("file", file)
+      formDataObj.append("imageType", "licenseFront")
+      formDataObj.append("userId", profile.id)
+      const res = await fetch("/api/upload", { method: "POST", body: formDataObj })
+      const data = await res.json()
       if (res.ok) {
-        alert(language === "ar" ? "تم رفع صورة الرخصة (الأمام) بنجاح!" : "License front image uploaded successfully!")
-        fetchMarshal()
+        setMessage({ type: "success", text: language === "ar" ? "تم رفع صورة الرخصة (الأمام) بنجاح!" : "License front image uploaded successfully!" })
+        fetchMarshalProfile(profile.id)
       } else {
-        const data = await res.json()
-        alert(data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image"))
+        setMessage({ type: "error", text: data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image") })
       }
     } catch (error) {
-      alert(language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading")
+      setMessage({ type: "error", text: language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading" })
     } finally {
       setUploadingLicenseFront(false)
     }
@@ -174,36 +151,107 @@ export default function MarshalDetails() {
 
   const handleLicenseBackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !marshal) return
+    if (!file || !profile) return
     if (!file.type.startsWith("image/")) {
-      alert(language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file")
+      setMessage({ type: "error", text: language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file" })
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert(language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB")
+      setMessage({ type: "error", text: language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB" })
       return
     }
     setUploadingLicenseBack(true)
+    setMessage(null)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("imageType", "licenseBack")
-      formData.append("userId", marshal.id)
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData
-      })
+      const formDataObj = new FormData()
+      formDataObj.append("file", file)
+      formDataObj.append("imageType", "licenseBack")
+      formDataObj.append("userId", profile.id)
+      const res = await fetch("/api/upload", { method: "POST", body: formDataObj })
+      const data = await res.json()
       if (res.ok) {
-        alert(language === "ar" ? "تم رفع صورة الرخصة (الخلف) بنجاح!" : "License back image uploaded successfully!")
-        fetchMarshal()
+        setMessage({ type: "success", text: language === "ar" ? "تم رفع صورة الرخصة (الخلف) بنجاح!" : "License back image uploaded successfully!" })
+        fetchMarshalProfile(profile.id)
       } else {
-        const data = await res.json()
-        alert(data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image"))
+        setMessage({ type: "error", text: data.error || (language === "ar" ? "فشل رفع صورة الرخصة" : "Failed to upload license image") })
       }
     } catch (error) {
-      alert(language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading")
+      setMessage({ type: "error", text: language === "ar" ? "حدث خطأ أثناء رفع صورة الرخصة" : "An error occurred while uploading" })
     } finally {
       setUploadingLicenseBack(false)
+    }
+  }
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!profile) return
+    setSaving(true)
+    setMessage(null)
+    try {
+      const updateData: any = {
+        name: formData.name,
+        phone: formData.phone,
+        civilId: formData.civilId,
+        dateOfBirth: formData.dateOfBirth,
+        nationality: formData.nationality,
+      }
+      const res = await fetch(`/api/admin/marshals/${profile.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData)
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setProfile(data)
+        setFormData({
+          name: data.name || "",
+          phone: data.phone || "",
+          civilId: data.civilId || "",
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
+          nationality: data.nationality || "",
+        })
+        setShowEdit(false)
+        setMessage({ type: "success", text: language === "ar" ? "تم تحديث البيانات بنجاح!" : "Profile updated successfully!" })
+      } else {
+        setMessage({ type: "error", text: data.error || (language === "ar" ? "حدث خطأ" : "An error occurred") })
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: language === "ar" ? "حدث خطأ في التحديث" : "Update failed" })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!profile) return
+    if (!confirm(language === "ar" ? "هل أنت متأكد من حذف هذا المارشال؟" : "Are you sure you want to delete this marshal?")) return
+    try {
+      const res = await fetch(`/api/admin/marshals/${profile.id}`, { method: "DELETE" })
+      if (res.ok) {
+        router.push("/admin/marshals")
+      } else {
+        setMessage({ type: "error", text: language === "ar" ? "فشل الحذف" : "Delete failed" })
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: language === "ar" ? "حدث خطأ أثناء الحذف" : "Delete error" })
+    }
+  }
+
+  const handleToggleStatus = async () => {
+    if (!profile) return
+    try {
+      const res = await fetch(`/api/admin/marshals/${profile.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !profile.isActive })
+      })
+      if (res.ok) {
+        fetchMarshalProfile(profile.id)
+      } else {
+        setMessage({ type: "error", text: language === "ar" ? "فشل تغيير الحالة" : "Status change failed" })
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: language === "ar" ? "حدث خطأ أثناء تغيير الحالة" : "Status change error" })
     }
   }
 
@@ -215,312 +263,170 @@ export default function MarshalDetails() {
     )
   }
 
-  if (!session || session.user.role !== "admin") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black">
-        <div className="bg-zinc-900/70 border border-yellow-600/40 rounded-2xl p-10 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">⚠️ {language === "ar" ? "يجب تسجيل الدخول كأدمن" : "Admin login required"}</h2>
-          <button
-            onClick={() => router.push("/login")}
-            className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl font-bold transition-all"
-          >
-            {language === "ar" ? "تسجيل الدخول" : "Login"}
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!marshal) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black">
-        <div className="bg-zinc-900/70 border border-red-600/40 rounded-2xl p-10 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">⚠️ {language === "ar" ? "لا يوجد بيانات لهذا المارشال" : "No marshal data found"}</h2>
-          <p className="text-gray-400 mb-6">{language === "ar" ? "تأكد من صحة الرابط أو الرجوع لقائمة المارشالات." : "Check the URL or return to the marshals list."}</p>
-          <button
-            onClick={() => router.push("/admin/marshals")}
-            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all"
-          >
-            {language === "ar" ? "العودة لقائمة المارشالات" : "Back to Marshals List"}
-          </button>
-        </div>
-      </div>
-    )
-  }
+  if (!session || session.user.role !== "admin" || !profile) return null
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
-      <main className="max-w-5xl mx-auto px-2 sm:px-8 py-10">
-        <section className="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 md:p-12 shadow-2xl max-w-4xl mx-auto mt-10">
-          {/* أزرار التحكم أعلى البطاقة */}
-          <div className="flex flex-row-reverse gap-4 mb-8">
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-base shadow-md"
-            >
-              ✏️ تعديل
-            </button>
-            <button
-              onClick={handleToggleStatus}
-              className={`px-5 py-2 rounded-xl font-bold transition-all text-base shadow-md ${marshal.isActive ? 'bg-yellow-600 hover:bg-yellow-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
-            >
-              {marshal.isActive ? '⏸️ إيقاف' : '▶️ تفعيل'}
-            </button>
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-base shadow-md"
-            >
-              🗑️ حذف
-            </button>
-          </div>
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            {/* صورة الملف الشخصي */}
-            <div className="flex-shrink-0 mb-6 md:mb-0">
-              {marshal.image ? (
-                <img src={marshal.image} alt={marshal.name} className="w-40 h-40 rounded-full object-cover border-4 border-red-600 shadow-xl" />
-              ) : (
-                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-6xl text-white font-bold shadow-xl">
-                  {marshal.name.charAt(0).toUpperCase()}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">👤 {language === "ar" ? "بيانات المارشال" : "Marshal Profile"}</h1>
+          <p className="text-gray-400">{language === "ar" ? "إدارة بيانات المارشال" : "Manage marshal information"}</p>
+        </motion.div>
+
+        {/* Message Alert */}
+        {message && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className={`mb-6 p-4 rounded-lg ${message.type === "success" ? "bg-green-600/20 border border-green-600/30 text-green-500" : "bg-red-600/20 border border-red-600/30 text-red-500"}`}>{message.text}</motion.div>
+        )}
+
+        {/* أزرار الأدمن */}
+        <div className="flex flex-row-reverse gap-4 mb-8">
+          <button onClick={() => setShowEdit(true)} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-base shadow-md">✏️ {language === "ar" ? "تعديل" : "Edit"}</button>
+          <button onClick={handleToggleStatus} className={`px-5 py-2 rounded-xl font-bold transition-all text-base shadow-md ${profile.isActive ? 'bg-yellow-600 hover:bg-yellow-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>{profile.isActive ? (language === "ar" ? '⏸️ إيقاف' : 'Deactivate') : (language === "ar" ? '▶️ تفعيل' : 'Activate')}</button>
+          <button onClick={handleDelete} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-base shadow-md">🗑️ {language === "ar" ? "حذف" : "Delete"}</button>
+        </div>
+
+        {/* عرض البيانات أو نموذج التعديل */}
+        {!showEdit ? (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div className="p-6 space-y-6">
+              {/* صورة الملف الشخصي */}
+              <div className="flex justify-center">
+                <div className="relative">
+                  {profile.image ? (
+                    <img src={profile.image} alt={profile.name} className="w-32 h-32 rounded-full object-cover border-4 border-red-600" />
+                  ) : (
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white text-4xl font-bold">{profile.name.charAt(0).toUpperCase()}</div>
+                  )}
+                  <label className="absolute bottom-0 right-0 w-10 h-10 bg-red-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700 transition-colors">
+                    {uploading ? (<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />) : (<span className="text-xl">📸</span>)}
+                    <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="hidden" />
+                  </label>
                 </div>
-              )}
-            </div>
-            {/* بيانات أساسية */}
-            <div className="flex-1 space-y-4">
-              <h2 className="text-4xl font-extrabold text-white mb-2 tracking-tight leading-tight">{marshal.name}</h2>
-              <div className="flex flex-wrap gap-4 items-center mb-2">
-                <span className="text-gray-400 text-lg font-mono bg-zinc-800 rounded px-3 py-1">{marshal.employeeId}</span>
-                <span className="text-gray-400 text-base">🆔 {marshal.civilId}</span>
-                <span className="text-gray-400 text-base">📅 {new Date(marshal.dateOfBirth).toLocaleDateString('ar-EG')}</span>
-                <span className="text-gray-400 text-base">� {marshal.nationality || '-'}</span>
               </div>
-              <div className="flex flex-wrap gap-4 items-center mb-2">
-                <span className="text-gray-300">{marshal.email}</span>
-                <span className="text-gray-300">{marshal.phone}</span>
+              {/* بيانات أساسية */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الاسم" : "Name"}</label>
+                  <input type="text" value={profile.name} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "البريد الإلكتروني" : "Email"}</label>
+                  <input type="email" value={profile.email} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم الوظيفي" : "Employee ID"}</label>
+                  <input type="text" value={profile.employeeId} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed font-bold" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "رقم الهاتف" : "Phone Number"}</label>
+                  <input type="tel" value={profile.phone || ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم المدني" : "Civil ID"}</label>
+                  <input type="text" value={profile.civilId || ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
+                  <input type="text" value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString('ar-EG') : ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
+                  <input type="text" value={profile.nationality || ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "عدد الحضور" : "Attendance Count"}</label>
+                  <input type="text" value={profile._count?.attendances ?? 0} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
               </div>
               {/* أنواع الوظائف */}
-              <div className="flex flex-wrap gap-2 mt-2">
-                {marshal.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).length > 0 ? (
-                  marshal.marshalTypes.split(',').filter(t => t).map((type) => {
-                    const typeIcons: Record<string, string> = {
-                      'drag-race': '🏁',
-                      'motocross': '🏍️',
-                      'karting': '🏎️',
-                      'drift': '💨',
-                      'circuit': '🏁',
-                      'rescue': '🚑'
-                    };
-                    const typeLabels: Record<string, string> = {
-                      'drag-race': 'دراق ريس',
-                      'motocross': 'موتوكروس',
-                      'karting': 'كارتينج',
-                      'drift': 'دريفت',
-                      'circuit': 'سيركت',
-                      'rescue': 'ريسكيو'
-                    };
-                    return (
-                      <span key={type} className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-zinc-800 text-white text-base font-bold border border-zinc-700">
-                        <span>{typeIcons[type] || '🏁'}</span>
-                        <span>{typeLabels[type] || type}</span>
-                      </span>
-                    )
-                  })
-                ) : (
-                  <span className="text-gray-500 text-base">لا يوجد أنواع وظائف</span>
-                )}
+              <div className="mt-4">
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>
+                <div className="flex flex-wrap gap-2">
+                  {profile.marshalTypes && profile.marshalTypes.split(',').filter(t => t).length > 0 ? (
+                    profile.marshalTypes.split(',').filter(t => t).map((type) => (
+                      <span key={type} className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-zinc-800 text-white text-base font-bold border border-zinc-700">{type}</span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-base">{language === "ar" ? "لا يوجد أنواع وظائف" : "No marshal types"}</span>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-6 mt-4">
-                <span className="text-gray-400 text-base">الحالة: <span className={marshal.isActive ? 'text-green-500' : 'text-red-500'}>{marshal.isActive ? 'نشط' : 'موقوف'}</span></span>
-                <span className="text-gray-400 text-base">عدد الحضور: <span className="text-white font-bold">{marshal._count.attendances}</span></span>
-                <span className="text-gray-400 text-base">تاريخ التسجيل: {new Date(marshal.createdAt).toLocaleDateString('ar-EG')}</span>
-              </div>
-            </div>
-          </div>
-          {/* رخص القيادة */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-            <div>
-              <h3 className="text-xl font-semibold text-white mb-3">رخصة القيادة (أمام)</h3>
-              {marshal.licenseFrontImage ? (
-                <img src={marshal.licenseFrontImage} alt="license front" className="w-full h-48 object-cover rounded-xl border-2 border-zinc-700 shadow" />
-              ) : (
-                <div className="h-48 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-xl">لا يوجد صورة</div>
-              )}
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-white mb-3">رخصة القيادة (خلف)</h3>
-              {marshal.licenseBackImage ? (
-                <img src={marshal.licenseBackImage} alt="license back" className="w-full h-48 object-cover rounded-xl border-2 border-zinc-700 shadow" />
-              ) : (
-                <div className="h-48 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-xl">لا يوجد صورة</div>
-              )}
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-zinc-900 border border-red-600/50 rounded-2xl p-8 max-w-md w-full"
-          >
-            <h3 className="text-2xl font-bold text-white mb-4">
-              ⚠️ {language === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
-            </h3>
-            <p className="text-gray-300 mb-6">
-              {language === "ar" 
-                ? `هل أنت متأكد من حذف المارشال "${marshal.name}"؟ هذا الإجراء لا يمكن التراجع عنه.`
-                : `Are you sure you want to delete marshal "${marshal.name}"? This action cannot be undone.`
-              }
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleDelete}
-                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all"
-              >
-                {language === "ar" ? "نعم، احذف" : "Yes, Delete"}
-              </button>
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold transition-all"
-              >
-                {language === "ar" ? "إلغاء" : "Cancel"}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-zinc-900 border border-blue-600/50 rounded-2xl p-6 max-w-2xl w-full my-8"
-          >
-            <h3 className="text-2xl font-bold text-white mb-6">
-              ✏️ {language === "ar" ? "تعديل البيانات" : "Edit Information"}
-            </h3>
-            <div className="max-h-[70vh] overflow-y-auto px-2">
-              <div className="space-y-4">
+              {/* رخص القيادة */}
+              <div className="space-y-4 mt-6">
+                <h3 className="text-lg font-semibold text-white border-b border-zinc-700 pb-2">{language === "ar" ? "رخصة القيادة (اختياري)" : "Driver License (Optional)"}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-400 text-sm mb-2">
-                      {language === "ar" ? "الاسم" : "Name"}
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-blue-600 focus:outline-none"
-                    />
+                    <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرخصة - الأمام" : "License - Front"}</label>
+                    <div className="space-y-3">
+                      {profile.licenseFrontImage && (
+                        <div className="relative group">
+                          <img src={profile.licenseFrontImage} alt="License Front" className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700" />
+                          <a href={profile.licenseFrontImage} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors">{language === "ar" ? "عرض" : "View"}</a>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-gray-400 text-sm mb-2">
-                      {language === "ar" ? "البريد الإلكتروني" : "Email"}
-                    </label>
-                    <input
-                      type="email"
-                      value={editForm.email}
-                      onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-blue-600 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-400 text-sm mb-2">
-                      {language === "ar" ? "رقم الهاتف" : "Phone"}
-                    </label>
-                    <input
-                      type="tel"
-                      value={editForm.phone}
-                      onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-blue-600 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-400 text-sm mb-2">
-                      {language === "ar" ? "الجنسية" : "Nationality"}
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.nationality}
-                      onChange={(e) => setEditForm({...editForm, nationality: e.target.value})}
-                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-blue-600 focus:outline-none"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-gray-400 text-sm mb-2">
-                      🏷️ {language === "ar" ? "الرقم الوظيفي" : "Employee ID"}
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.employeeId}
-                      onChange={(e) => setEditForm({...editForm, employeeId: e.target.value})}
-                      placeholder="KMT-100"
-                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-blue-600 focus:outline-none font-mono"
-                    />
-                    <p className="text-gray-500 text-xs mt-1">
-                      {language === "ar" ? "مثال: KMT-100, KMT-101, KMT-102..." : "Example: KMT-100, KMT-101, KMT-102..."}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Marshal Types */}
-                <div>
-                  <label className="block text-gray-400 text-sm mb-3 font-semibold">
-                    {language === "ar" ? "أنواع الوظائف" : "Marshal Job Types"}
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {[
-                      {value: 'drag-race', labelEn: 'Drag Race Marshal', labelAr: 'دراق ريس مارشال', icon: '🏁'},
-                      {value: 'motocross', labelEn: 'Motocross Marshal', labelAr: 'موتور كروس مارشال', icon: '🏍️'},
-                      {value: 'karting', labelEn: 'Karting Marshal', labelAr: 'كارتينق مارشال', icon: '🏎️'},
-                      {value: 'drift', labelEn: 'Drift Marshal', labelAr: 'دريفت مارشال', icon: '💨'},
-                      {value: 'circuit', labelEn: 'Circuit Marshal', labelAr: 'سيركت مارشال', icon: '🏁'},
-                      {value: 'rescue', labelEn: 'Rescue Marshal', labelAr: 'ريسك يو مارشال', icon: '🚑'}
-                    ].map((type) => (
-                      <label key={type.value} className="flex items-center gap-2 p-2 bg-zinc-800/50 rounded-lg cursor-pointer hover:bg-zinc-800 transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={editForm.marshalTypes.includes(type.value)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setEditForm({...editForm, marshalTypes: [...editForm.marshalTypes, type.value]})
-                            } else {
-                              setEditForm({...editForm, marshalTypes: editForm.marshalTypes.filter(t => t !== type.value)})
-                            }
-                          }}
-                          className="w-4 h-4 rounded border-zinc-600 text-blue-600 focus:ring-blue-600 focus:ring-offset-0"
-                        />
-                        <span className="text-base">{type.icon}</span>
-                        <span className="text-white text-sm">
-                          {language === "ar" ? type.labelAr : type.labelEn}
-                        </span>
-                      </label>
-                    ))}
+                    <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرخصة - الخلف" : "License - Back"}</label>
+                    <div className="space-y-3">
+                      {profile.licenseBackImage && (
+                        <div className="relative group">
+                          <img src={profile.licenseBackImage} alt="License Back" className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700" />
+                          <a href={profile.licenseBackImage} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors">{language === "ar" ? "عرض" : "View"}</a>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleEdit}
-                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
-              >
-                {language === "ar" ? "حفظ" : "Save"}
-              </button>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold transition-all"
-              >
-                {language === "ar" ? "إلغاء" : "Cancel"}
-              </button>
-            </div>
           </motion.div>
-        </div>
-      )}
+        ) : (
+          <motion.form onSubmit={handleEdit} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden p-6 space-y-6">
+            {/* صورة الملف الشخصي */}
+            <div className="flex justify-center">
+              <div className="relative">
+                {profile.image ? (
+                  <img src={profile.image} alt={profile.name} className="w-32 h-32 rounded-full object-cover border-4 border-red-600" />
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white text-4xl font-bold">{profile.name.charAt(0).toUpperCase()}</div>
+                )}
+                <label className="absolute bottom-0 right-0 w-10 h-10 bg-red-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700 transition-colors">
+                  {uploading ? (<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />) : (<span className="text-xl">📸</span>)}
+                  <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="hidden" />
+                </label>
+              </div>
+            </div>
+            {/* نموذج التعديل */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الاسم" : "Name"}</label>
+                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "رقم الهاتف" : "Phone Number"}</label>
+                <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم المدني" : "Civil ID"}</label>
+                <input type="text" value={formData.civilId} onChange={e => setFormData({ ...formData, civilId: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
+                <input type="date" value={formData.dateOfBirth} onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
+                <input type="text" value={formData.nationality} onChange={e => setFormData({ ...formData, nationality: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button type="submit" disabled={saving} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50">{saving ? (<span className="flex items-center justify-center gap-2"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />{language === "ar" ? "جاري الحفظ..." : "Saving..."}</span>) : (<>💾 {language === "ar" ? "حفظ التغييرات" : "Save Changes"}</>)}</button>
+              <button type="button" onClick={() => setShowEdit(false)} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-lg transition-colors">{language === "ar" ? "إلغاء" : "Cancel"}</button>
+            </div>
+          </motion.form>
+        )}
+      </main>
     </div>
   )
 }
