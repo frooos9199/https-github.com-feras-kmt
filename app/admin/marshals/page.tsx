@@ -55,11 +55,22 @@ export default function MarshalsManagement() {
     }
   }, [status, session, router])
 
+
   useEffect(() => {
     if (session?.user?.role === "admin") {
-      fetchMarshals()
+      fetchMarshals();
+      // إعادة جلب البيانات عند العودة من صفحة التفاصيل
+      const handleVisibility = () => {
+        if (document.visibilityState === "visible") {
+          fetchMarshals();
+        }
+      };
+      document.addEventListener("visibilitychange", handleVisibility);
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibility);
+      };
     }
-  }, [session])
+  }, [session]);
 
   const fetchMarshals = async () => {
     setLoading(true)
