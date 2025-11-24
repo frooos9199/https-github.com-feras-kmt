@@ -21,10 +21,23 @@ interface Marshal {
   image: string | null
   createdAt: string
   isActive: boolean
+  marshalTypes?: string | null // إضافة هذا السطر
   _count: {
     attendances: number
   }
 }
+
+const MARSHAL_TYPES = [
+  { value: "karting", label: { ar: "كارتنج", en: "Karting" }, color: "bg-yellow-500", icon: "🏎️" },
+  { value: "motocross", label: { ar: "موتوكروس", en: "Motocross" }, color: "bg-orange-600", icon: "🏍️" },
+  { value: "rescue", label: { ar: "إنقاذ", en: "Rescue" }, color: "bg-red-700", icon: "🚑" },
+  { value: "circuit", label: { ar: "حلبة", en: "Circuit" }, color: "bg-blue-700", icon: "🏁" },
+  { value: "drift", label: { ar: "دريفت", en: "Drift" }, color: "bg-purple-700", icon: "💨" },
+  { value: "drag-race", label: { ar: "سباق الدراج", en: "Drag Race" }, color: "bg-pink-600", icon: "🚦" },
+  { value: "recovery", label: { ar: "الإخلاء", en: "Recovery" }, color: "bg-green-700", icon: "🚚" },
+  { value: "grid", label: { ar: "شبكة الانطلاق", en: "Grid" }, color: "bg-gray-700", icon: "🔢" },
+  { value: "pit", label: { ar: "منطقة الصيانة", en: "Pit" }, color: "bg-teal-700", icon: "🛠️" },
+]
 
 export default function MarshalsManagement() {
   const { data: session, status } = useSession()
@@ -277,6 +290,22 @@ export default function MarshalsManagement() {
             </div>
           </div>
         )}
+
+        {/* أنواع الوظائف في البروفايل */}
+        <div className="mt-4">
+          <label className="block text-gray-400 mb-2 text-sm">{isArabic ? "أنواع الوظائف" : "Marshal Types"}</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {(filteredMarshals[0]?.marshalTypes ? filteredMarshals[0].marshalTypes.split(',').filter(Boolean) : []).map((type: string) => {
+              const t = MARSHAL_TYPES.find(t => t.value === type)
+              return t ? (
+                <div key={t.value} className={`flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-3 font-bold text-white shadow border-2 ${t.color} border-white`}>
+                  <span className="text-2xl">{t.icon}</span>
+                  <span className="text-xs mt-1">{isArabic ? t.label.ar : t.label.en}</span>
+                </div>
+              ) : null
+            })}
+          </div>
+        </div>
       </main>
     </div>
   )
