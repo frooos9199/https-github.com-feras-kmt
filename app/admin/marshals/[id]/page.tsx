@@ -275,51 +275,53 @@ export default function MarshalDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* تصميم عصري لعرض بيانات المارشال مع زر تفعيل/إيقاف وأنواع الوظائف */}
-        <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl p-8 max-w-3xl mx-auto mt-8 shadow-lg">
-          <div className="flex flex-col md:flex-row items-center gap-8">
+      <main className="max-w-5xl mx-auto px-2 sm:px-8 py-10">
+        <section className="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 md:p-12 shadow-2xl max-w-4xl mx-auto mt-10">
+          {/* أزرار التحكم أعلى البطاقة */}
+          <div className="flex flex-row-reverse gap-4 mb-8">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-base shadow-md"
+            >
+              ✏️ تعديل
+            </button>
+            <button
+              onClick={handleToggleStatus}
+              className={`px-5 py-2 rounded-xl font-bold transition-all text-base shadow-md ${marshal.isActive ? 'bg-yellow-600 hover:bg-yellow-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
+            >
+              {marshal.isActive ? '⏸️ إيقاف' : '▶️ تفعيل'}
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-base shadow-md"
+            >
+              🗑️ حذف
+            </button>
+          </div>
+          <div className="flex flex-col md:flex-row items-center gap-12">
             {/* صورة الملف الشخصي */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 mb-6 md:mb-0">
               {marshal.image ? (
-                <img src={marshal.image} alt={marshal.name} className="w-32 h-32 rounded-full object-cover border-4 border-red-600 shadow" />
+                <img src={marshal.image} alt={marshal.name} className="w-40 h-40 rounded-full object-cover border-4 border-red-600 shadow-xl" />
               ) : (
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-4xl text-white font-bold">
+                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-6xl text-white font-bold shadow-xl">
                   {marshal.name.charAt(0).toUpperCase()}
                 </div>
               )}
             </div>
-            {/* بيانات أساسية وزر */}
-            <div className="flex-1 space-y-2">
-              <div className="flex gap-3 mb-4">
-                <button
-                  onClick={() => setShowEditModal(true)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all text-sm shadow"
-                >
-                  ✏️ تعديل
-                </button>
-                <button
-                  onClick={() => setShowDeleteModal(true)}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-all text-sm shadow"
-                >
-                  🗑️ حذف
-                </button>
+            {/* بيانات أساسية */}
+            <div className="flex-1 space-y-4">
+              <h2 className="text-4xl font-extrabold text-white mb-2 tracking-tight leading-tight">{marshal.name}</h2>
+              <div className="flex flex-wrap gap-4 items-center mb-2">
+                <span className="text-gray-400 text-lg font-mono bg-zinc-800 rounded px-3 py-1">{marshal.employeeId}</span>
+                <span className="text-gray-400 text-base">🆔 {marshal.civilId}</span>
+                <span className="text-gray-400 text-base">📅 {new Date(marshal.dateOfBirth).toLocaleDateString('ar-EG')}</span>
+                <span className="text-gray-400 text-base">� {marshal.nationality || '-'}</span>
               </div>
-              <div className="flex items-center gap-4 mb-2">
-                <h2 className="text-2xl font-bold text-white">{marshal.name}</h2>
-                <button
-                  onClick={handleToggleStatus}
-                  className={`px-4 py-2 rounded-lg font-bold transition-all text-sm shadow ${marshal.isActive ? 'bg-yellow-600 hover:bg-yellow-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
-                >
-                  {marshal.isActive ? '⏸️ إيقاف' : '▶️ تفعيل'}
-                </button>
+              <div className="flex flex-wrap gap-4 items-center mb-2">
+                <span className="text-gray-300">{marshal.email}</span>
+                <span className="text-gray-300">{marshal.phone}</span>
               </div>
-              <div className="text-gray-400 text-sm">{marshal.employeeId}</div>
-              <div className="text-gray-300">{marshal.email}</div>
-              <div className="text-gray-300">{marshal.phone}</div>
-              <div className="text-gray-400 text-sm">🆔 {marshal.civilId}</div>
-              <div className="text-gray-400 text-sm">📅 {new Date(marshal.dateOfBirth).toLocaleDateString('ar-EG')}</div>
-              <div className="text-gray-400 text-sm">🌍 {marshal.nationality || '-'}</div>
               {/* أنواع الوظائف */}
               <div className="flex flex-wrap gap-2 mt-2">
                 {marshal.marshalTypes && marshal.marshalTypes.split(',').filter(t => t).length > 0 ? (
@@ -327,7 +329,7 @@ export default function MarshalDetails() {
                     const typeIcons: Record<string, string> = {
                       'drag-race': '🏁',
                       'motocross': '🏍️',
-                      'karting': '�️',
+                      'karting': '🏎️',
                       'drift': '💨',
                       'circuit': '🏁',
                       'rescue': '🚑'
@@ -341,41 +343,43 @@ export default function MarshalDetails() {
                       'rescue': 'ريسكيو'
                     };
                     return (
-                      <span key={type} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-zinc-800 text-white text-xs font-bold border border-zinc-700">
+                      <span key={type} className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-zinc-800 text-white text-base font-bold border border-zinc-700">
                         <span>{typeIcons[type] || '🏁'}</span>
                         <span>{typeLabels[type] || type}</span>
                       </span>
                     )
                   })
                 ) : (
-                  <span className="text-gray-500 text-xs">لا يوجد أنواع وظائف</span>
+                  <span className="text-gray-500 text-base">لا يوجد أنواع وظائف</span>
                 )}
               </div>
-              <div className="text-gray-400 text-sm mt-2">الحالة: <span className={marshal.isActive ? 'text-green-500' : 'text-red-500'}>{marshal.isActive ? 'نشط' : 'موقوف'}</span></div>
-              <div className="text-gray-400 text-sm">عدد الحضور: <span className="text-white font-bold">{marshal._count.attendances}</span></div>
-              <div className="text-gray-400 text-sm">تاريخ التسجيل: {new Date(marshal.createdAt).toLocaleDateString('ar-EG')}</div>
+              <div className="flex flex-wrap gap-6 mt-4">
+                <span className="text-gray-400 text-base">الحالة: <span className={marshal.isActive ? 'text-green-500' : 'text-red-500'}>{marshal.isActive ? 'نشط' : 'موقوف'}</span></span>
+                <span className="text-gray-400 text-base">عدد الحضور: <span className="text-white font-bold">{marshal._count.attendances}</span></span>
+                <span className="text-gray-400 text-base">تاريخ التسجيل: {new Date(marshal.createdAt).toLocaleDateString('ar-EG')}</span>
+              </div>
             </div>
           </div>
           {/* رخص القيادة */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-2">رخصة القيادة (أمام)</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">رخصة القيادة (أمام)</h3>
               {marshal.licenseFrontImage ? (
-                <img src={marshal.licenseFrontImage} alt="license front" className="w-full h-40 object-cover rounded-lg border-2 border-zinc-700" />
+                <img src={marshal.licenseFrontImage} alt="license front" className="w-full h-48 object-cover rounded-xl border-2 border-zinc-700 shadow" />
               ) : (
-                <div className="h-40 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-lg">لا يوجد صورة</div>
+                <div className="h-48 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-xl">لا يوجد صورة</div>
               )}
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white mb-2">رخصة القيادة (خلف)</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">رخصة القيادة (خلف)</h3>
               {marshal.licenseBackImage ? (
-                <img src={marshal.licenseBackImage} alt="license back" className="w-full h-40 object-cover rounded-lg border-2 border-zinc-700" />
+                <img src={marshal.licenseBackImage} alt="license back" className="w-full h-48 object-cover rounded-xl border-2 border-zinc-700 shadow" />
               ) : (
-                <div className="h-40 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-lg">لا يوجد صورة</div>
+                <div className="h-48 flex items-center justify-center bg-zinc-800 text-gray-500 rounded-xl">لا يوجد صورة</div>
               )}
             </div>
           </div>
-        </div>
+        </section>
       </main>
 
       {/* Delete Modal */}
