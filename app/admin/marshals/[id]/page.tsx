@@ -291,6 +291,20 @@ export default function MarshalDetails() {
             </div>
             {/* بيانات أساسية وزر */}
             <div className="flex-1 space-y-2">
+              <div className="flex gap-3 mb-4">
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all text-sm shadow"
+                >
+                  ✏️ تعديل
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-all text-sm shadow"
+                >
+                  🗑️ حذف
+                </button>
+              </div>
               <div className="flex items-center gap-4 mb-2">
                 <h2 className="text-2xl font-bold text-white">{marshal.name}</h2>
                 <button
