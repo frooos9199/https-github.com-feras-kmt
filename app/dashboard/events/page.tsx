@@ -151,7 +151,7 @@ export default function EventsPage() {
                     className="h-48 flex items-center justify-center bg-black relative"
                     style={{
                       backgroundImage: 'url(/test.jpg)',
-                      backgroundSize: 'cover',
+                      backgroundSize: 'contain',
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat'
                     }}
