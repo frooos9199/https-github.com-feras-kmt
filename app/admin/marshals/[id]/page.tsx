@@ -6,6 +6,15 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 
+const MARSHAL_TYPES = [
+  { value: "drag-race", label: { ar: "سباق الدراج", en: "Drag Race" } },
+  { value: "drift", label: { ar: "دريفت", en: "Drift" } },
+  { value: "circuit", label: { ar: "حلبة", en: "Circuit" } },
+  { value: "pit", label: { ar: "منطقة الصيانة", en: "Pit" } },
+  { value: "grid", label: { ar: "شبكة الانطلاق", en: "Grid" } },
+  { value: "recovery", label: { ar: "الإخلاء", en: "Recovery" } },
+]
+
 interface MarshalProfile {
   id: string
   employeeId: string
@@ -40,10 +49,12 @@ export default function AdminMarshalProfile() {
 
   const [formData, setFormData] = useState({
     name: "",
+    employeeId: "",
     phone: "",
     civilId: "",
     dateOfBirth: "",
     nationality: "",
+    marshalTypes: [] as string[],
   })
 
   useEffect(() => {
@@ -69,10 +80,12 @@ export default function AdminMarshalProfile() {
         setProfile(data)
         setFormData({
           name: data.name || "",
+          employeeId: data.employeeId || "",
           phone: data.phone || "",
           civilId: data.civilId || "",
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
           nationality: data.nationality || "",
+          marshalTypes: data.marshalTypes ? data.marshalTypes.split(",").filter((t: string) => t) : [],
         })
       } else {
         router.push("/admin/marshals")
@@ -190,10 +203,12 @@ export default function AdminMarshalProfile() {
     try {
       const updateData: any = {
         name: formData.name,
+        employeeId: formData.employeeId,
         phone: formData.phone,
         civilId: formData.civilId,
         dateOfBirth: formData.dateOfBirth,
         nationality: formData.nationality,
+        marshalTypes: formData.marshalTypes.join(","),
       }
       const res = await fetch(`/api/admin/marshals/${profile.id}`, {
         method: "PATCH",
@@ -205,10 +220,12 @@ export default function AdminMarshalProfile() {
         setProfile(data)
         setFormData({
           name: data.name || "",
+          employeeId: data.employeeId || "",
           phone: data.phone || "",
           civilId: data.civilId || "",
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
           nationality: data.nationality || "",
+          marshalTypes: data.marshalTypes ? data.marshalTypes.split(",").filter((t: string) => t) : [],
         })
         setShowEdit(false)
         setMessage({ type: "success", text: language === "ar" ? "تم تحديث البيانات بنجاح!" : "Profile updated successfully!" })
@@ -268,6 +285,16 @@ export default function AdminMarshalProfile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* زر العودة */}
+        <div className="mb-6 flex justify-start">
+          <button
+            onClick={() => router.push('/admin/marshals')}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-bold shadow transition-colors border border-zinc-700"
+          >
+            <span className="text-xl">⬅️</span>
+            <span>{language === "ar" ? "العودة إلى قائمة المارشال" : "Back to Marshals List"}</span>
+          </button>
+        </div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">👤 {language === "ar" ? "بيانات المارشال" : "Marshal Profile"}</h1>
           <p className="text-gray-400">{language === "ar" ? "إدارة بيانات المارشال" : "Manage marshal information"}</p>
@@ -404,6 +431,10 @@ export default function AdminMarshalProfile() {
                 <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
               </div>
               <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم الوظيفي" : "Employee ID"}</label>
+                <input type="text" value={formData.employeeId} onChange={e => setFormData({ ...formData, employeeId: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white font-bold focus:border-red-600 focus:outline-none" />
+              </div>
+              <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "رقم الهاتف" : "Phone Number"}</label>
                 <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
               </div>
@@ -418,6 +449,28 @@ export default function AdminMarshalProfile() {
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
                 <input type="text" value={formData.nationality} onChange={e => setFormData({ ...formData, nationality: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>
+                <div className="flex flex-wrap gap-2">
+                  {MARSHAL_TYPES.map(type => (
+                    <label key={type.value} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800 text-white border border-zinc-700 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        className="accent-red-600"
+                        checked={formData.marshalTypes.includes(type.value)}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setFormData(f => ({ ...f, marshalTypes: [...f.marshalTypes, type.value] }))
+                          } else {
+                            setFormData(f => ({ ...f, marshalTypes: f.marshalTypes.filter(t => t !== type.value) }))
+                          }
+                        }}
+                      />
+                      <span>{language === "ar" ? type.label.ar : type.label.en}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="flex gap-3 pt-4">
