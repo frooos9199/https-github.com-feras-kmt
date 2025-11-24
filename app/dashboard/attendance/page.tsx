@@ -272,7 +272,7 @@ export default function MyAttendancePage() {
                       backgroundRepeat: 'no-repeat'
                     }}
                   >
-                    <div className="absolute inset-0 bg-black/60" />
+                    <div className="absolute inset-0 bg-black/30" />
                     <span className="text-5xl relative z-10">
                       {attendance.event.type === "race" && "🏁"}
                       {attendance.event.type === "drift" && "🚗"}
