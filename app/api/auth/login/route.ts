@@ -30,6 +30,8 @@ export async function POST(request: NextRequest) {
     }
 
     // يمكنك هنا إنشاء توكن JWT إذا أردت، أو فقط إرجاع بيانات المستخدم
+    // مثال: توليد توكن وهمي (استبدله بتوليد JWT حقيقي في الإنتاج)
+    const accessToken = `demo-token-${user.id}`;
     return NextResponse.json({
       success: true,
       user: {
@@ -38,8 +40,9 @@ export async function POST(request: NextRequest) {
         role: user.role,
         name: user.name,
         image: user.image,
-  employee_number: user.employeeId
-      }
+        employee_number: user.employeeId
+      },
+      accessToken // أضف التوكن هنا
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
