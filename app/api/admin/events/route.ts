@@ -26,6 +26,7 @@ function verifyJWT(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = verifyJWT(request);
+    console.log("[DEBUG] Decoded user from JWT:", user);
     if (!user || !["admin", "marshal"].includes((user as any).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
