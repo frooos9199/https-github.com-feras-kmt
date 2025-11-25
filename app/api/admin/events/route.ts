@@ -1,3 +1,98 @@
+// POST - Create new event
+export async function POST(request: NextRequest) {
+  try {
+    // تحقق من session (next-auth) للأدمن فقط
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const {
+      titleEn,
+      titleAr,
+      descriptionEn,
+      descriptionAr,
+      date,
+      endDate,
+      time,
+      endTime,
+      location,
+      marshalTypes,
+      maxMarshals
+    } = body;
+
+    // Validate required fields
+    if (!titleEn || !titleAr || !descriptionEn || !descriptionAr ||
+        !date || !time || !location || !marshalTypes || !maxMarshals) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const event = await prisma.event.create({
+      data: {
+        titleEn,
+        titleAr,
+        descriptionEn,
+        descriptionAr,
+        date: new Date(date),
+        endDate: endDate ? new Date(endDate) : null,
+        time,
+        endTime: endTime || null,
+        location,
+        marshalTypes: Array.isArray(marshalTypes) ? marshalTypes.join(",") : marshalTypes,
+        maxMarshals: parseInt(maxMarshals),
+        status: "active"
+      }
+    });
+
+    // Send notifications to matching marshals
+    await notifyMatchingMarshalsAboutNewEvent(
+      event.id,
+      event.titleEn,
+      event.titleAr,
+      event.marshalTypes
+    );
+
+    // Send email to all marshals about new event
+    const allMarshals = await prisma.user.findMany({
+      where: { role: 'marshal' },
+      select: { name: true, email: true }
+    });
+
+    // Send emails to all marshals (in parallel, continue even if some fail)
+    const emailPromises = allMarshals
+      .filter(marshal => marshal.email)
+      .map(marshal =>
+        sendEmail({
+          to: marshal.email!,
+          subject: `🏁 New Event Available - ${event.titleEn}`,
+          html: newEventEmailTemplate(
+            marshal.name,
+            event.titleEn,
+            new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            event.time,
+            event.location,
+            event.descriptionEn,
+            event.endDate ? new Date(event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
+            event.endTime || undefined
+          )
+        }).catch(error => {
+          console.error(`Failed to send email to ${marshal.email}:`, error);
+          return { success: false, error };
+        })
+      );
+
+    // Wait for all emails to be sent (or fail)
+    const emailResults = await Promise.allSettled(emailPromises);
+    const successCount = emailResults.filter(r => r.status === 'fulfilled').length;
+    console.log(`Sent new event emails: ${successCount}/${allMarshals.length} successful`);
+
+    return NextResponse.json(event, { status: 201 });
+  } catch (error) {
+    console.error("Error creating event:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
