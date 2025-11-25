@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export async function OPTIONS(request: NextRequest) {
   return new Response(null, {
@@ -29,9 +30,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 });
     }
 
-    // يمكنك هنا إنشاء توكن JWT إذا أردت، أو فقط إرجاع بيانات المستخدم
-    // مثال: توليد توكن وهمي (استبدله بتوليد JWT حقيقي في الإنتاج)
-    const accessToken = `demo-token-${user.id}`;
+    // توليد JWT حقيقي
+    const jwtSecret = process.env.JWT_SECRET || "dev-secret-key";
+    const accessToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      },
+      jwtSecret,
+      { expiresIn: "7d" }
+    );
     return NextResponse.json({
       success: true,
       user: {
@@ -42,7 +51,7 @@ export async function POST(request: NextRequest) {
         image: user.image,
         employee_number: user.employeeId
       },
-      accessToken // أضف التوكن هنا
+      accessToken
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
