@@ -69,7 +69,13 @@ export default function EventsManagement() {
     try {
       const res = await fetch("/api/admin/events")
       const data = await res.json()
-      setEvents(data)
+      if (Array.isArray(data)) {
+        setEvents(data)
+      } else if (Array.isArray(data.events)) {
+        setEvents(data.events)
+      } else {
+        setEvents([])
+      }
     } catch (error) {
       console.error("Error fetching events:", error)
     } finally {
