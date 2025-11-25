@@ -24,150 +24,46 @@ function verifyJWT(request: NextRequest) {
 // GET - Fetch all events
 export async function GET(request: NextRequest) {
   try {
+    // تحقق من session (next-auth) للأدمن
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role === "admin") {
+      const events = await prisma.event.findMany({
+        include: {
+          _count: {
+            select: {
+              attendances: {
+                where: { status: 'approved' }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" }
+      });
+      return NextResponse.json(events);
+    }
+
+    // تحقق من JWT (للأدمن أو المارشال)
     const user = verifyJWT(request);
     console.log("[DEBUG] Decoded user from JWT:", user);
     if (!user || !["admin", "marshal"].includes((user as any).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // Fetch all events
     const events = await prisma.event.findMany({
-      try {
-        // تحقق من session (next-auth) للأدمن
-        const session = await getServerSession(authOptions);
-        if (session?.user?.role === "admin") {
-          // Fetch all events
-          const events = await prisma.event.findMany({
-            include: {
-              _count: {
-                select: { 
-                  attendances: {
-                    where: {
-                      status: 'approved'
-                    }
-                  }
-                }
-              }
-            },
-            orderBy: { createdAt: "desc" }
-          })
-          return NextResponse.json(events)
-        }
-        // تحقق من JWT (للأدمن أو المارشال)
-        const user = verifyJWT(request);
-        console.log("[DEBUG] Decoded user from JWT:", user);
-        if (!user || !["admin", "marshal"].includes((user as any).role)) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-        const events = await prisma.event.findMany({
-          include: {
-            _count: {
-              select: { 
-                attendances: {
-                  where: {
-                    status: 'approved'
-                  }
-                }
-              }
+      include: {
+        _count: {
+          select: {
+            attendances: {
+              where: { status: 'approved' }
             }
-          },
-          orderBy: { createdAt: "desc" }
-        })
-        return NextResponse.json(events)
-      } catch (error) {
-        console.error("Error fetching events:", error)
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-      }
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const body = await request.json()
-    const {
-      titleEn,
-      titleAr,
-      descriptionEn,
-      descriptionAr,
-      date,
-      endDate,
-      time,
-      endTime,
-      location,
-      marshalTypes,
-      maxMarshals
-    } = body
-
-    // Validate required fields
-    if (!titleEn || !titleAr || !descriptionEn || !descriptionAr || 
-        !date || !time || !location || !marshalTypes || !maxMarshals) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    const event = await prisma.event.create({
-      data: {
-        titleEn,
-        titleAr,
-        descriptionEn,
-        descriptionAr,
-        date: new Date(date),
-        endDate: endDate ? new Date(endDate) : null,
-        time,
-        endTime,
-        location,
-        marshalTypes,
-        maxMarshals: parseInt(maxMarshals),
-        status: "active"
-      }
-    })
-
-    // Send notifications to matching marshals
-    await notifyMatchingMarshalsAboutNewEvent(
-      event.id,
-      event.titleEn,
-      event.titleAr,
-      event.marshalTypes
-    )
-
-    // Send email to all marshals about new event
-    const allMarshals = await prisma.user.findMany({
-      where: {
-        role: 'marshal',
+          }
+        }
       },
-      select: {
-        name: true,
-        email: true,
-      }
-    })
-
-    // Send emails to all marshals (in parallel, continue even if some fail)
-    const emailPromises = allMarshals
-      .filter(marshal => marshal.email) // Only marshals with email
-      .map(marshal => 
-        sendEmail({
-          to: marshal.email!,
-          subject: `🏁 New Event Available - ${event.titleEn}`,
-          html: newEventEmailTemplate(
-            marshal.name,
-            event.titleEn,
-            new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-            event.time,
-            event.location,
-            event.descriptionEn,
-            event.endDate ? new Date(event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
-            event.endTime || undefined
-          )
-        }).catch(error => {
-          console.error(`Failed to send email to ${marshal.email}:`, error)
-          return { success: false, error }
-        })
-      )
-
-    // Wait for all emails to be sent (or fail)
-    const emailResults = await Promise.allSettled(emailPromises)
-    const successCount = emailResults.filter(r => r.status === 'fulfilled').length
-    console.log(`Sent new event emails: ${successCount}/${allMarshals.length} successful`)
-
-    return NextResponse.json(event, { status: 201 })
+      orderBy: { createdAt: "desc" }
+    });
+    return NextResponse.json(events);
   } catch (error) {
-    console.error("Error creating event:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error fetching events:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
