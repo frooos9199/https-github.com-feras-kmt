@@ -14,7 +14,6 @@ function verifyJWT(request: NextRequest) {
   try {
     const jwtSecret = process.env.JWT_SECRET || "dev-secret-key";
     const decoded = jwt.verify(token, jwtSecret);
-    // إذا كان التوكن من نوع string (غير متوقع)، أعد null
     if (typeof decoded === "string") return null;
     return decoded;
   } catch {
@@ -32,31 +31,52 @@ export async function GET(request: NextRequest) {
     }
     // Fetch all events
     const events = await prisma.event.findMany({
-      include: {
-        _count: {
-          select: { 
-            attendances: {
-              where: {
-                status: 'approved' // Only count approved attendances
+      try {
+        // تحقق من session (next-auth) للأدمن
+        const session = await getServerSession(authOptions);
+        if (session?.user?.role === "admin") {
+          // Fetch all events
+          const events = await prisma.event.findMany({
+            include: {
+              _count: {
+                select: { 
+                  attendances: {
+                    where: {
+                      status: 'approved'
+                    }
+                  }
+                }
+              }
+            },
+            orderBy: { createdAt: "desc" }
+          })
+          return NextResponse.json(events)
+        }
+        // تحقق من JWT (للأدمن أو المارشال)
+        const user = verifyJWT(request);
+        console.log("[DEBUG] Decoded user from JWT:", user);
+        if (!user || !["admin", "marshal"].includes((user as any).role)) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        const events = await prisma.event.findMany({
+          include: {
+            _count: {
+              select: { 
+                attendances: {
+                  where: {
+                    status: 'approved'
+                  }
+                }
               }
             }
-          }
-        }
-      },
-      orderBy: { createdAt: "desc" }
-    })
-    return NextResponse.json(events)
-  } catch (error) {
-    console.error("Error fetching events:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
-}
-
-// POST - Create new event
-export async function POST(request: NextRequest) {
-  try {
-    const user = verifyJWT(request);
-    if (!user || (user as any).role !== "admin") {
+          },
+          orderBy: { createdAt: "desc" }
+        })
+        return NextResponse.json(events)
+      } catch (error) {
+        console.error("Error fetching events:", error)
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+      }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await request.json()
