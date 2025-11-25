@@ -26,7 +26,7 @@ function verifyJWT(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = verifyJWT(request);
-    if (!user || (user as any).role !== "admin") {
+    if (!user || !["admin", "marshal"].includes((user as any).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     // Fetch all events
