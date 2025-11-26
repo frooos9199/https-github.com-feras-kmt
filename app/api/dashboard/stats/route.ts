@@ -12,10 +12,13 @@ export async function GET() {
     }
 
     // Count upcoming events
+    // استخدم كائن Date مباشرةً وليس string
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const upcomingEvents = await prisma.event.count({
       where: {
         date: {
-          gte: new Date().toISOString().split('T')[0]
+          gte: today
         },
         status: "active"
       }
