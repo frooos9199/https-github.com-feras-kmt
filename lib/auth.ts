@@ -23,21 +23,25 @@ export async function getUserFromToken(req: NextRequest): Promise<{
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return undefined;
   }
-  if (!JWT_SECRET) {
+  // استخدم نفس secret المستخدم في تسجيل الدخول (NEXTAUTH_SECRET)
+  const jwtSecret = process.env.NEXTAUTH_SECRET || "dev-secret-key";
+  if (!jwtSecret) {
     return undefined;
   }
   const token = authHeader.replace("Bearer ", "")
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken
+    const decoded = jwt.verify(token, jwtSecret) as DecodedToken
     if (!decoded?.id) {
       return undefined
     }
     // جلب المستخدم من قاعدة البيانات
     const user = await prisma.user.findUnique({ where: { id: decoded.id } })
+    // طباعة بيانات المستخدم بعد فك التوكن
+    console.log('Decoded user:', user);
     if (!user) {
       return undefined
     }
-    // فقط تحقق من role = 'admin' بدون أي شروط إضافية
+    // تحقق من صلاحية الأدمن فقط
     if (user.role === 'admin') {
       return {
         id: user.id,
