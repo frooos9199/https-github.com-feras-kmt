@@ -1,3 +1,4 @@
+// آخر تحديث: 26-11-2025 - تعديل اختباري للتأكيد على تحديث git
 // POST - Create new event
 export async function POST(request: NextRequest) {
   try {
