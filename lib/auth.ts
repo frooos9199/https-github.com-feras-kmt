@@ -21,42 +21,34 @@ export async function getUserFromToken(req: NextRequest): Promise<{
 } | undefined> {
   const authHeader = req.headers.get("authorization")
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    console.log('[getUserFromToken] No Authorization header or not Bearer');
     return undefined;
   }
   if (!JWT_SECRET) {
-    console.log('[getUserFromToken] No JWT_SECRET');
     return undefined;
   }
   const token = authHeader.replace("Bearer ", "")
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken
-    console.log('[getUserFromToken] Decoded JWT:', decoded)
     if (!decoded?.id) {
-      console.log('[getUserFromToken] No id in token')
       return undefined
     }
-    // جلب المستخدم من قاعدة البيانات للتأكد من الصلاحيات
+    // جلب المستخدم من قاعدة البيانات
     const user = await prisma.user.findUnique({ where: { id: decoded.id } })
-    console.log('[getUserFromToken] DB user:', user)
     if (!user) {
-      console.log('[getUserFromToken] User not found in DB')
       return undefined
     }
-    if (user.role !== 'admin') {
-      console.log('[getUserFromToken] User is not admin')
-      return undefined
+    // فقط تحقق من role = 'admin' بدون أي شروط إضافية
+    if (user.role === 'admin') {
+      return {
+        id: user.id,
+        role: user.role,
+        name: user.name,
+        email: user.email,
+        image: user.image
+      }
     }
-    // أرجع فقط الحقول المطلوبة مثل session.user
-    return {
-      id: user.id,
-      role: user.role,
-      name: user.name,
-      email: user.email,
-      image: user.image
-    }
+    return undefined;
   } catch (e) {
-    console.log('[getUserFromToken] JWT error:', e)
     return undefined
   }
 }
