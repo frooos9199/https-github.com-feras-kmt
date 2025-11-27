@@ -454,6 +454,14 @@ export default function AdminMarshalProfile() {
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
                 <input type="date" value={formData.dateOfBirth} onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+                {/* عرض التاريخ بشكل مقروء حسب اللغة */}
+                {formData.dateOfBirth && (
+                  <div className="mt-2 text-gray-400 text-sm">
+                    {language === "ar"
+                      ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
+                      : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
