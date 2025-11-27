@@ -74,12 +74,14 @@ export async function PATCH(
     if (email) updateData.email = email
     if (phone) updateData.phone = phone
     if (nationality !== undefined) updateData.nationality = nationality
-    if (marshalTypes !== undefined) updateData.marshalTypes = marshalTypes
-    if (employeeId !== undefined) {
-      // Validate employeeId format
-      if (!employeeId.startsWith('KMT-')) {
-        return NextResponse.json({ error: "Employee ID must start with KMT-" }, { status: 400 })
+    if (marshalTypes !== undefined) {
+      if (Array.isArray(marshalTypes)) {
+        updateData.marshalTypes = marshalTypes.join(",");
+      } else {
+        updateData.marshalTypes = marshalTypes;
       }
+    }
+    if (employeeId !== undefined) {
       // Check if employeeId is already used by another marshal
       const existingMarshal = await prisma.user.findFirst({
         where: {
@@ -122,8 +124,14 @@ export async function PATCH(
 
     return NextResponse.json(marshal)
   } catch (error) {
-    console.error("Error updating marshal:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error updating marshal:", error);
+    let errMsg = "Internal server error";
+    if (error instanceof Error) {
+      errMsg = error.message + (error.stack ? "\n" + error.stack : "");
+    } else if (typeof error === 'string') {
+      errMsg = error;
+    }
+    return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }
 

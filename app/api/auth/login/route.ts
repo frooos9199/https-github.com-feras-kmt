@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // توليد JWT حقيقي
-    const jwtSecret = process.env.JWT_SECRET || "dev-secret-key";
+    const jwtSecret = process.env.NEXTAUTH_SECRET || "dev-secret-key";
     const accessToken = jwt.sign(
       {
         id: user.id,

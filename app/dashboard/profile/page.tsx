@@ -61,6 +61,14 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
+    // Early return if profile is null and not loading
+    if (!loading && !profile) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-black text-white text-xl">
+          {language === 'ar' ? 'لا توجد بيانات لهذا المستخدم' : 'No data for this user'}
+        </div>
+      );
+    }
       const res = await fetch("/api/profile")
       const data = await res.json()
       setProfile(data)
@@ -354,10 +362,12 @@ export default function ProfilePage() {
     )
   }
 
-  if (!session || !profile) return null
+  console.log('session:', session, 'profile:', profile, 'status:', status, 'loading:', loading);
+  // if (!session || !profile) return null // مؤقتًا للتشخيص
 
+  if (!profile) return null;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
+  <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
       {/* Header */}
       <header className="bg-black/50 backdrop-blur-lg border-b border-red-600/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -715,7 +725,7 @@ export default function ProfilePage() {
           </form>
         </motion.div>
 
-        {/* Role Badge */}
+            {/* Role Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

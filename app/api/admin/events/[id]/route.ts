@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { getUserFromToken } from "@/lib/auth"
 
 // GET - Fetch single event with registered marshals
 export async function GET(
@@ -9,8 +10,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    let session = await getServerSession(authOptions)
+    let user = session?.user
+    if (!user) {
+      user = await getUserFromToken(req)
+    }
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -64,8 +69,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    let session = await getServerSession(authOptions)
+    let user = session?.user
+    if (!user) {
+      user = await getUserFromToken(req)
+    }
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -118,8 +127,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    let session = await getServerSession(authOptions)
+    let user = session?.user
+    if (!user) {
+      user = await getUserFromToken(req)
+    }
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

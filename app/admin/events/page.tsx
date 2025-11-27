@@ -69,6 +69,7 @@ export default function EventsManagement() {
     try {
       const res = await fetch("/api/admin/events")
       const data = await res.json()
+      console.log('FETCH EVENTS RESPONSE:', data)
       if (Array.isArray(data)) {
         setEvents(data)
       } else if (Array.isArray(data.events)) {
@@ -103,6 +104,13 @@ export default function EventsManagement() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       })
+      let apiResponse = null;
+      try {
+        apiResponse = await res.clone().json();
+      } catch {
+        apiResponse = await res.text();
+      }
+      console.log('SAVE EVENT RESPONSE:', apiResponse);
 
       if (res.ok) {
         fetchEvents()
