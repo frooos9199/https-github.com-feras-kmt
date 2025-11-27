@@ -1,3 +1,5 @@
+
+import '@react-native-firebase/app';
 /**
  * @format
  */
