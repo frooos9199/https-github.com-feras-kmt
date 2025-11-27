@@ -19,36 +19,20 @@ export async function GET() {
 
     const userTypes = user?.marshalTypes ? user.marshalTypes.split(',').filter((t: string) => t) : []
 
-    // Get all upcoming active events
+    // إرجاع جميع الأحداث من قاعدة البيانات بدون أي فلترة
     const allEvents = await prisma.event.findMany({
-      where: {
-        date: {
-          gte: new Date()
-        },
-        status: "active"
-      },
       orderBy: {
         date: "asc"
       },
       include: {
-        attendances: {
-          where: {
-            userId: session.user.id
-          }
-        },
+        attendances: true,
         _count: {
           select: {
-            attendances: {
-              where: {
-                status: "approved"
-              }
-            }
+            attendances: true
           }
         }
       }
     })
-
-    // إرجاع جميع الأحداث بدون فلترة marshalTypes
     return NextResponse.json(allEvents)
   } catch (error) {
     console.error("Error fetching events:", error)
