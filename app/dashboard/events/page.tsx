@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import EventCountdown from "@/components/EventCountdown"
 
 interface Event {
   id: string
@@ -15,6 +16,8 @@ interface Event {
   descriptionAr: string
   date: string
   time: string
+  endDate?: string | null
+  endTime?: string | null
   location: string
   type: string
   maxMarshals: number
@@ -133,110 +136,175 @@ export default function EventsPage() {
               </p>
             </div>
           ) : (
-            events.map((event, index) => {
-              const isRegistered = event.attendances.length > 0
-              const registrationStatus = isRegistered ? event.attendances[0].status : null
-              const isFull = event._count.attendances >= event.maxMarshals
-
-              return (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-colors"
-                >
-                  {/* Event Image: صورة test.jpg مع طبقة داكنة */}
-                  <div
-                    className="h-48 flex items-center justify-center bg-black relative"
-                    style={{
-                      backgroundImage: 'url(/test.jpg)',
-                      backgroundSize: 'contain',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat'
-                    }}
+            (() => {
+              // Sort events: current first, then upcoming, then ended
+              const now = new Date();
+              const parseDate = (event: any, which: 'start'|'end') => {
+                const dateStr = which === 'start' ? event.date : event.endDate;
+                const timeStr = which === 'start' ? event.time : event.endTime;
+                if (!dateStr || !timeStr) return null;
+                const datePart = typeof dateStr === 'string' ? dateStr.split('T')[0] : '';
+                const dt = new Date(datePart + 'T' + timeStr);
+                return isNaN(dt.getTime()) ? null : dt;
+              };
+              const getState = (event: any) => {
+                const start = parseDate(event, 'start');
+                const end = parseDate(event, 'end');
+                if (!start) return 'ended';
+                if (end && now > end) return 'ended';
+                if (now >= start && (!end || now <= end)) return 'current';
+                if (now < start) return 'upcoming';
+                return 'ended';
+              };
+              const sorted = [...events].sort((a, b) => {
+                const stateOrder = { current: 0, upcoming: 1, ended: 2 };
+                const aState = getState(a);
+                const bState = getState(b);
+                if (aState !== bState) return stateOrder[aState] - stateOrder[bState];
+                // If same state, sort by start date ascending
+                const aStart = parseDate(a, 'start');
+                const bStart = parseDate(b, 'start');
+                if (aStart && bStart) return aStart.getTime() - bStart.getTime();
+                return 0;
+              });
+              return sorted.map((event, index) => {
+                const isRegistered = event.attendances.length > 0;
+                const registrationStatus = isRegistered ? event.attendances[0].status : null;
+                const isFull = event._count.attendances >= event.maxMarshals;
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-colors"
                   >
-                    {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
-                    <span className="text-6xl relative z-10">
-                      {event.type === "race" && "🏁"}
-                      {event.type === "drift" && "🚗"}
-                      {event.type === "track-day" && "🏎️"}
-                    </span>
-                  </div>
-
-                  <div className="p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">
-                      {language === "ar" ? event.titleAr : event.titleEn}
-                    </h3>
-                    
-                    <p className="text-gray-400 mb-4">
-                      {language === "ar" ? event.descriptionAr : event.descriptionEn}
-                    </p>
-
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>📅</span>
-                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>🕐</span>
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>📍</span>
-                        <span>{event.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>👥</span>
-                        <span>
-                          {event._count.attendances}/{event.maxMarshals} {language === "ar" ? "مارشال" : "Marshals"}
-                        </span>
-                      </div>
+                    {/* Event Image: صورة test.jpg مع طبقة داكنة */}
+                    <div
+                      className="h-48 flex items-center justify-center bg-black relative"
+                      style={{
+                        backgroundImage: 'url(/test.jpg)',
+                        backgroundSize: 'contain',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                      }}
+                    >
+                      {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
+                      <span className="text-6xl relative z-10">
+                        {event.type === "race" && "🏁"}
+                        {event.type === "drift" && "🚗"}
+                        {event.type === "track-day" && "🏎️"}
+                      </span>
                     </div>
 
-                    {/* Registration Status */}
-                    {isRegistered ? (
-                      <div className={`px-4 py-2 rounded-lg text-center font-medium ${
-                        registrationStatus === "approved" 
-                          ? "bg-green-600/20 text-green-500 border border-green-600/30"
-                          : registrationStatus === "pending"
-                          ? "bg-yellow-600/20 text-yellow-500 border border-yellow-600/30"
-                          : "bg-red-600/20 text-red-500 border border-red-600/30"
-                      }`}>
-                        {registrationStatus === "approved" && (language === "ar" ? "✅ مقبول" : "✅ Approved")}
-                        {registrationStatus === "pending" && (language === "ar" ? "⏳ معلق" : "⏳ Pending")}
-                        {registrationStatus === "rejected" && (language === "ar" ? "❌ مرفوض" : "❌ Rejected")}
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleRegister(event.id)}
-                        disabled={registering === event.id || isFull}
-                        className={`w-full py-3 rounded-lg font-bold transition-colors ${
-                          isFull
-                            ? "bg-gray-600 cursor-not-allowed"
-                            : "bg-red-600 hover:bg-red-700"
-                        } text-white disabled:opacity-50`}
-                      >
-                        {registering === event.id ? (
-                          <span className="flex items-center justify-center gap-2">
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            {language === "ar" ? "جاري التسجيل..." : "Registering..."}
-                          </span>
-                        ) : isFull ? (
-                          language === "ar" ? "مكتمل" : "Full"
-                        ) : (
-                          <>🏁 {language === "ar" ? "سجل حضورك" : "Register"}</>
+                    <div className="p-6">
+                      <EventCountdown event={event} language={language} />
+                      <h3 className="text-2xl font-bold text-white mb-2">
+                        {language === "ar" ? event.titleAr : event.titleEn}
+                      </h3>
+                      <p className="text-gray-400 mb-4">
+                        {language === "ar" ? event.descriptionAr : event.descriptionEn}
+                      </p>
+                      <div className="space-y-2 mb-4">
+                        {/* Start Date/Time */}
+                        <div className="flex flex-col items-start gap-1">
+                          <div className="flex items-center gap-2 text-green-500 font-bold">
+                            <span>📅</span>
+                            <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-green-500 font-bold">
+                            <span>🕐</span>
+                            <span>{event.time}</span>
+                          </div>
+                        </div>
+                        {/* End Date/Time */}
+                        {event.endDate && event.endTime && (
+                          <div className="flex flex-col items-start gap-1 mt-1">
+                            <div className="flex items-center gap-2 text-red-500 font-bold">
+                              <span>�</span>
+                              <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-red-500 font-bold">
+                              <span>�</span>
+                              <span>{event.endTime}</span>
+                            </div>
+                          </div>
                         )}
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              )
-            })
+                        {/* Location and Marshals */}
+                        <div className="flex items-center gap-2 text-gray-300">
+                          <span>📍</span>
+                          <span>{event.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span>👥</span>
+                          <span>
+                            <span className={
+                              event._count.attendances >= event.maxMarshals
+                                ? "text-red-500 font-bold"
+                                : "text-green-500 font-bold"
+                            }>
+                              {event._count.attendances}
+                            </span>
+                            <span className="mx-1 text-gray-400">/</span>
+                            <span className={
+                              event._count.attendances >= event.maxMarshals
+                                ? "text-red-500 font-bold"
+                                : "text-red-500 font-bold"
+                            }>
+                              {event.maxMarshals}
+                            </span>
+                            <span className="ml-1 text-gray-400">{language === "ar" ? "مارشال" : "Marshals"}</span>
+                          </span>
+                        </div>
+                      </div>
+                      {/* Registration Status */}
+                      {isRegistered ? (
+                        <div className={`px-4 py-2 rounded-lg text-center font-medium ${
+                          registrationStatus === "approved" 
+                            ? "bg-green-600/20 text-green-500 border border-green-600/30"
+                            : registrationStatus === "pending"
+                            ? "bg-yellow-600/20 text-yellow-500 border border-yellow-600/30"
+                            : "bg-red-600/20 text-red-500 border border-red-600/30"
+                        }`}>
+                          {registrationStatus === "approved" && (language === "ar" ? "✅ مقبول" : "✅ Approved")}
+                          {registrationStatus === "pending" && (language === "ar" ? "⏳ معلق" : "⏳ Pending")}
+                          {registrationStatus === "rejected" && (language === "ar" ? "❌ مرفوض" : "❌ Rejected")}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleRegister(event.id)}
+                          disabled={registering === event.id || isFull}
+                          className={`w-full py-3 rounded-lg font-bold transition-colors ${
+                            isFull
+                              ? "bg-gray-600 cursor-not-allowed"
+                              : "bg-red-600 hover:bg-red-700"
+                          } text-white disabled:opacity-50`}
+                        >
+                          {registering === event.id ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              {language === "ar" ? "جاري التسجيل..." : "Registering..."}
+                            </span>
+                          ) : isFull ? (
+                            language === "ar" ? "مكتمل" : "Full"
+                          ) : (
+                            <>🏁 {language === "ar" ? "سجل حضورك" : "Register"}</>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              });
+            })()
           )}
         </div>
       </main>

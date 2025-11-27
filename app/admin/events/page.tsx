@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import EventCountdown from "@/components/EventCountdown"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -29,95 +30,144 @@ interface Event {
 export default function EventsManagement() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { language } = useLanguage()
-  const [events, setEvents] = useState<Event[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false)
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState<string | null>(null)
-
-  const [formData, setFormData] = useState({
-    titleEn: "",
-    titleAr: "",
-    descriptionEn: "",
-    descriptionAr: "",
-    date: "",
-    endDate: "",
-    time: "",
-    endTime: "",
-    location: "",
-    marshalTypes: [] as string[],
-    maxMarshals: "20",
-  })
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login")
-    } else if (status === "authenticated" && session?.user?.role !== "admin") {
-      router.push("/dashboard")
-    }
-  }, [status, session, router])
-
-  useEffect(() => {
-    if (session?.user?.role === "admin") {
-      fetchEvents()
-    }
-  }, [session])
-
-  const fetchEvents = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch("/api/admin/events")
-      const data = await res.json()
-      console.log('FETCH EVENTS RESPONSE:', data)
-      if (Array.isArray(data)) {
-        setEvents(data)
-      } else if (Array.isArray(data.events)) {
-        setEvents(data.events)
-      } else {
-        setEvents([])
-      }
-    } catch (error) {
-      console.error("Error fetching events:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-
-    try {
-      const url = "/api/admin/events"
-      const method = editingEvent ? "PUT" : "POST"
-      const bodyData = {
-        ...formData,
-        marshalTypes: formData.marshalTypes.join(',')
-      }
-      const body = editingEvent
-        ? { id: editingEvent.id, ...bodyData }
-        : bodyData
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      })
-      let apiResponse = null;
-      try {
-        apiResponse = await res.clone().json();
-      } catch {
-        apiResponse = await res.text();
-      }
-      console.log('SAVE EVENT RESPONSE:', apiResponse);
-
-      if (res.ok) {
-        fetchEvents()
-        setShowModal(false)
-        resetForm()
-        alert(language === "ar"
+            {(() => {
+              // Sort events: current first, then upcoming, then ended
+              const now = new Date();
+              const parseDate = (event: any, which: 'start'|'end') => {
+                const dateStr = which === 'start' ? event.date : event.endDate;
+                const timeStr = which === 'start' ? event.time : event.endTime;
+                if (!dateStr || !timeStr) return null;
+                const datePart = typeof dateStr === 'string' ? dateStr.split('T')[0] : '';
+                const dt = new Date(datePart + 'T' + timeStr);
+                return isNaN(dt.getTime()) ? null : dt;
+              };
+              const getState = (event: any) => {
+                const start = parseDate(event, 'start');
+                const end = parseDate(event, 'end');
+                if (!start) return 'ended';
+                if (end && now > end) return 'ended';
+                if (now >= start && (!end || now <= end)) return 'current';
+                if (now < start) return 'upcoming';
+                return 'ended';
+              };
+              const sorted = [...events].sort((a, b) => {
+                const stateOrder = { current: 0, upcoming: 1, ended: 2 };
+                const aState = getState(a);
+                const bState = getState(b);
+                if (aState !== bState) return stateOrder[aState] - stateOrder[bState];
+                // If same state, sort by start date ascending
+                const aStart = parseDate(a, 'start');
+                const bStart = parseDate(b, 'start');
+                if (aStart && bStart) return aStart.getTime() - bStart.getTime();
+                return 0;
+              });
+              return sorted.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => router.push(`/admin/events/${event.id}`)}
+                  className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer transform hover:scale-105"
+                >
+                  <div className="relative h-32 overflow-hidden">
+                    {/* صورة الهيدر فقط */}
+                    <div className="absolute inset-0 w-full h-full z-0">
+                      <div
+                        style={{
+                          backgroundImage: 'url(/test.jpg)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                          width: '100%',
+                          height: '100%',
+                          position: 'absolute',
+                          inset: 0
+                        }}
+                      />
+                      {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
+                    </div>
+                  </div>
+                  {/* نهاية منطقة الصورة فقط */}
+                  {/* عداد تنازلي فوق معلومات الحدث */}
+                  <EventCountdown event={event} language={language} />
+                  <div className="flex">
+                    {/* أيقونات المارشال في الجانب الأيسر */}
+                    <div className="flex flex-col items-center justify-center px-3 py-4 gap-2">
+                      {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
+                        const typeIcons: Record<string, string> = {
+                          'drag-race': '🏁',
+                          'motocross': '🏍️',
+                          'karting': '🏎️',
+                          'drift': '💨',
+                          'circuit': '🏁',
+                          'rescue': '🚑'
+                        }
+                        return <span key={type} className="text-2xl md:text-3xl">{typeIcons[type] || '�'}</span>
+                      })}
+                    </div>
+                    {/* معلومات الفعالية */}
+                    <div className="flex-1 p-4">
+                      <h3 className="text-lg font-bold text-white mb-2 truncate">
+                        {language === "ar" ? event.titleAr : event.titleEn}
+                      </h3>
+                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+                        {language === "ar" ? event.descriptionAr : event.descriptionEn}
+                      </p>
+                      <div className="space-y-1 text-sm text-gray-300 mb-4">
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <div className="flex flex-col gap-1">
+                            <span className="font-bold text-green-500 flex items-center gap-1">
+                              {language === "ar" ? "بداية" : "Start"}:
+                              <span className="flex items-center gap-2">
+                                <span>🕐 {event.time}</span>
+                                <span className="inline-block w-3" />
+                                <span>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                              </span>
+                            </span>
+                            {event.endDate && event.endTime && (
+                              <span className="font-bold text-red-500 flex items-center gap-1 mt-1">
+                                {language === "ar" ? "نهاية" : "End"}:
+                                <span className="flex items-center gap-2">
+                                  <span>🕐 {event.endTime}</span>
+                                  <span className="inline-block w-3" />
+                                  <span>📅 {new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                                </span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span>📍</span>
+                          <span>{event.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span>👥</span>
+                          <span>
+                            <span className={
+                              event._count.attendances >= event.maxMarshals
+                                ? "text-red-500 font-bold"
+                                : "text-green-500 font-bold"
+                            }>
+                              {event._count.attendances}
+                            </span>
+                            <span className="mx-1 text-gray-400">/</span>
+                            <span className={
+                              event._count.attendances >= event.maxMarshals
+                                ? "text-red-500 font-bold"
+                                : "text-red-500 font-bold"
+                            }>
+                              {event.maxMarshals}
+                            </span>
+                            <span className="ml-1 text-gray-400">{language === "ar" ? "مارشال" : "Marshals"}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ));
+            })()}
           ? editingEvent ? "تم تحديث الفعالية بنجاح!" : "تم إنشاء الفعالية بنجاح!"
           : editingEvent ? "Event updated successfully!" : "Event created successfully!"
         )
@@ -607,84 +657,3 @@ export default function EventsManagement() {
 }
 
 // عداد تنازلي للفعالية
-function getTimeDiff(target: Date, now: Date) {
-  const diff = target.getTime() - now.getTime();
-  if (diff <= 0) return null;
-  const totalSeconds = Math.floor(diff / 1000);
-  const days = Math.floor(totalSeconds / (3600 * 24));
-  const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return { days, hours, minutes, seconds };
-}
-
-function EventCountdown({ event, language }: { event: any, language: string }) {
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // تحقق من صحة التاريخ والوقت
-  if (!event.date || !event.time) return null;
-  // استخدم فقط الجزء yyyy-mm-dd من التاريخ
-  const datePart = typeof event.date === 'string' ? event.date.split('T')[0] : '';
-  const start = new Date(datePart + 'T' + event.time);
-  if (isNaN(start.getTime())) return null;
-  let end: Date | null = null;
-  if (event.endDate && event.endTime) {
-    const endDatePart = typeof event.endDate === 'string' ? event.endDate.split('T')[0] : '';
-    end = new Date(endDatePart + 'T' + event.endTime);
-    if (isNaN(end.getTime())) return null;
-  }
-
-  let state: 'before' | 'during' | 'ended' = 'before';
-  if (end && now > end) state = 'ended';
-  else if (now >= start && (!end || now <= end)) state = 'during';
-
-  let color = '';
-  let label = '';
-  let diff = null as ReturnType<typeof getTimeDiff> | null;
-  if (state === 'before') {
-    color = 'text-green-500';
-    label = language === 'ar' ? 'يبدأ بعد' : 'Starts in';
-    diff = getTimeDiff(start, now);
-  } else if (state === 'during') {
-    color = 'text-orange-400';
-    label = language === 'ar' ? 'ينتهي بعد' : 'Ends in';
-    diff = end ? getTimeDiff(end, now) : null;
-  } else {
-    color = 'text-red-500';
-    label = language === 'ar' ? 'انتهى الحدث' : 'Event Ended';
-  }
-
-  // لا تظهر العداد إذا انتهى الحدث فقط
-  let bgColor = '';
-  if (state === 'before') bgColor = 'bg-zinc-900/80';
-  else if (state === 'during') bgColor = 'bg-zinc-900/80';
-  else bgColor = 'bg-zinc-900/80';
-
-  let textColor = color;
-  if (state === 'ended') textColor = 'text-red-500';
-
-  return (
-    <div className={`w-full flex items-center justify-center py-2 font-bold text-lg ${textColor} ${bgColor} border border-zinc-700 rounded-b-xl mb-1`} style={{letterSpacing: 1}}>
-      {state === 'ended' ? (
-        <span>{label}</span>
-      ) : (
-        <span>
-          {label}
-          {language === 'ar' ? ' : ' : ': '}
-          {diff && typeof diff.days === 'number' && diff.days > 0 && (
-            <>
-              {language === 'ar' ? `${diff.days} يوم ` : `${diff.days}d `}
-            </>
-          )}
-          {diff && typeof diff.hours === 'number' && typeof diff.minutes === 'number' && typeof diff.seconds === 'number'
-            ? `${diff.hours.toString().padStart(2, '0')}:${diff.minutes.toString().padStart(2, '0')}:${diff.seconds.toString().padStart(2, '0')}`
-            : '00:00:00'}
-        </span>
-      )}
-    </div>
-  );
-}
