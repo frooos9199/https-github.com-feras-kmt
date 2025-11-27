@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { language } = useLanguage()
+  console.log("language in profile:", language)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
