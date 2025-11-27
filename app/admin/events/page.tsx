@@ -17,6 +17,7 @@ interface Event {
   endDate: string | null
   time: string
   location: string
+  endTime?: string | null
   marshalTypes: string
   maxMarshals: number
   status: string
@@ -288,6 +289,9 @@ export default function EventsManagement() {
                     {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
                   </div>
                 </div>
+                {/* نهاية منطقة الصورة فقط */}
+                {/* عداد تنازلي فوق معلومات الحدث */}
+                <EventCountdown event={event} language={language} />
                 <div className="flex">
                   {/* أيقونات المارشال في الجانب الأيسر */}
                   <div className="flex flex-col items-center justify-center px-3 py-4 gap-2">
@@ -312,8 +316,28 @@ export default function EventsManagement() {
                       {language === "ar" ? event.descriptionAr : event.descriptionEn}
                     </p>
                     <div className="space-y-1 text-sm text-gray-300 mb-4">
-                      <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
-                      <div>🕐 {event.time}</div>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-bold text-green-500 flex items-center gap-1">
+                            {language === "ar" ? "بداية" : "Start"}:
+                            <span className="flex items-center gap-2">
+                              <span>🕐 {event.time}</span>
+                              <span className="inline-block w-3" />
+                              <span>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                            </span>
+                          </span>
+                          {event.endDate && event.endTime && (
+                            <span className="font-bold text-red-500 flex items-center gap-1 mt-1">
+                              {language === "ar" ? "نهاية" : "End"}:
+                              <span className="flex items-center gap-2">
+                                <span>🕐 {event.endTime}</span>
+                                <span className="inline-block w-3" />
+                                <span>📅 {new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
                       <div>📍 {event.location}</div>
                       <div>👥 {event._count.attendances}/{event.maxMarshals}</div>
                     </div>
@@ -580,4 +604,87 @@ export default function EventsManagement() {
       )}
     </div>
   )
+}
+
+// عداد تنازلي للفعالية
+function getTimeDiff(target: Date, now: Date) {
+  const diff = target.getTime() - now.getTime();
+  if (diff <= 0) return null;
+  const totalSeconds = Math.floor(diff / 1000);
+  const days = Math.floor(totalSeconds / (3600 * 24));
+  const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return { days, hours, minutes, seconds };
+}
+
+function EventCountdown({ event, language }: { event: any, language: string }) {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // تحقق من صحة التاريخ والوقت
+  if (!event.date || !event.time) return null;
+  // استخدم فقط الجزء yyyy-mm-dd من التاريخ
+  const datePart = typeof event.date === 'string' ? event.date.split('T')[0] : '';
+  const start = new Date(datePart + 'T' + event.time);
+  if (isNaN(start.getTime())) return null;
+  let end: Date | null = null;
+  if (event.endDate && event.endTime) {
+    const endDatePart = typeof event.endDate === 'string' ? event.endDate.split('T')[0] : '';
+    end = new Date(endDatePart + 'T' + event.endTime);
+    if (isNaN(end.getTime())) return null;
+  }
+
+  let state: 'before' | 'during' | 'ended' = 'before';
+  if (end && now > end) state = 'ended';
+  else if (now >= start && (!end || now <= end)) state = 'during';
+
+  let color = '';
+  let label = '';
+  let diff = null as ReturnType<typeof getTimeDiff> | null;
+  if (state === 'before') {
+    color = 'text-green-500';
+    label = language === 'ar' ? 'يبدأ بعد' : 'Starts in';
+    diff = getTimeDiff(start, now);
+  } else if (state === 'during') {
+    color = 'text-orange-400';
+    label = language === 'ar' ? 'ينتهي بعد' : 'Ends in';
+    diff = end ? getTimeDiff(end, now) : null;
+  } else {
+    color = 'text-red-500';
+    label = language === 'ar' ? 'انتهى الحدث' : 'Event Ended';
+  }
+
+  // لا تظهر العداد إذا انتهى الحدث فقط
+  let bgColor = '';
+  if (state === 'before') bgColor = 'bg-zinc-900/80';
+  else if (state === 'during') bgColor = 'bg-zinc-900/80';
+  else bgColor = 'bg-zinc-900/80';
+
+  let textColor = color;
+  if (state === 'ended') textColor = 'text-red-500';
+
+  return (
+    <div className={`w-full flex items-center justify-center py-2 font-bold text-lg ${textColor} ${bgColor} border border-zinc-700 rounded-b-xl mb-1`} style={{letterSpacing: 1}}>
+      {state === 'ended' ? (
+        <span>{label}</span>
+      ) : (
+        <span>
+          {label}
+          {language === 'ar' ? ' : ' : ': '}
+          {diff && typeof diff.days === 'number' && diff.days > 0 && (
+            <>
+              {language === 'ar' ? `${diff.days} يوم ` : `${diff.days}d `}
+            </>
+          )}
+          {diff && typeof diff.hours === 'number' && typeof diff.minutes === 'number' && typeof diff.seconds === 'number'
+            ? `${diff.hours.toString().padStart(2, '0')}:${diff.minutes.toString().padStart(2, '0')}:${diff.seconds.toString().padStart(2, '0')}`
+            : '00:00:00'}
+        </span>
+      )}
+    </div>
+  );
 }
