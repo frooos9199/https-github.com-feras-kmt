@@ -48,15 +48,8 @@ export async function GET() {
       }
     })
 
-    // Filter events based on user's marshal types
-    const filteredEvents = allEvents.filter((event: any) => {
-      if (!event.marshalTypes) return false
-      const eventTypes = event.marshalTypes.split(',').filter((t: string) => t)
-      // Check if user has at least one matching type
-      return eventTypes.some((eventType: string) => userTypes.includes(eventType))
-    })
-
-    return NextResponse.json(filteredEvents)
+    // إرجاع جميع الأحداث بدون فلترة marshalTypes
+    return NextResponse.json(allEvents)
   } catch (error) {
     console.error("Error fetching events:", error)
     return NextResponse.json(
