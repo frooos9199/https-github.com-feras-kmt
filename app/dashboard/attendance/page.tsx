@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import EventCountdown from "@/components/EventCountdown"
 
 interface AttendanceRecord {
   id: string
@@ -22,6 +23,12 @@ interface AttendanceRecord {
     time: string
     location: string
     type: string
+    endDate?: string | null
+    endTime?: string | null
+    maxMarshals?: number
+    _count?: {
+      attendances: number
+    }
   }
 }
 
@@ -254,6 +261,8 @@ export default function MyAttendancePage() {
             {filteredAttendances.map((attendance, index) => {
               const isPast = new Date(attendance.event.date) < new Date()
               
+              // Unified event card UI (copied/adapted from events page)
+              const event = attendance.event;
               return (
                 <motion.div
                   key={attendance.id}
@@ -262,9 +271,9 @@ export default function MyAttendancePage() {
                   transition={{ delay: index * 0.05 }}
                   className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-colors"
                 >
-                  {/* Event Image: صورة test.jpg مع طبقة داكنة */}
+                  {/* Event Image */}
                   <div
-                    className="h-32 flex items-center justify-center bg-black relative"
+                    className="h-48 flex items-center justify-center bg-black relative"
                     style={{
                       backgroundImage: 'url(/test.jpg)',
                       backgroundSize: 'contain',
@@ -272,51 +281,87 @@ export default function MyAttendancePage() {
                       backgroundRepeat: 'no-repeat'
                     }}
                   >
-                    {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
-                    <span className="text-5xl relative z-10">
-                      {attendance.event.type === "race" && "🏁"}
-                      {attendance.event.type === "drift" && "🚗"}
-                      {attendance.event.type === "track-day" && "🏎️"}
+                    <span className="text-6xl relative z-10">
+                      {event.type === "race" && "🏁"}
+                      {event.type === "drift" && "🚗"}
+                      {event.type === "track-day" && "🏎️"}
                     </span>
-                    {isPast && (
-                      <div className="absolute top-2 right-2 px-3 py-1 bg-gray-600/80 rounded-full text-xs text-white z-20">
-                        {language === "ar" ? "منتهي" : "Past"}
-                      </div>
-                    )}
                   </div>
-
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {language === "ar" ? attendance.event.titleAr : attendance.event.titleEn}
+                    <EventCountdown event={event} language={language} />
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      {language === "ar" ? event.titleAr : event.titleEn}
                     </h3>
-                    
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                      {language === "ar" ? attendance.event.descriptionAr : attendance.event.descriptionEn}
+                    <p className="text-gray-400 mb-4">
+                      {language === "ar" ? event.descriptionAr : event.descriptionEn}
                     </p>
-
-                    <div className="space-y-2 mb-4 text-sm">
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>📅</span>
-                        <span>{new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}</span>
+                    <div className="space-y-2 mb-4">
+                      {/* Start Date/Time */}
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-2 text-green-500 font-bold">
+                          <span>📅</span>
+                          <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-green-500 font-bold">
+                          <span>🕐</span>
+                          <span>{event.time}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>🕐</span>
-                        <span>{attendance.event.time}</span>
-                      </div>
+                      {/* End Date/Time (if available) */}
+                      {typeof event.endDate === 'string' && event.endDate && typeof event.endTime === 'string' && event.endTime && (
+                        <div className="flex flex-col items-start gap-1 mt-1">
+                          <div className="flex items-center gap-2 text-red-500 font-bold">
+                            <span>📅</span>
+                            <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-red-500 font-bold">
+                            <span>🕐</span>
+                            <span>{event.endTime}</span>
+                          </div>
+                        </div>
+                      )}
+                      {/* Location */}
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📍</span>
-                        <span>{attendance.event.location}</span>
+                        <span>{event.location}</span>
                       </div>
+                      {/* Marshals count (if available) */}
+                      {typeof event._count === 'object' && event._count && typeof event._count.attendances === 'number' && typeof event.maxMarshals === 'number' && (
+                        <div className="flex items-center gap-2">
+                          <span>👥</span>
+                          <span>
+                            <span className={
+                              event._count.attendances >= event.maxMarshals
+                                ? "text-red-500 font-bold"
+                                : "text-green-500 font-bold"
+                            }>
+                              {event._count.attendances}
+                            </span>
+                            <span className="mx-1 text-gray-400">/</span>
+                            <span className={
+                              event._count.attendances >= event.maxMarshals
+                                ? "text-red-500 font-bold"
+                                : "text-red-500 font-bold"
+                            }>
+                              {event.maxMarshals}
+                            </span>
+                            <span className="ml-1 text-gray-400">{language === "ar" ? "مارشال" : "Marshals"}</span>
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📝</span>
                         <span>{new Date(attendance.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
                       </div>
                     </div>
-
                     {/* Status Badge */}
                     <div className={`px-4 py-2 rounded-lg text-center font-medium ${
                       attendance.status === "approved" 
@@ -332,7 +377,6 @@ export default function MyAttendancePage() {
                       {attendance.status === "rejected" && (language === "ar" ? "❌ مرفوض" : "❌ Rejected")}
                       {attendance.status === "cancelled" && (language === "ar" ? "🚫 ملغي" : "🚫 Cancelled")}
                     </div>
-
                     {/* Cancel Button - Show only for approved registrations for future events */}
                     {attendance.status === "approved" && !isPast && (
                       <button
@@ -346,7 +390,6 @@ export default function MyAttendancePage() {
                         }
                       </button>
                     )}
-
                     {/* Notes */}
                     {attendance.notes && (
                       <div className="mt-4 p-3 bg-zinc-800/50 rounded-lg">
