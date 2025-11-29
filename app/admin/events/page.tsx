@@ -7,6 +7,7 @@ import EventCountdown from "@/components/EventCountdown"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import MobileConfigAdminButton from "@/components/MobileConfigAdminButton"
 
 interface Event {
   id: string
@@ -147,6 +148,7 @@ export default function EventsManagement() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <MobileConfigAdminButton />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

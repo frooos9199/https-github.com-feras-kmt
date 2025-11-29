@@ -260,6 +260,12 @@ export default function AdminDashboard() {
             >
               🏠 {language === "ar" ? "الرئيسية" : "Home"}
             </Link>
+            <Link
+              href="/admin/mobile-config"
+              className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
+            >
+              📱 {language === "ar" ? "إعدادات الجوال" : "Mobile Config"}
+            </Link>
           </div>
         </motion.div>
 
