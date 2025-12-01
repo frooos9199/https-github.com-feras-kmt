@@ -52,6 +52,18 @@ const LoginScreen = ({ navigation }) => {
       console.log('Saving user data:', userData);
       setUser(userData);
       
+      // Get FCM token and send to server
+      try {
+        const fcmToken = await FCMService.getToken();
+        if (fcmToken) {
+          console.log('📱 FCM Token obtained:', fcmToken);
+          await sendFcmTokenToServer(fcmToken, email);
+        }
+      } catch (fcmError) {
+        console.error('Failed to get/send FCM token:', fcmError);
+        // Don't block login if FCM fails
+      }
+      
       navigation.replace('MainTabs');
     } catch (err) {
       console.error('Login error:', err);

@@ -16,8 +16,23 @@ class FCMService {
 
   // الحصول على FCM Token
   async getToken() {
-    let fcmToken = await messaging().getToken();
-    return fcmToken;
+    try {
+      console.log('[FCM] Requesting permission...');
+      const hasPermission = await this.requestPermission();
+      
+      if (!hasPermission) {
+        console.log('[FCM] Permission denied');
+        return null;
+      }
+      
+      console.log('[FCM] Permission granted, getting token...');
+      let fcmToken = await messaging().getToken();
+      console.log('[FCM] Token obtained:', fcmToken ? 'YES' : 'NO');
+      return fcmToken;
+    } catch (error) {
+      console.error('[FCM] Error getting token:', error);
+      return null;
+    }
   }
 
   // الاستماع للإشعارات في المقدمة

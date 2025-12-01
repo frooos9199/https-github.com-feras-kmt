@@ -20,46 +20,87 @@ const Stack = createStackNavigator();
 
 
 const App = () => {
+  const navigationRef = React.useRef(null);
+
   React.useEffect(() => {
     let unsubscribeForeground;
+    
     (async () => {
+      // Request permission
       const authStatus = await messaging().requestPermission();
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      
       if (!enabled) {
-        Alert.alert('تنبيه', 'لم يتم منح صلاحية الإشعارات.');
+        console.log('⚠️ Push notification permission not granted');
         return;
       }
+
+      // Get FCM token
       const token = await messaging().getToken();
-      Alert.alert('FCM Token', token);
+      console.log('📱 FCM Token:', token);
+
+      // Handle foreground notifications
       unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+        console.log('🔔 Foreground notification:', remoteMessage);
+        
         if (remoteMessage?.notification) {
           Alert.alert(
             remoteMessage.notification.title || 'إشعار جديد',
-            remoteMessage.notification.body || ''
+            remoteMessage.notification.body || '',
+            [
+              { text: 'إغلاق', style: 'cancel' },
+              {
+                text: 'عرض',
+                onPress: () => {
+                  // Navigate to event if eventId exists
+                  if (remoteMessage.data?.eventId && navigationRef.current) {
+                    navigationRef.current.navigate('EventDetails', {
+                      eventId: remoteMessage.data.eventId
+                    });
+                  }
+                }
+              }
+            ]
           );
         }
       });
+
+      // Handle notification when app opened from background
       messaging().onNotificationOpenedApp(remoteMessage => {
-        if (remoteMessage?.notification) {
-          Alert.alert(
-            remoteMessage.notification.title || 'إشعار (فتح من الخلفية)',
-            remoteMessage.notification.body || ''
-          );
+        console.log('🔔 Notification opened app from background:', remoteMessage);
+        
+        if (remoteMessage?.data?.eventId && navigationRef.current) {
+          setTimeout(() => {
+            navigationRef.current.navigate('EventDetails', {
+              eventId: remoteMessage.data.eventId
+            });
+          }, 1000);
         }
       });
+
+      // Handle notification when app opened from quit state
       const initialMessage = await messaging().getInitialNotification();
-      if (initialMessage?.notification) {
-        Alert.alert(
-          initialMessage.notification.title || 'إشعار (تشغيل من إشعار)',
-          initialMessage.notification.body || ''
-        );
+      if (initialMessage) {
+        console.log('🔔 Notification opened app from quit state:', initialMessage);
+        
+        if (initialMessage?.data?.eventId && navigationRef.current) {
+          setTimeout(() => {
+            navigationRef.current.navigate('EventDetails', {
+              eventId: initialMessage.data.eventId
+            });
+          }, 2000);
+        }
       }
+
+      // Handle token refresh
       messaging().onTokenRefresh(newToken => {
-        Alert.alert('FCM Token تم تحديثه', newToken);
+        console.log('🔄 FCM Token refreshed:', newToken);
+        // TODO: Send new token to server
       });
     })();
+
     return () => {
       if (unsubscribeForeground) unsubscribeForeground();
     };
@@ -68,7 +109,7 @@ const App = () => {
   return (
     <UserProvider>
       <LanguageProvider>
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
           <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
