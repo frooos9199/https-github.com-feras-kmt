@@ -3,9 +3,12 @@
 
 // ⚠️ للتطوير: استخدم localhost
 // 🌐 للإنتاج: استخدم kmtsys.com
-const API_BASE_URL = __DEV__ 
-  ? 'http://localhost:3000/api'  // Development - Backend المحلي
-  : 'https://www.kmtsys.com/api'; // Production
+// const API_BASE_URL = __DEV__ 
+//   ? 'http://localhost:3000/api'  // Development - Backend المحلي
+//   : 'https://www.kmtsys.com/api'; // Production
+
+// استخدام Production دائماً للتطوير والتجربة
+const API_BASE_URL = 'https://www.kmtsys.com/api';
 
 console.log('[API CONFIG] Using API_BASE_URL:', API_BASE_URL);
 

@@ -18,7 +18,7 @@ const API_URL = 'https://www.kmtsys.com/api/admin/events';
 
 const EditEventScreen = ({ navigation, route }) => {
   const { user } = useContext(UserContext);
-  const { eventId } = route.params || {};
+  const { id: eventId } = route.params || {};
   const [form, setForm] = useState(null);
   const [fetchError, setFetchError] = useState(null);
   const [showDate, setShowDate] = useState(false);
@@ -40,7 +40,7 @@ const EditEventScreen = ({ navigation, route }) => {
       console.log('Using token:', user?.token);
       const res = await fetch(`${API_URL}/${eventId}`, {
         headers: {
-          'Authorization': `Bearer ${user?.token}`,
+          'Cookie': `__Secure-next-auth.session-token=${user?.token}`,
         },
       });
       console.log('Response status:', res.status);
