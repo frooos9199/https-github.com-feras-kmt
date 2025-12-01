@@ -13,12 +13,17 @@ const NotificationsScreen = () => {
   const navigation = useNavigation();
 
   const fetchNotifications = async () => {
+    console.log('[NOTIFICATIONS] Fetching notifications...');
+    console.log('[NOTIFICATIONS] User token:', user?.token ? 'EXISTS' : 'MISSING');
+    
     if (!user?.token) {
+      console.log('[NOTIFICATIONS] No token, skipping fetch');
       setLoading(false);
       return;
     }
 
     try {
+      console.log('[NOTIFICATIONS] API URL:', API_ENDPOINTS.NOTIFICATIONS);
       const response = await fetch(API_ENDPOINTS.NOTIFICATIONS, {
         method: 'GET',
         headers: {
@@ -27,17 +32,22 @@ const NotificationsScreen = () => {
         }
       });
 
+      console.log('[NOTIFICATIONS] Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('[NOTIFICATIONS] Received notifications:', data.length);
         setNotifications(data);
       } else {
-        console.error('Failed to fetch notifications');
+        const errorData = await response.json();
+        console.error('[NOTIFICATIONS] Failed to fetch:', errorData);
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('[NOTIFICATIONS] Error:', error.message);
     } finally {
       setLoading(false);
       setRefreshing(false);
+      console.log('[NOTIFICATIONS] Fetch completed');
     }
   };
 
