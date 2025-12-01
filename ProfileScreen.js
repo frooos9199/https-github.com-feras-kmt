@@ -1,53 +1,191 @@
-import React, { useContext, useState, useCallback } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, I18nManager } from 'react-native';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
+import { createAuthHeaders } from './apiConfig';
 
 const appLogo = require('./assets/splash/kmt-logo.png');
 
 const ProfileScreen = () => {
   const { user } = useContext(UserContext);
-    const [lang, setLang] = useState(I18n.locale);
-    const switchLang = useCallback(() => {
-      const newLang = lang === 'ar' ? 'en' : 'ar';
-      I18n.locale = newLang;
-      setLang(newLang);
-    }, [lang]);
+  const [lang, setLang] = useState(I18n.locale);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const switchLang = useCallback(() => {
+    const newLang = lang === 'ar' ? 'en' : 'ar';
+    I18n.locale = newLang;
+    setLang(newLang);
+  }, [lang]);
+
+  // جلب بيانات البروفايل من API
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        if (!user?.token) {
+          setLoading(false);
+          return;
+        }
+
+        console.log('Fetching profile data...');
+        const response = await fetch('https://www.kmtsys.com/api/profile', {
+          method: 'GET',
+          headers: createAuthHeaders(user.token),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Profile data:', data);
+          // تحويل dateOfBirth إلى birthdate للتوافق
+          if (data.dateOfBirth) {
+            data.birthdate = data.dateOfBirth;
+          }
+          setProfileData(data);
+        } else {
+          console.error('Failed to fetch profile:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user?.token]);
+
+  // دمج بيانات user مع profileData
+  const displayData = profileData || user || {};
+
+  if (loading) {
+    return (
+      <LinearGradient colors={['#000', '#b71c1c']} style={styles.bg}>
+        <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={{ color: '#fff', marginTop: 16, fontSize: 16 }}>
+            {lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}
+          </Text>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
   return (
     <LinearGradient colors={['#000', '#b71c1c']} style={styles.bg}>
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity style={styles.bellIcon}>
-            <Ionicons name="notifications" size={28} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.langSwitch} onPress={switchLang}>
-            <Text style={{ color: '#fff', fontSize: 16 }}>{I18n.t('switch_lang')}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.logoBox}>
-          <Image source={appLogo} style={styles.logo} />
-        </View>
-        <View style={styles.container}>
-          <View style={styles.avatarBox}>
-            <Image
-              source={user?.avatar ? { uri: user.avatar } : require('./assets/splash/kmt-logo.png')}
-              style={styles.avatar}
-            />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View style={styles.headerRow}>
+            <TouchableOpacity style={styles.bellIcon}>
+              <Ionicons name="notifications" size={26} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.langSwitch} onPress={switchLang}>
+              <Ionicons name="language" size={20} color="#fff" style={{ marginRight: 6 }} />
+              <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600' }}>
+                {lang === 'ar' ? 'EN' : 'ع'}
+              </Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.userInfoBox}>
-            <Text style={styles.userName}>{user?.name || (lang === 'ar' ? 'اسم المستخدم' : 'User Name')}</Text>
-            <Text style={styles.userEmail}>{user?.email || 'user@email.com'}</Text>
-            <View style={styles.profileDetailsBox}>
-              <Text style={styles.profileDetail}><Text style={styles.profileLabel}>{lang === 'ar' ? 'الرقم الوظيفي: ' : 'Employee ID: '}</Text>{user?.employeeId || '---'}</Text>
-              <Text style={styles.profileDetail}><Text style={styles.profileLabel}>{lang === 'ar' ? 'الرقم المدني: ' : 'Civil ID: '}</Text>{user?.civilId || '---'}</Text>
-              <Text style={styles.profileDetail}><Text style={styles.profileLabel}>{lang === 'ar' ? 'الجنسية: ' : 'Nationality: '}</Text>{user?.nationality || '---'}</Text>
-              <Text style={styles.profileDetail}><Text style={styles.profileLabel}>{lang === 'ar' ? 'تاريخ الميلاد: ' : 'Birthdate: '}</Text>{user?.birthdate || '---'}</Text>
-              <Text style={styles.profileDetail}><Text style={styles.profileLabel}>{lang === 'ar' ? 'رقم الهاتف: ' : 'Phone: '}</Text>{user?.phone || '---'}</Text>
+
+          {/* Profile Card */}
+          <View style={styles.profileCard}>
+            {/* Avatar with Glow */}
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatarGlow}>
+                <Image
+                  source={displayData?.image ? { uri: displayData.image } : (displayData?.avatar ? { uri: displayData.avatar } : appLogo)}
+                  style={styles.avatar}
+                />
+              </View>
+              {/* Status Badge */}
+              <View style={styles.statusBadge}>
+                <View style={styles.statusDot} />
+              </View>
+            </View>
+
+            {/* User Info */}
+            <Text style={styles.userName}>{displayData?.name || (lang === 'ar' ? 'اسم المستخدم' : 'User Name')}</Text>
+            <Text style={styles.userEmail}>{displayData?.email || 'user@email.com'}</Text>
+            
+            {/* Role Badge */}
+            <View style={styles.roleBadge}>
+              <MaterialCommunityIcons 
+                name={displayData?.role === 'admin' ? 'shield-crown' : 'shield-account'} 
+                size={18} 
+                color="#fbbf24" 
+              />
+              <Text style={styles.roleText}>
+                {displayData?.role === 'admin' ? (lang === 'ar' ? 'مدير النظام' : 'Admin') : (lang === 'ar' ? 'مارشال' : 'Marshal')}
+              </Text>
             </View>
           </View>
-        </View>
+
+          {/* Details Section */}
+          <View style={styles.detailsContainer}>
+            <Text style={styles.sectionTitle}>
+              {lang === 'ar' ? '📋 المعلومات الشخصية' : '📋 Personal Information'}
+            </Text>
+
+            {/* Detail Cards */}
+            <View style={styles.detailCard}>
+              <View style={styles.detailIconBox}>
+                <Ionicons name="id-card" size={22} color="#dc2626" />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>{lang === 'ar' ? 'الرقم الوظيفي' : 'Employee ID'}</Text>
+                <Text style={styles.detailValue}>{displayData?.employeeId || '---'}</Text>
+              </View>
+            </View>
+
+            <View style={styles.detailCard}>
+              <View style={styles.detailIconBox}>
+                <Ionicons name="card" size={22} color="#dc2626" />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>{lang === 'ar' ? 'الرقم المدني' : 'Civil ID'}</Text>
+                <Text style={styles.detailValue}>{displayData?.civilId || '---'}</Text>
+              </View>
+            </View>
+
+            <View style={styles.detailCard}>
+              <View style={styles.detailIconBox}>
+                <Ionicons name="flag" size={22} color="#dc2626" />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>{lang === 'ar' ? 'الجنسية' : 'Nationality'}</Text>
+                <Text style={styles.detailValue}>{displayData?.nationality || '---'}</Text>
+              </View>
+            </View>
+
+            <View style={styles.detailCard}>
+              <View style={styles.detailIconBox}>
+                <Ionicons name="calendar" size={22} color="#dc2626" />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>{lang === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth'}</Text>
+                <Text style={styles.detailValue}>{displayData?.birthdate ? new Date(displayData.birthdate).toLocaleDateString() : '---'}</Text>
+              </View>
+            </View>
+
+            <View style={styles.detailCard}>
+              <View style={styles.detailIconBox}>
+                <Ionicons name="call" size={22} color="#dc2626" />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>{lang === 'ar' ? 'رقم الهاتف' : 'Phone Number'}</Text>
+                <Text style={styles.detailValue}>{displayData?.phone || '---'}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Logo at Bottom */}
+          <View style={styles.bottomLogoBox}>
+            <Image source={appLogo} style={styles.bottomLogo} />
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -59,48 +197,166 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 24,
-    marginHorizontal: 16,
-  },
-  langSwitch: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    marginBottom: 8,
   },
   bellIcon: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
     width: 44,
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.10,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
   },
-  logoBox: { alignItems: 'center', marginTop: 12, marginBottom: 12 },
-  logo: { width: 90, height: 90, resizeMode: 'contain' },
-  container: { flex: 1, justifyContent: 'flex-start', alignItems: 'center', marginTop: 24 },
-  avatarBox: { marginBottom: 16, alignItems: 'center' },
+  langSwitch: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 44,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  // Profile Card
+  profileCard: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    marginHorizontal: 20,
+    marginTop: 12,
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 20,
+  },
+  avatarGlow: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(220, 38, 38, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
+    elevation: 10,
+  },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 4,
     borderColor: '#fff',
-    backgroundColor: '#eee',
+    backgroundColor: '#1a1a1a',
   },
-  userInfoBox: { alignItems: 'center' },
-  userName: { fontSize: 22, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
-  userEmail: { fontSize: 16, color: '#fff', opacity: 0.85 },
-  profileDetailsBox: { marginTop: 18, alignItems: 'flex-start' },
-  profileDetail: { fontSize: 16, color: '#fff', marginBottom: 6, textAlign: 'right' },
-  profileLabel: { fontWeight: 'bold', color: '#fff' },
+  statusBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#000',
+  },
+  statusDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#22c55e',
+  },
+  userName: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  userEmail: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.8)',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(251, 191, 36, 0.15)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.4)',
+  },
+  roleText: {
+    color: '#fbbf24',
+    fontSize: 14,
+    fontWeight: '700',
+    marginLeft: 6,
+  },
+
+  // Details Section
+  detailsContainer: {
+    paddingHorizontal: 20,
+    marginTop: 12,
+    paddingBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 16,
+  },
+  detailCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  detailIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: 'rgba(220, 38, 38, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  detailContent: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.6)',
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
+  },
+
+  // Bottom Logo
+  bottomLogoBox: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    opacity: 0.3,
+  },
+  bottomLogo: {
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
+  },
 });
 
 export default ProfileScreen;

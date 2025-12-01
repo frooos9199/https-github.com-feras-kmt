@@ -35,8 +35,8 @@ const SplashScreen = ({ navigation }) => {
     >
       <Animated.View style={[styles.logoBox, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}> 
         <Image source={require('./assets/appicon/icon.png')} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.title}>نظام إدارة المارشلات</Text>
-        <Text style={styles.subtitle}>نادي الكويت للسيارات</Text>
+  <Text style={styles.title}>Marshal Management System</Text>
+  <Text style={styles.subtitle}>KUWAIT MOTOR TOWN</Text>
       </Animated.View>
       <Animated.View style={{ opacity: fadeAnim }}>
         <ActivityIndicator size="large" color="#fff" style={styles.loader} />
@@ -79,23 +79,28 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#fff',
-    fontSize: 26,
-    fontWeight: 'bold',
+    fontSize: 27,
+    fontWeight: '700',
     marginBottom: 6,
     letterSpacing: 1.2,
     textShadowColor: '#991b1b',
     textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
+    textShadowRadius: 7,
+    fontFamily: 'System',
+    textAlign: 'center',
   },
   subtitle: {
     color: '#fff',
-    fontSize: 17,
-    opacity: 0.85,
-    marginBottom: 4,
-    letterSpacing: 0.5,
+    fontSize: 15.5,
+    opacity: 0.88,
+    marginBottom: 10,
+    letterSpacing: 0.7,
     textShadowColor: '#991b1b',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
+    textShadowRadius: 5,
+    fontFamily: 'System',
+    fontWeight: '400',
+    textAlign: 'center',
   },
   loader: {
     marginBottom: 30,

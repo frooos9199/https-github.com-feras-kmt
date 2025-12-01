@@ -365,30 +365,6 @@ const EventsScreen = ({ navigation }) => {
   // استخدم EventCard في renderItem
   const renderEvent = ({ item }) => <EventCard item={item} />;
 
-  // جلب إعدادات الموبايل من /api/mobile/config
-  const fetchMobileConfig = async () => {
-    try {
-      const response = await fetch('https://www.kmtsys.com/api/mobile/config', {
-        headers: {
-          'Authorization': 'Bearer my-secret-token', // غيّر التوكن إذا كان لديك توكن خاص
-          'Accept': 'application/json',
-        },
-      });
-      const data = await response.json();
-      setMobileConfig(data);
-      console.log('Mobile Config:', data);
-      return data;
-    } catch (error) {
-      console.error('Error fetching mobile config:', error);
-      return null;
-    }
-  };
-
-  // تفعيل جلب الإعدادات عند فتح الشاشة
-  useEffect(() => {
-    fetchMobileConfig();
-  }, []);
-
   return (
     <LinearGradient colors={['#000', '#b71c1c']} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>

@@ -5,13 +5,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { View, Text } from 'react-native';
 import HomeScreen from './HomeScreen';
 import NotificationsScreen from './NotificationsScreen';
-
-
-
 import EventsScreen from './EventsScreen';
 import StatsScreen from './StatsScreen';
 import ProfileScreen from './ProfileScreen';
-import QuickActionsScreen from './QuickActionsScreen';
 import I18n from './i18n';
 
 
@@ -31,28 +27,25 @@ const MainTabNavigator = () => (
         paddingBottom: 6,
         paddingTop: 6,
       },
-         tabBarIcon: ({ color, size }) => {
-           if (route.name === 'Home') {
-             return <Ionicons name="home" size={size} color={color} />;
-           } else if (route.name === 'Notifications') {
-             return <Ionicons name="notifications" size={size} color={color} />;
-           } else if (route.name === 'Events') {
-             return <MaterialCommunityIcons name="calendar-star" size={size} color={color} />;
-           } else if (route.name === 'Stats') {
-             return <Ionicons name="stats-chart" size={size} color={color} />;
-           } else if (route.name === 'QuickActions') {
-             return <Ionicons name="apps" size={size} color={color} />;
-           } else if (route.name === 'Profile') {
-             return <Ionicons name="person-circle" size={size} color={color} />;
-           }
-           return null;
-         },
+      tabBarIcon: ({ color, size }) => {
+        if (route.name === 'Home') {
+          return <Ionicons name="home" size={size} color={color} />;
+        } else if (route.name === 'Notifications') {
+          return <Ionicons name="notifications" size={size} color={color} />;
+        } else if (route.name === 'Events') {
+          return <MaterialCommunityIcons name="calendar-star" size={size} color={color} />;
+        } else if (route.name === 'Stats') {
+          return <Ionicons name="stats-chart" size={size} color={color} />;
+        } else if (route.name === 'Profile') {
+          return <Ionicons name="person-circle" size={size} color={color} />;
+        }
+        return null;
+      },
     })}
   >
     <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: I18n.t('tab_home') }} />
     <Tab.Screen name="Events" component={EventsScreen} options={{ tabBarLabel: I18n.t('tab_events') }} />
     <Tab.Screen name="Stats" component={StatsScreen} options={{ tabBarLabel: I18n.t('tab_stats') }} />
-    <Tab.Screen name="QuickActions" component={QuickActionsScreen} options={{ tabBarLabel: I18n.t('tab_quick_actions') }} />
     <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: I18n.t('tab_profile') }} />
   </Tab.Navigator>
 );
