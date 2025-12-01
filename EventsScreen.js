@@ -1,11 +1,11 @@
-
-import React, { useContext, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, Image, TouchableOpacity, FlatList, RefreshControl, Alert } from 'react-native';
 import { Dimensions } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
+import { getEventsEndpoint, createAuthHeaders } from './apiConfig';
 const appLogo = require('./assets/splash/kmt-logo.png');
 const profilePlaceholder = require('./assets/appicon/icon.png');
 
@@ -22,76 +22,149 @@ const TAG_LABELS = {
 };
 
 
-const EventsScreen = () => {
+const EventsScreen = ({ navigation }) => {
   const { user } = useContext(UserContext);
   const avatarSource = user?.avatar ? { uri: user.avatar } : profilePlaceholder;
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // دالة حذف الحدث
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      if (!user?.token) {
+        Alert.alert('خطأ', 'يجب تسجيل الدخول أولاً');
+        return;
+      }
+
+      // في React Native لا يوجد window.confirm، استخدم Alert بدلاً منها
+      Alert.alert(
+        'تأكيد الحذف',
+        'هل أنت متأكد أنك تريد حذف هذا الحدث؟ لا يمكن التراجع!',
+        [
+          { text: 'إلغاء', style: 'cancel' },
+          {
+            text: 'حذف',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                const response = await fetch(`https://www.kmtsys.com/api/events/${eventId}`, {
+                  method: 'DELETE',
+                  headers: createAuthHeaders(user.token),
+                });
+                
+                if (response.ok) {
+                  fetchEvents();
+                  Alert.alert('نجح', 'تم حذف الحدث بنجاح');
+                } else {
+                  Alert.alert('خطأ', 'فشل حذف الحدث!');
+                }
+              } catch (err) {
+                Alert.alert('خطأ', 'حدث خطأ أثناء الحذف!');
+              }
+            }
+          }
+        ]
+      );
+    } catch (err) {
+      Alert.alert('خطأ', 'حدث خطأ أثناء الحذف!');
+    }
+  };
+  
+  // حساب عدد الأحداث اليوم
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  // يشمل الأحداث التي تبدأ أو تنتهي اليوم أو تغطي اليوم
+  const todayEventsCount = events.filter(ev => {
+    if (!ev.date || !ev.endDate) return false;
+    const start = new Date(ev.date.slice(0,10));
+    const end = new Date(ev.endDate.slice(0,10));
+    // اليوم يقع بين البداية والنهاية (شامل)
+    return start <= today && today <= end;
+  }).length;
 
   // جلب الأحداث من API
   const fetchEvents = useCallback(async () => {
     try {
       setRefreshing(true);
-      // استبدل الرابط برابط API الفعلي
-      // استخدم التوكن الذي أرسله المستخدم مباشرة
-      const sessionToken = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..LMxbc2WjAlwaz9xv.tPkCWD5sMj1_oCJrETpcOhLG_4KTgzGZKq-OkN89HATrtIaVXrsldjC7PZt_xiUPTuYZMs-f7jeosbJP3dAw_oCCv7Aq7ryfXDvar2Un0JCy1fxSV3OSHhSaHO9QukcAvvQBw1CNy-jVfzOQCHv9LKABQH2Qh5tHQHOybvhUhADgpipiJJWU9nelMSqcgNo9cZthLo4ZMLf0jbEEwAhmlgfRFqXUN4zZqyrFDLyGMF4lAOazPoQxX6N3XnZZntOVQA45fG-M42pbC4k3jdRmvqVayn_U1vc.gIaf6EfiqVr6GrdFJfVB8w";
-      const response = await fetch('https://www.kmtsys.com/api/events', {
-        headers: {
-          'Cookie': `__Secure-next-auth.session-token=${sessionToken}`,
-          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
+      
+      // التحقق من وجود توكن ودور المستخدم
+      console.log('fetchEvents - user:', user ? {email: user.email, role: user.role, hasToken: !!user.token} : 'null');
+      
+      if (!user?.token) {
+        console.log('No token found, cannot fetch events');
+        setRefreshing(false);
+        return;
+      }
+
+      // الحصول على المسار الصحيح حسب دور المستخدم
+      const apiUrl = getEventsEndpoint(user.role);
+      console.log('Fetching events from:', apiUrl);
+      console.log('User role:', user.role);
+      console.log('Token preview:', user.token.substring(0, 30) + '...');
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: createAuthHeaders(user.token),
       });
+
       let data = null;
-      let status = response.status;
       try {
         data = await response.json();
+        console.log('Events API response:', data);
       } catch (err) {
         console.log('Events API JSON error:', err);
       }
-      console.log('Events API status:', status);
-      console.log('Events API typeof:', typeof data);
-      console.log('Events API raw:', JSON.stringify(data));
-      // إذا كان هناك خاصية events داخل الكائن
-      let rawEvents = [];
-      if (data && Array.isArray(data.events)) {
-        rawEvents = data.events;
-      } else if (Array.isArray(data)) {
-        rawEvents = data;
+
+      // إذا لم يوجد رد من الـ API أو حدث خطأ، استخدم بيانات فارغة
+      if (!data || data.error || !response.ok) {
+        console.log('API error or no data:', data?.error || 'Unknown error');
+        setEvents([]);
+        setRefreshing(false);
+        return;
       }
+
+      // معالجة البيانات
+      const eventsData = Array.isArray(data) ? data : (data.events || []);
+      
       // ترتيب الأحداث: الجاري أولاً، ثم القادمة، ثم المنتهية
       const now = new Date();
-      const sorted = rawEvents.slice().sort((a, b) => {
+      const sorted = eventsData.slice().sort((a, b) => {
         const aStart = a.date ? new Date(a.date) : new Date(0);
         const aEnd = a.endDate ? new Date(a.endDate) : new Date(0);
         const bStart = b.date ? new Date(b.date) : new Date(0);
         const bEnd = b.endDate ? new Date(b.endDate) : new Date(0);
+        
         // حالة a
         let aStatus = 'finished';
         if (now < aStart) aStatus = 'upcoming';
         else if (now >= aStart && now <= aEnd) aStatus = 'ongoing';
+        
         // حالة b
         let bStatus = 'finished';
         if (now < bStart) bStatus = 'upcoming';
         else if (now >= bStart && now <= bEnd) bStatus = 'ongoing';
+        
         // الجاري أولاً
         if (aStatus === 'ongoing' && bStatus !== 'ongoing') return -1;
         if (bStatus === 'ongoing' && aStatus !== 'ongoing') return 1;
+        
         // القادمة ثانياً حسب التاريخ
         if (aStatus === 'upcoming' && bStatus === 'upcoming') return aStart - bStart;
         if (aStatus === 'upcoming') return -1;
         if (bStatus === 'upcoming') return 1;
+        
         // المنتهية حسب الأحدث
         return bEnd - aEnd;
       });
+      
       setEvents(sorted);
     } catch (error) {
       setEvents([]);
+      console.error('Error fetching events:', error);
     } finally {
       setRefreshing(false);
     }
-  }, []);
+  }, [user]);
 
   React.useEffect(() => {
     // اربط لغة التطبيق مع لغة البروفايل إذا توفرت
@@ -144,6 +217,9 @@ const EventsScreen = () => {
 
   // مكون بطاقة الحدث مع عد تنازلي حي
   const EventCard = ({ item }) => {
+    // هل هذا الحدث يغطي اليوم الحالي؟
+    const today = new Date();
+    const coversToday = item.date && item.endDate && (new Date(item.date.slice(0,10)) <= today && today <= new Date(item.endDate.slice(0,10)));
     const isArabic = I18n.locale === 'ar';
     const title = isArabic ? item.titleAr : item.titleEn;
     const desc = isArabic ? item.descriptionAr : item.descriptionEn;
@@ -215,77 +291,72 @@ const EventsScreen = () => {
     return (
       <View style={styles.eventCard}>
         <LinearGradient colors={[barColor, barColor]} style={styles.eventCardBar}>
-          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between', paddingHorizontal: 8}}>
+          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between', paddingHorizontal: 8, position:'relative'}}>
             <Text style={[styles.eventTitle, {textAlign: isArabic ? 'right' : 'left', color:'#fff', fontSize:22, fontWeight:'bold'}]} numberOfLines={1}>{title}</Text>
-            <View style={[
-              styles.statusTag,
-              {
-                backgroundColor: barColor,
-                alignSelf: 'flex-start',
-                marginLeft: isArabic ? 0 : 8,
-                marginRight: isArabic ? 8 : 0,
-                borderWidth: 2.5,
-                borderColor: '#111',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.18,
-                shadowRadius: 4,
-                elevation: 4,
-              }
-            ]}>
+            <View style={{
+              ...styles.statusTag,
+              backgroundColor: barColor,
+              alignSelf: 'flex-start',
+              marginLeft: isArabic ? 0 : 8,
+              marginRight: isArabic ? 8 : 0,
+              borderWidth: 2.5,
+              borderColor: '#111',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.18,
+              shadowRadius: 4,
+              elevation: 4,
+            }}>
               <Text style={styles.statusTagText}>{isArabic ? (barColor==='#43A047'?'قادم':barColor==='#FFA726'?'نشط':'منتهي') : barColor==='#43A047'?'Upcoming':barColor==='#FFA726'?'Ongoing':'Finished'}</Text>
             </View>
           </View>
         </LinearGradient>
-        <View style={{paddingHorizontal: 4, paddingTop: 12}}>
-          <Text style={[
-            styles.countdown,
-            {
-              color: barColor,
-              marginBottom: 14,
-              fontSize: 32,
-              fontWeight: 'bold',
-              textAlign: 'center',
-              letterSpacing: 1,
-            },
-          ]}>
-            {countdown}
-          </Text>
-          <View style={styles.detailsContainer}>
-            <View style={styles.eventDetailsRow}>
-              <Ionicons name="calendar" size={20} color="#43A047" style={{ marginRight: 6 }} />
-              <Text style={[styles.eventDetailText, {color:'#43A047', fontWeight:'bold'}]}>{item.date ? item.date.slice(0,10) : ''}</Text>
-              <Text style={[styles.eventDetailText, {color:'#43A047'}]}>{isArabic ? '| يبدأ' : '| Start'}</Text>
-              <Text style={[styles.eventDetailText, {color:'#43A047'}]}>{startTime}</Text>
-            </View>
-            <View style={styles.eventDetailsRow}>
-              <Ionicons name="hourglass" size={20} color="#e53935" style={{ marginRight: 6 }} />
-              <Text style={[styles.eventDetailText, {color:'#e53935', fontWeight:'bold'}]}>{item.endDate ? item.endDate.slice(0,10) : ''}</Text>
-              <Text style={[styles.eventDetailText, {color:'#e53935'}]}>{isArabic ? '| ينتهي' : '| End'}</Text>
-              <Text style={[styles.eventDetailText, {color:'#e53935'}]}>{endTime}</Text>
-            </View>
-            <View style={styles.eventDetailsRow}>
-              <Ionicons name="pin" size={20} color="#fff" style={{ marginRight: 6 }} />
-              <Text style={styles.eventDetailText}>{item.location}</Text>
-            </View>
-            <View style={styles.eventDetailsRow}>
-              <Ionicons name="people" size={20} color="#fff" style={{ marginRight: 6 }} />
-              <Text style={[styles.eventDetailText, {color:'#43A047', fontWeight:'bold'}]}>{attendances}</Text>
-              <Text style={[styles.eventDetailText, {color:'#fff'}]}>/</Text>
-              <Text style={[styles.eventDetailText, {color:'#e53935', fontWeight:'bold'}]}>{maxMarshals}</Text>
-              <Text style={[styles.eventDetailText, {color:'#fff'}]}>{isArabic ? 'مارشال' : 'Marshals'}</Text>
-            </View>
-            <View style={[styles.tagsRow, {marginTop: 12, flexWrap: 'wrap', justifyContent: isArabic ? 'flex-end' : 'flex-start'}]}> 
-              {types && types.length > 0 ? types.map((type, idx) => (
-                <View key={idx} style={styles.marshallTypeTag}>
-                  <Ionicons name="checkmark-circle" size={16} color="#43A047" style={{marginRight: 4}} />
-                  <Text style={styles.marshallTypeText}>{type}</Text>
-                </View>
-              )) : (
-                <Text style={[styles.marshallTypeText, {color:'#e53935'}]}>{isArabic ? 'لا يوجد تخصصات' : 'No specialties'}</Text>
-              )}
-            </View>
+        {/* العداد التنازلي */}
+        <View style={{alignItems:'center', marginTop: 8, marginBottom: 2}}>
+          <Text style={{color: barColor, fontWeight:'bold', fontSize: 18, letterSpacing:1}}>{countdown}</Text>
+        </View>
+        {/* وقت وتاريخ البداية والنهاية */}
+        <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginHorizontal: 12, marginBottom: 8, marginTop: 2}}>
+          <View style={{alignItems:'flex-start'}}>
+            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15, marginBottom:2}}>
+              {isArabic ? 'تاريخ البداية:' : 'Start Date:'} <Text style={{color:'#43A047'}}>{item.date ? item.date.slice(0,10) : '-'}</Text>
+            </Text>
+            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15}}>
+              {isArabic ? 'وقت البداية:' : 'Start Time:'} <Text style={{color:'#43A047'}}>{startTime || '-'}</Text>
+            </Text>
           </View>
+          <View style={{alignItems:'flex-end'}}>
+            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15, marginBottom:2}}>
+              {isArabic ? 'تاريخ النهاية:' : 'End Date:'} <Text style={{color:'#e53935'}}>{item.endDate ? item.endDate.slice(0,10) : '-'}</Text>
+            </Text>
+            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15}}>
+              {isArabic ? 'وقت النهاية:' : 'End Time:'} <Text style={{color:'#e53935'}}>{endTime || '-'}</Text>
+            </Text>
+          </View>
+        </View>
+        {/* الموقع */}
+        <View style={{flexDirection:'row', alignItems:'center', marginHorizontal: 12, marginBottom: 6}}>
+          <Ionicons name="pin" size={20} color="#fff" style={{ marginRight: 6 }} />
+          <Text style={[styles.eventDetailText, {fontWeight:'bold', color:'#fff', fontSize:15}]}>{item.location}</Text>
+        </View>
+        {/* المارشالات */}
+        <View style={{flexDirection:'row', alignItems:'center', marginHorizontal: 12, marginBottom: 6}}>
+          <Ionicons name="people" size={20} color="#fff" style={{ marginRight: 6 }} />
+          <Text style={[styles.eventDetailText, {color:'#43A047', fontWeight:'bold', fontSize:15}]}>{attendances}</Text>
+          <Text style={[styles.eventDetailText, {color:'#fff', fontSize:15}]}>/</Text>
+          <Text style={[styles.eventDetailText, {color:'#e53935', fontWeight:'bold', fontSize:15}]}>{maxMarshals}</Text>
+          <Text style={[styles.eventDetailText, {color:'#fff', fontSize:15, marginLeft:4}]}>{isArabic ? 'مارشال' : 'Marshals'}</Text>
+        </View>
+        {/* الأنواع */}
+        <View style={[styles.tagsRow, {marginTop: 8, flexWrap: 'wrap', justifyContent: isArabic ? 'flex-end' : 'flex-start', marginHorizontal: 12, marginBottom: 6}]}> 
+          {types && types.length > 0 ? types.map((type, idx) => (
+            <View key={idx} style={styles.marshallTypeTag}>
+              <Ionicons name="checkmark-circle" size={16} color="#43A047" style={{marginRight: 4}} />
+              <Text style={styles.marshallTypeText}>{type}</Text>
+            </View>
+          )) : (
+            <Text style={[styles.marshallTypeText, {color:'#e53935'}]}>{isArabic ? 'لا يوجد تخصصات' : 'No specialties'}</Text>
+          )}
         </View>
       </View>
     );
@@ -293,6 +364,30 @@ const EventsScreen = () => {
 
   // استخدم EventCard في renderItem
   const renderEvent = ({ item }) => <EventCard item={item} />;
+
+  // جلب إعدادات الموبايل من /api/mobile/config
+  const fetchMobileConfig = async () => {
+    try {
+      const response = await fetch('https://www.kmtsys.com/api/mobile/config', {
+        headers: {
+          'Authorization': 'Bearer my-secret-token', // غيّر التوكن إذا كان لديك توكن خاص
+          'Accept': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setMobileConfig(data);
+      console.log('Mobile Config:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching mobile config:', error);
+      return null;
+    }
+  };
+
+  // تفعيل جلب الإعدادات عند فتح الشاشة
+  useEffect(() => {
+    fetchMobileConfig();
+  }, []);
 
   return (
     <LinearGradient colors={['#000', '#b71c1c']} style={{ flex: 1 }}>
@@ -305,8 +400,9 @@ const EventsScreen = () => {
             <Image source={appLogo} style={styles.logo} />
             <Image source={avatarSource} style={styles.avatar} />
           </View>
-        </View>
-        <FlatList
+  </View>
+  {/* ...existing code... */}
+  <FlatList
           data={events}
           keyExtractor={(item, idx) => item.id?.toString() || idx.toString()}
           // عند السحب للأسفل يتم إعادة جلب الأحداث

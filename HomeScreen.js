@@ -7,6 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
+import { getEventsEndpoint, createAuthHeaders } from './apiConfig';
 
 const { width } = Dimensions.get('window');
 
@@ -44,15 +45,43 @@ const HomeScreen = () => {
     // جلب الفعاليات من API
     const fetchEvents = async () => {
       try {
-        const response = await fetch('https://www.kmtsys.com/api/user/events');
-        const data = await response.json();
-        if (data.success && Array.isArray(data.events)) {
-          setEvents(data.events);
+        if (!user?.token || !user?.role) {
+          console.log('No token or role found');
+          return;
         }
-      } catch (err) {}
+
+        // الحصول على المسار الصحيح حسب دور المستخدم
+        const apiUrl = getEventsEndpoint(user.role);
+        console.log('Fetching events from:', apiUrl);
+
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: createAuthHeaders(user.token),
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          console.log('Events API error:', data.error || 'Unknown error');
+          return;
+        }
+
+        // معالجة البيانات
+        const eventsData = Array.isArray(data) ? data : (data.events || []);
+        
+        if (eventsData.length > 0) {
+          console.log('Fetched events:', eventsData.length);
+          setEvents(eventsData);
+        } else {
+          console.log('No events found');
+        }
+      } catch (err) {
+        console.log('Error fetching events:', err);
+      }
     };
+    
     fetchEvents();
-  }, []);
+  }, [user]);
 
 
 
@@ -65,8 +94,13 @@ const HomeScreen = () => {
   // حساب عدد الحضور اليوم من الأحداث (مثال: عدد الأحداث التي status=approved وdate=اليوم)
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
-  // الأحداث التي تاريخها اليوم
-  const todayEvents = events.filter(e => (e.date && e.date.startsWith(todayStr)));
+  // الأحداث التي تغطي اليوم (تبدأ أو قبل اليوم وتنتهي أو بعد اليوم)
+  const todayEvents = events.filter(e => {
+    if (!e.date) return false;
+    const start = new Date(e.date.slice(0,10));
+    const end = e.endDate ? new Date(e.endDate.slice(0,10)) : start;
+    return start <= today && today <= end;
+  });
   const todayEventsCount = todayEvents.length;
   // الطلبات المعلقة اليوم (status === 'pending' وتاريخ اليوم)
   const pendingRequests = todayEvents.filter(e => e.status === 'pending').length;
@@ -185,6 +219,19 @@ const HomeScreen = () => {
             number={todayEventsCount}
             bgColor="#1e293b"
           />
+          {/* قائمة أحداث اليوم */}
+          {todayEventsCount > 0 && (
+            <View style={{marginTop: 8, width: '100%'}}>
+              {todayEvents.map((ev, idx) => (
+                <View key={ev.id || idx} style={{backgroundColor:'#222', borderRadius:12, padding:12, marginBottom:8, shadowColor:'#000', shadowOpacity:0.08, shadowRadius:4, elevation:2}}>
+                  <Text style={{color:'#fff', fontWeight:'bold', fontSize:16, marginBottom:2}}>{ev.titleAr || ev.titleEn || ev.title}</Text>
+                  <Text style={{color:'#aaa', fontSize:13}}>{ev.date}{ev.endDate ? ' - ' + ev.endDate : ''}</Text>
+                  <Text style={{color:'#fff', fontSize:13, marginTop:2}}>{ev.location}</Text>
+                  {/* يمكنك إضافة تفاصيل أكثر هنا حسب الحاجة */}
+                </View>
+              ))}
+            </View>
+          )}
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

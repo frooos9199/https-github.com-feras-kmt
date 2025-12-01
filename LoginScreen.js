@@ -4,6 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import FCMService from './FCMService';
 import { sendFcmTokenToServer } from './fcmApi';
 import { UserContext } from './UserContext';
+import { API_ENDPOINTS } from './apiConfig';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -12,33 +13,49 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('خطأ', 'يرجى إدخال البريد وكلمة المرور');
+      Alert.alert('Error', 'Please enter your email and password');
       return;
     }
     try {
-      const response = await fetch('https://www.kmtsys.com/api/auth/login', {
+      const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
       console.log('LOGIN RESPONSE:', response.status, response.ok, data);
-      // طباعة جميع الحقول لمعرفة مكان التوكن
-      Object.keys(data).forEach(k => console.log('LOGIN FIELD:', k, data[k]));
-      if (data.user) {
-        Object.keys(data.user).forEach(k => console.log('USER FIELD:', k, data.user[k]));
+      
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Login failed');
       }
-      if (!response.ok) throw new Error(data.message || 'فشل تسجيل الدخول');
 
-      setUser({
-        name: data.user?.name || '',
-        employeeId: data.user?.employee_number || '',
-        avatar: data.user?.image || '',
-        token: data.accessToken || data.token || data.jwt || data.user?.token || '',
-      });
+      // التحقق من وجود التوكن و البيانات
+      if (!data.accessToken || !data.user) {
+        throw new Error('Invalid response from server');
+      }
+
+      // حفظ بيانات المستخدم مع التوكن
+      const userData = {
+        id: data.user.id,
+        name: data.user.name || '',
+        email: data.user.email || email,
+        employeeId: data.user.employee_number || '',
+        avatar: data.user.image || '',
+        token: data.accessToken, // التوكن الصحيح من API
+        role: data.user.role || 'marshal',
+        civilId: data.user.civilId || '',
+        nationality: data.user.nationality || '',
+        birthdate: data.user.birthdate || '',
+        phone: data.user.phone || '',
+      };
+
+      console.log('Saving user data:', userData);
+      setUser(userData);
+      
       navigation.replace('MainTabs');
     } catch (err) {
-      Alert.alert('خطأ', err.message);
+      console.error('Login error:', err);
+      Alert.alert('Error', err.message || 'Login failed');
     }
   };
 
@@ -51,34 +68,34 @@ const LoginScreen = ({ navigation }) => {
     >
       <View style={styles.logoBox}>
         <Image source={require('./kmt-logo-white.png')} style={styles.logo} />
-        <Text style={styles.systemTitle}>نظام إدارة المارشلات</Text>
-        <Text style={styles.clubTitle}>نادي الكويت للسيارات</Text>
+        <Text style={styles.systemTitle}>Marshal Management System</Text>
+        <Text style={styles.clubTitle}>KUWAIT MOTOR TOWN</Text>
       </View>
       <View style={styles.formBox}>
-        <Text style={styles.title}>تسجيل الدخول</Text>
+        <Text style={styles.title}>Login</Text>
         <TextInput
           style={styles.input}
-          placeholder="البريد الإلكتروني"
+          placeholder="Email"
           placeholderTextColor="#888"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
-          textAlign={I18nManager.isRTL ? 'right' : 'left'}
+          textAlign="left"
         />
         <TextInput
           style={styles.input}
-          placeholder="كلمة المرور"
+          placeholder="Password"
           placeholderTextColor="#888"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          textAlign={I18nManager.isRTL ? 'right' : 'left'}
+          textAlign="left"
         />
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>دخول</Text>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.signupLink} onPress={() => Alert.alert('قريباً', 'ميزة تسجيل حساب جديد ستتوفر قريباً!')}>
-          <Text style={styles.signupText}>ليس لديك حساب؟ <Text style={{color:'#dc2626',fontWeight:'bold'}}>سجل الآن</Text></Text>
+        <TouchableOpacity style={styles.signupLink} onPress={() => Alert.alert('Coming Soon', 'Sign up feature will be available soon!')}>
+          <Text style={styles.signupText}>Don't have an account? <Text style={{color:'#dc2626',fontWeight:'bold'}}>Sign up</Text></Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
