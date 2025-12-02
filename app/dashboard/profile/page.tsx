@@ -18,6 +18,8 @@ interface UserProfile {
   nationality: string | null
   bloodType: string | null
   image: string | null
+  civilIdFrontImage: string | null
+  civilIdBackImage: string | null
   licenseFrontImage: string | null
   licenseBackImage: string | null
   role: string
@@ -31,6 +33,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadingCivilIdFront, setUploadingCivilIdFront] = useState(false)
+  const [uploadingCivilIdBack, setUploadingCivilIdBack] = useState(false)
   const [uploadingLicenseFront, setUploadingLicenseFront] = useState(false)
   const [uploadingLicenseBack, setUploadingLicenseBack] = useState(false)
   const [editing, setEditing] = useState(true) // مفعّل دائماً
@@ -139,6 +143,126 @@ export default function ProfilePage() {
       })
     } finally {
       setUploading(false)
+    }
+  }
+
+  const handleCivilIdFrontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file"
+      })
+      return
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB"
+      })
+      return
+    }
+
+    setUploadingCivilIdFront(true)
+    setMessage(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("imageType", "civilIdFront")
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage({
+          type: "success",
+          text: language === "ar" ? "تم رفع صورة البطاقة المدنية (الأمام) بنجاح!" : "Civil ID front image uploaded successfully!"
+        })
+        fetchProfile() // Refresh profile to show new image
+      } else {
+        setMessage({
+          type: "error",
+          text: data.error || (language === "ar" ? "فشل رفع صورة البطاقة المدنية" : "Failed to upload civil ID image")
+        })
+      }
+    } catch (error) {
+      console.error("Error uploading civil ID front:", error)
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حدث خطأ أثناء رفع صورة البطاقة المدنية" : "An error occurred while uploading"
+      })
+    } finally {
+      setUploadingCivilIdFront(false)
+    }
+  }
+
+  const handleCivilIdBackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "الرجاء اختيار صورة فقط" : "Please select an image file"
+      })
+      return
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" : "Image size must be less than 5MB"
+      })
+      return
+    }
+
+    setUploadingCivilIdBack(true)
+    setMessage(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("imageType", "civilIdBack")
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage({
+          type: "success",
+          text: language === "ar" ? "تم رفع صورة البطاقة المدنية (الخلف) بنجاح!" : "Civil ID back image uploaded successfully!"
+        })
+        fetchProfile() // Refresh profile to show new image
+      } else {
+        setMessage({
+          type: "error",
+          text: data.error || (language === "ar" ? "فشل رفع صورة البطاقة المدنية" : "Failed to upload civil ID image")
+        })
+      }
+    } catch (error) {
+      console.error("Error uploading civil ID back:", error)
+      setMessage({
+        type: "error",
+        text: language === "ar" ? "حدث خطأ أثناء رفع صورة البطاقة المدنية" : "An error occurred while uploading"
+      })
+    } finally {
+      setUploadingCivilIdBack(false)
     }
   }
 
@@ -470,6 +594,107 @@ export default function ProfilePage() {
                 disabled
                 className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed font-bold"
               />
+            </div>
+
+            {/* Civil ID Images */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white border-b border-zinc-700 pb-2">
+                {language === "ar" ? "البطاقة المدنية" : "Civil ID"}
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Civil ID Front */}
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">
+                    {language === "ar" ? "البطاقة المدنية - الأمام" : "Civil ID - Front"}
+                  </label>
+                  <div className="space-y-3">
+                    {profile.civilIdFrontImage && (
+                      <div className="relative group">
+                        <img
+                          src={profile.civilIdFrontImage}
+                          alt="Civil ID Front"
+                          className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700"
+                        />
+                        <a
+                          href={profile.civilIdFrontImage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
+                        >
+                          {language === "ar" ? "عرض" : "View"}
+                        </a>
+                      </div>
+                    )}
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white hover:bg-zinc-800 transition-colors cursor-pointer">
+                      {uploadingCivilIdFront ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xl">🪪</span>
+                          <span>{language === "ar" ? "رفع صورة الأمام" : "Upload Front Image"}</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCivilIdFrontUpload}
+                        className="hidden"
+                        disabled={uploadingCivilIdFront}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Civil ID Back */}
+                <div>
+                  <label className="block text-gray-400 mb-2 text-sm">
+                    {language === "ar" ? "البطاقة المدنية - الخلف" : "Civil ID - Back"}
+                  </label>
+                  <div className="space-y-3">
+                    {profile.civilIdBackImage && (
+                      <div className="relative group">
+                        <img
+                          src={profile.civilIdBackImage}
+                          alt="Civil ID Back"
+                          className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700"
+                        />
+                        <a
+                          href={profile.civilIdBackImage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors"
+                        >
+                          {language === "ar" ? "عرض" : "View"}
+                        </a>
+                      </div>
+                    )}
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white hover:bg-zinc-800 transition-colors cursor-pointer">
+                      {uploadingCivilIdBack ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>{language === "ar" ? "جاري الرفع..." : "Uploading..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xl">🪪</span>
+                          <span>{language === "ar" ? "رفع صورة الخلف" : "Upload Back Image"}</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCivilIdBackUpload}
+                        className="hidden"
+                        disabled={uploadingCivilIdBack}
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* License Images */}

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get("file") as File
-    const imageType = formData.get("imageType") as string || "profile" // profile, licenseFront, licenseBack
+    const imageType = formData.get("imageType") as string || "profile" // profile, civilIdFront, civilIdBack, licenseFront, licenseBack
     const targetUserId = formData.get("userId") as string || session.user.id // For admin uploads
     
     // If uploading for another user, must be admin
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const base64File = `data:${file.type};base64,${buffer.toString('base64')}`
-
+    
     // Upload to Cloudinary
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`
     
@@ -63,7 +63,11 @@ export async function POST(request: NextRequest) {
 
     // Update user image in database based on type
     const updateData: any = {}
-    if (imageType === "licenseFront") {
+    if (imageType === "civilIdFront") {
+      updateData.civilIdFrontImage = imageUrl
+    } else if (imageType === "civilIdBack") {
+      updateData.civilIdBackImage = imageUrl
+    } else if (imageType === "licenseFront") {
       updateData.licenseFrontImage = imageUrl
     } else if (imageType === "licenseBack") {
       updateData.licenseBackImage = imageUrl

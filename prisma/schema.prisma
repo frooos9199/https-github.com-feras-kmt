@@ -22,6 +22,8 @@ model User {
   nationality        String? // Nationality field
   bloodType          String? // Blood type field
   image              String?
+  civilIdFrontImage  String? // Civil ID front image
+  civilIdBackImage   String? // Civil ID back image
   licenseFrontImage  String? // Driver license front image
   licenseBackImage   String? // Driver license back image
   isActive           Boolean  @default(true) // Active/Suspended status
