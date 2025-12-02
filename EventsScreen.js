@@ -128,35 +128,13 @@ const EventsScreen = ({ navigation }) => {
       // معالجة البيانات
       const eventsData = Array.isArray(data) ? data : (data.events || []);
       
-      // ترتيب الأحداث: الجاري أولاً، ثم القادمة، ثم المنتهية
-      const now = new Date();
+      // ترتيب الأحداث حسب التاريخ من الأقرب للأبعد
       const sorted = eventsData.slice().sort((a, b) => {
         const aStart = a.date ? new Date(a.date) : new Date(0);
-        const aEnd = a.endDate ? new Date(a.endDate) : new Date(0);
         const bStart = b.date ? new Date(b.date) : new Date(0);
-        const bEnd = b.endDate ? new Date(b.endDate) : new Date(0);
         
-        // حالة a
-        let aStatus = 'finished';
-        if (now < aStart) aStatus = 'upcoming';
-        else if (now >= aStart && now <= aEnd) aStatus = 'ongoing';
-        
-        // حالة b
-        let bStatus = 'finished';
-        if (now < bStart) bStatus = 'upcoming';
-        else if (now >= bStart && now <= bEnd) bStatus = 'ongoing';
-        
-        // الجاري أولاً
-        if (aStatus === 'ongoing' && bStatus !== 'ongoing') return -1;
-        if (bStatus === 'ongoing' && aStatus !== 'ongoing') return 1;
-        
-        // القادمة ثانياً حسب التاريخ
-        if (aStatus === 'upcoming' && bStatus === 'upcoming') return aStart - bStart;
-        if (aStatus === 'upcoming') return -1;
-        if (bStatus === 'upcoming') return 1;
-        
-        // المنتهية حسب الأحدث
-        return bEnd - aEnd;
+        // ترتيب تصاعدي حسب تاريخ البداية (الأقرب أولاً)
+        return aStart - bStart;
       });
       
       setEvents(sorted);
@@ -318,22 +296,53 @@ const EventsScreen = ({ navigation }) => {
           <Text style={{color: barColor, fontWeight:'bold', fontSize: 18, letterSpacing:1}}>{countdown}</Text>
         </View>
         {/* وقت وتاريخ البداية والنهاية */}
-        <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginHorizontal: 12, marginBottom: 8, marginTop: 2}}>
-          <View style={{alignItems:'flex-start'}}>
-            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15, marginBottom:2}}>
-              {isArabic ? 'تاريخ البداية:' : 'Start Date:'} <Text style={{color:'#43A047'}}>{item.date ? item.date.slice(0,10) : '-'}</Text>
-            </Text>
-            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15}}>
-              {isArabic ? 'وقت البداية:' : 'Start Time:'} <Text style={{color:'#43A047'}}>{startTime || '-'}</Text>
-            </Text>
+        <View style={{marginHorizontal: 12, marginBottom: 8, marginTop: 6}}>
+          {/* تاريخ ووقت البداية */}
+          <View style={{flexDirection:'row', alignItems:'center', marginBottom: 8, backgroundColor: 'rgba(67, 160, 71, 0.1)', padding: 10, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#43A047'}}>
+            <Ionicons name="calendar" size={20} color="#43A047" style={{marginRight: 8}} />
+            <View style={{flex: 1}}>
+              <Text style={{color:'#43A047', fontWeight:'bold', fontSize: 13, marginBottom: 2}}>
+                {isArabic ? 'البداية' : 'Start'}
+              </Text>
+              <Text style={{color:'#fff', fontSize: 15, fontWeight: '600'}}>
+                {item.date ? new Date(item.date).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
+                  weekday: 'short',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                }) : '-'}
+              </Text>
+            </View>
+            <View style={{alignItems: 'flex-end'}}>
+              <Ionicons name="time" size={18} color="#43A047" />
+              <Text style={{color:'#43A047', fontSize: 16, fontWeight: 'bold', marginTop: 2}}>
+                {startTime || '-'}
+              </Text>
+            </View>
           </View>
-          <View style={{alignItems:'flex-end'}}>
-            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15, marginBottom:2}}>
-              {isArabic ? 'تاريخ النهاية:' : 'End Date:'} <Text style={{color:'#e53935'}}>{item.endDate ? item.endDate.slice(0,10) : '-'}</Text>
-            </Text>
-            <Text style={{color:'#fff', fontWeight:'bold', fontSize:15}}>
-              {isArabic ? 'وقت النهاية:' : 'End Time:'} <Text style={{color:'#e53935'}}>{endTime || '-'}</Text>
-            </Text>
+          
+          {/* تاريخ ووقت النهاية */}
+          <View style={{flexDirection:'row', alignItems:'center', backgroundColor: 'rgba(229, 57, 53, 0.1)', padding: 10, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#e53935'}}>
+            <Ionicons name="calendar-outline" size={20} color="#e53935" style={{marginRight: 8}} />
+            <View style={{flex: 1}}>
+              <Text style={{color:'#e53935', fontWeight:'bold', fontSize: 13, marginBottom: 2}}>
+                {isArabic ? 'النهاية' : 'End'}
+              </Text>
+              <Text style={{color:'#fff', fontSize: 15, fontWeight: '600'}}>
+                {item.endDate ? new Date(item.endDate).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
+                  weekday: 'short',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                }) : '-'}
+              </Text>
+            </View>
+            <View style={{alignItems: 'flex-end'}}>
+              <Ionicons name="time-outline" size={18} color="#e53935" />
+              <Text style={{color:'#e53935', fontSize: 16, fontWeight: 'bold', marginTop: 2}}>
+                {endTime || '-'}
+              </Text>
+            </View>
           </View>
         </View>
         {/* الموقع */}

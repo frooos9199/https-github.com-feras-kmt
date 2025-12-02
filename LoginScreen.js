@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, I18nManager, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import messaging from '@react-native-firebase/messaging';
 import FCMService from './FCMService';
 import { sendFcmTokenToServer } from './fcmApi';
@@ -10,6 +11,7 @@ import { API_ENDPOINTS } from './apiConfig';
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { setUser } = useContext(UserContext);
 
   const handleLogin = async () => {
@@ -112,15 +114,27 @@ const LoginScreen = ({ navigation }) => {
               textAlign="left"
               keyboardType="email-address"
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#888"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              textAlign="left"
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Password"
+                placeholderTextColor="#888"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                textAlign="left"
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons 
+                  name={showPassword ? "eye" : "eye-off"} 
+                  size={24} 
+                  color="#888" 
+                />
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
               <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
@@ -227,6 +241,27 @@ const styles = StyleSheet.create({
     fontFamily: 'System',
     backgroundColor: '#f8f9fa',
     textAlign: I18nManager.isRTL ? 'right' : 'left',
+  },
+  passwordContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
+    marginBottom: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 12,
+    fontSize: 16,
+    color: '#222',
+    fontFamily: 'System',
+    textAlign: I18nManager.isRTL ? 'right' : 'left',
+  },
+  eyeIcon: {
+    padding: 12,
   },
   button: {
     width: '100%',
