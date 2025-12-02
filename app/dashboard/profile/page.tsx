@@ -16,6 +16,7 @@ interface UserProfile {
   civilId: string | null
   dateOfBirth: string | null
   nationality: string | null
+  bloodType: string | null
   image: string | null
   licenseFrontImage: string | null
   licenseBackImage: string | null
@@ -41,6 +42,7 @@ export default function ProfilePage() {
     civilId: "",
     dateOfBirth: "",
     nationality: "",
+    bloodType: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -69,6 +71,7 @@ export default function ProfilePage() {
         civilId: data.civilId || "",
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
         nationality: data.nationality || "",
+        bloodType: data.bloodType || "",
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
@@ -320,6 +323,7 @@ export default function ProfilePage() {
           civilId: data.civilId || "",
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
           nationality: data.nationality || "",
+          bloodType: data.bloodType || "",
           currentPassword: "",
           newPassword: "",
           confirmPassword: "",
@@ -641,6 +645,29 @@ export default function ProfilePage() {
                 placeholder={language === "ar" ? "الكويت" : "Kuwait"}
                 className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
               />
+            </div>
+
+            {/* Blood Type */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">
+                {language === "ar" ? "فصيلة الدم" : "Blood Type"}
+              </label>
+              <select
+                value={formData.bloodType}
+                onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
+                disabled={!editing}
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
+              >
+                <option value="">{language === "ar" ? "اختر فصيلة الدم" : "Select Blood Type"}</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
             </div>
 
             {/* Password Change Section */}

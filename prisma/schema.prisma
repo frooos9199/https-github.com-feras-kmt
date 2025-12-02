@@ -20,6 +20,7 @@ model User {
   civilId            String
   dateOfBirth        DateTime
   nationality        String? // Nationality field
+  bloodType          String? // Blood type field
   image              String?
   licenseFrontImage  String? // Driver license front image
   licenseBackImage   String? // Driver license back image
