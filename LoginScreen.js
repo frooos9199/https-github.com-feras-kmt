@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, I18nManager } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, I18nManager, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import messaging from '@react-native-firebase/messaging';
 import FCMService from './FCMService';
 import { sendFcmTokenToServer } from './fcmApi';
 import { UserContext } from './UserContext';
@@ -49,24 +50,31 @@ const LoginScreen = ({ navigation }) => {
         phone: data.user.phone || '',
       };
 
-      console.log('Saving user data:', userData);
-      setUser(userData);
+      console.log('[LOGIN] ✅ Saving user data:', {
+        email: userData.email,
+        role: userData.role,
+        hasToken: !!userData.token,
+        tokenPreview: userData.token.substring(0, 30) + '...'
+      });
+      
+      await setUser(userData);
       
       // Get FCM token and send to server
       try {
         const fcmToken = await FCMService.getToken();
         if (fcmToken) {
-          console.log('📱 FCM Token obtained:', fcmToken);
-          await sendFcmTokenToServer(fcmToken, email);
+          console.log('[LOGIN] 📱 FCM Token obtained');
+          await sendFcmTokenToServer(fcmToken, userData.token);
         }
       } catch (fcmError) {
-        console.error('Failed to get/send FCM token:', fcmError);
+        console.error('[LOGIN] ❌ Failed to get/send FCM token:', fcmError);
         // Don't block login if FCM fails
       }
       
+      console.log('[LOGIN] ✅ Navigating to MainTabs');
       navigation.replace('MainTabs');
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('[LOGIN] ❌ Login error:', err);
       Alert.alert('Error', err.message || 'Login failed');
     }
   };

@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
     MARSHALS: `${API_BASE_URL}/admin/marshals`,
     REPORTS: `${API_BASE_URL}/admin/reports`,
     BROADCAST: `${API_BASE_URL}/admin/broadcast`,
+    ATTENDANCE: `${API_BASE_URL}/admin/attendance`,
   },
   
   // مسارات المارشال/المستخدم

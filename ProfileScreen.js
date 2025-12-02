@@ -1,16 +1,18 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
 import { createAuthHeaders } from './apiConfig';
+import { useNavigation } from '@react-navigation/native';
 
 const appLogo = require('./assets/splash/kmt-logo.png');
 
 const ProfileScreen = () => {
   const { user } = useContext(UserContext);
+  const navigation = useNavigation();
   const [lang, setLang] = useState(I18n.locale);
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,8 +81,14 @@ const ProfileScreen = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.headerRow}>
-            <TouchableOpacity style={styles.bellIcon}>
-              <Ionicons name="notifications" size={26} color="#fff" />
+            <TouchableOpacity 
+              style={styles.editButton}
+              onPress={() => {
+                // فتح صفحة تعديل البروفايل في المتصفح
+                Linking.openURL('https://www.kmtsys.com/dashboard/profile');
+              }}
+            >
+              <Ionicons name="create-outline" size={24} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.langSwitch} onPress={switchLang}>
               <Ionicons name="language" size={20} color="#fff" style={{ marginRight: 6 }} />
@@ -209,6 +217,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  editButton: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   langSwitch: {
     backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 12,
@@ -312,6 +328,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 16,
   },
+  
   detailCard: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -88,36 +88,38 @@ const EventsScreen = ({ navigation }) => {
       setRefreshing(true);
       
       // التحقق من وجود توكن ودور المستخدم
-      console.log('fetchEvents - user:', user ? {email: user.email, role: user.role, hasToken: !!user.token} : 'null');
+      console.log('[EVENTS] 🔄 Fetching events...');
+      console.log('[EVENTS] 👤 User:', user ? {email: user.email, role: user.role, hasToken: !!user.token} : 'null');
       
       if (!user?.token) {
-        console.log('No token found, cannot fetch events');
+        console.log('[EVENTS] ❌ No token found, cannot fetch events');
         setRefreshing(false);
         return;
       }
 
       // الحصول على المسار الصحيح حسب دور المستخدم
       const apiUrl = getEventsEndpoint(user.role);
-      console.log('Fetching events from:', apiUrl);
-      console.log('User role:', user.role);
-      console.log('Token preview:', user.token.substring(0, 30) + '...');
+      console.log('[EVENTS] 🌐 API URL:', apiUrl);
+      console.log('[EVENTS] 👔 User role:', user.role);
 
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: createAuthHeaders(user.token),
       });
 
+      console.log('[EVENTS] 📊 Response status:', response.status);
+
       let data = null;
       try {
         data = await response.json();
-        console.log('Events API response:', data);
+        console.log('[EVENTS] 📦 Response data:', Array.isArray(data) ? `Array(${data.length})` : typeof data);
       } catch (err) {
-        console.log('Events API JSON error:', err);
+        console.log('[EVENTS] ❌ JSON parse error:', err);
       }
 
       // إذا لم يوجد رد من الـ API أو حدث خطأ، استخدم بيانات فارغة
       if (!data || data.error || !response.ok) {
-        console.log('API error or no data:', data?.error || 'Unknown error');
+        console.log('[EVENTS] ❌ API error or no data:', data?.error || 'Unknown error');
         setEvents([]);
         setRefreshing(false);
         return;

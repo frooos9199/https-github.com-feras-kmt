@@ -50,13 +50,13 @@ const RecentActivityScreen = () => {
     <LinearGradient colors={['#000', '#b71c1c']} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
-            <Ionicons name="close" size={32} color="#fff" />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          {/* زر تبديل اللغة أزيل بناءً على طلب المستخدم */}
-        </View>
-        <View style={{ alignItems: 'center', marginBottom: 16 }}>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>{I18n.t('recent_activity') || (I18n.locale === 'ar' ? 'النشاط الأخير' : 'Recent Activity')}</Text>
+          <Text style={styles.headerTitle}>
+            {I18n.t('recent_activity') || (I18n.locale === 'ar' ? 'النشاط الأخير' : 'Recent Activity')}
+          </Text>
+          <View style={{ width: 44 }} />
         </View>
         {loading ? (
           <ActivityIndicator color="#fff" size="large" style={{ marginTop: 40 }} />
@@ -106,26 +106,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 24,
-    marginHorizontal: 16,
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
-  closeBtn: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 24,
+  backBtn: {
     width: 44,
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
   },
-  langSwitch: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   activityList: {
     paddingHorizontal: 16,

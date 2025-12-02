@@ -22,9 +22,21 @@ const QuickActionsScreen = () => {
 
   const handleActionPress = (key) => {
     if (key === 'recent_activity') {
-      navigation.navigate('RecentActivityModal');
+      navigation.navigate('RecentActivity');
+    } else if (key === 'attendance_requests') {
+      navigation.navigate('PendingRequests');
+    } else if (key === 'manage_events') {
+      navigation.navigate('ManageEvents');
+    } else if (key === 'manage_marshals') {
+      navigation.navigate('ManageMarshals');
+    } else if (key === 'reports') {
+      navigation.navigate('Reports');
+    } else if (key === 'broadcast_messages') {
+      navigation.navigate('BroadcastMessages');
+    } else if (key === 'backup') {
+      navigation.navigate('Backup');
     } else {
-      navigation.navigate('PlaceholderCardModal', { actionKey: key });
+      navigation.navigate('PlaceholderCard', { actionKey: key });
     }
   };
 
@@ -47,7 +59,7 @@ const QuickActionsScreen = () => {
           {actions.map(action => (
             <TouchableOpacity key={action.key} style={styles.actionCard} onPress={() => handleActionPress(action.key)}>
               <Ionicons name={action.icon} size={36} color="#fff" style={{ marginBottom: 10 }} />
-              <Text style={styles.actionLabel}>{action.key === 'recent_activity' ? (I18n.t('recent_activity') || (I18n.locale === 'ar' ? 'النشاط الأخير' : 'Recent Activity')) : I18n.t(action.key)}</Text>
+              <Text style={styles.actionLabel}>{I18n.t(action.key)}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

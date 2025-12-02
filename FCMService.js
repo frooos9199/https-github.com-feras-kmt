@@ -25,6 +25,12 @@ class FCMService {
         return null;
       }
       
+      // تسجيل الجهاز للرسائل البعيدة (مطلوب لـ iOS)
+      if (Platform.OS === 'ios') {
+        console.log('[FCM] Registering device for remote messages (iOS)...');
+        await messaging().registerDeviceForRemoteMessages();
+      }
+      
       console.log('[FCM] Permission granted, getting token...');
       let fcmToken = await messaging().getToken();
       console.log('[FCM] Token obtained:', fcmToken ? 'YES' : 'NO');

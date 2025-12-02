@@ -8,13 +8,35 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { UserContext } from './UserContext';
 import I18n from './i18n';
 import { getEventsEndpoint, createAuthHeaders } from './apiConfig';
+import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 const appLogo = require('./assets/splash/kmt-logo.png'); // شعار موجود فعلياً
 
-const Card = ({ icon, iconColor, title, number, bgColor, iconType }) => (
-  <View style={[styles.infoCard, { backgroundColor: bgColor }]}> 
+// دالة لتنسيق التاريخ
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // إذا كان التاريخ غير صالح
+    
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    return dateString;
+  }
+};
+
+const Card = ({ icon, iconColor, title, number, bgColor, iconType, onPress }) => (
+  <TouchableOpacity 
+    style={[styles.infoCard, { backgroundColor: bgColor }]} 
+    onPress={onPress}
+    disabled={!onPress}
+  > 
     <View style={styles.iconCircle}>
       {iconType === 'Ionicons' ? (
         <Ionicons name={icon} size={28} color={iconColor} />
@@ -24,11 +46,12 @@ const Card = ({ icon, iconColor, title, number, bgColor, iconType }) => (
     </View>
     <Text style={styles.infoLabel}>{title}</Text>
     <Text style={styles.infoNumber}>{number}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 const HomeScreen = () => {
   const { user } = useContext(UserContext);
+  const navigation = useNavigation();
   const [events, setEvents] = useState([]);
   const [notifModal, setNotifModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -45,24 +68,29 @@ const HomeScreen = () => {
     // جلب الفعاليات من API
     const fetchEvents = async () => {
       try {
+        console.log('[HOME] Starting fetch events...');
+        console.log('[HOME] User:', user ? { email: user.email, role: user.role, hasToken: !!user.token } : 'null');
+        
         if (!user?.token || !user?.role) {
-          console.log('No token or role found');
+          console.log('[HOME] ❌ No token or role found');
           return;
         }
 
         // الحصول على المسار الصحيح حسب دور المستخدم
         const apiUrl = getEventsEndpoint(user.role);
-        console.log('Fetching events from:', apiUrl);
+        console.log('[HOME] 🌐 Fetching events from:', apiUrl);
 
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: createAuthHeaders(user.token),
         });
 
+        console.log('[HOME] 📊 Response status:', response.status);
         const data = await response.json();
+        console.log('[HOME] 📦 Response data:', data);
         
         if (!response.ok) {
-          console.log('Events API error:', data.error || 'Unknown error');
+          console.log('[HOME] ❌ Events API error:', data.error || 'Unknown error');
           return;
         }
 
@@ -70,13 +98,14 @@ const HomeScreen = () => {
         const eventsData = Array.isArray(data) ? data : (data.events || []);
         
         if (eventsData.length > 0) {
-          console.log('Fetched events:', eventsData.length);
+          console.log('[HOME] ✅ Fetched events:', eventsData.length);
           setEvents(eventsData);
         } else {
-          console.log('No events found');
+          console.log('[HOME] ⚠️ No events found');
         }
       } catch (err) {
-        console.log('Error fetching events:', err);
+        console.log('[HOME] 💥 Error fetching events:', err.message);
+        console.error('[HOME] Error stack:', err);
       }
     };
     
@@ -161,7 +190,13 @@ const HomeScreen = () => {
               <Ionicons name="notifications" size={28} color="#fff" />
             </TouchableOpacity>
             <Image source={appLogo} style={styles.logo} />
-            <Image source={avatarSource} style={styles.avatar} />
+            {user?.role === 'marshal' ? (
+              <TouchableOpacity onPress={() => navigation.navigate('MyAttendance')}>
+                <Image source={avatarSource} style={styles.avatar} />
+              </TouchableOpacity>
+            ) : (
+              <Image source={avatarSource} style={styles.avatar} />
+            )}
           </View>
           <View style={styles.headerRow}>
             <Text style={styles.welcome}>{I18n.t('welcome')}, {displayName}</Text>
@@ -186,7 +221,7 @@ const HomeScreen = () => {
               <View style={styles.eventCard}>
                 <MaterialCommunityIcons name="calendar-star" size={28} color="#fff" style={{marginBottom: 6}} />
                 <Text style={styles.eventTitle}>{item.title}</Text>
-                <Text style={styles.eventDate}>{item.date}</Text>
+                <Text style={styles.eventDate}>{formatDate(item.date)}</Text>
                 <Text style={styles.eventLocation}>{item.location}</Text>
                 <Text style={styles.eventStatus}>{item.status === 'approved' ? (I18n.locale === 'ar' ? 'مقبول' : 'Approved') : item.status}</Text>
               </View>
@@ -195,6 +230,31 @@ const HomeScreen = () => {
         </View>
 
         <ScrollView style={{flexGrow:0}} contentContainerStyle={styles.cardsColumn} showsVerticalScrollIndicator={false}>
+          {/* Marshal Quick Actions */}
+          {user?.role === 'marshal' && (
+            <View style={styles.marshalActionsRow}>
+              <TouchableOpacity 
+                style={styles.marshalActionCard}
+                onPress={() => navigation.navigate('Attendance')}
+              >
+                <Ionicons name="add-circle" size={32} color="#22c55e" />
+                <Text style={styles.marshalActionText}>
+                  {I18n.locale === 'ar' ? 'تسجيل حضور' : 'Register'}
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.marshalActionCard}
+                onPress={() => navigation.navigate('MyAttendance')}
+              >
+                <Ionicons name="list-circle" size={32} color="#f59e0b" />
+                <Text style={styles.marshalActionText}>
+                  {I18n.locale === 'ar' ? 'طلباتي' : 'My Requests'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          
           <Card
             iconType="Ionicons"
             icon="checkmark-done-circle"
@@ -202,6 +262,7 @@ const HomeScreen = () => {
             title={I18n.locale === 'ar' ? 'الحضور اليوم' : "Today's Attendance"}
             number={attendanceCount}
             bgColor="#14532d"
+            onPress={() => user?.role === 'marshal' && navigation.navigate('MyAttendance')}
           />
           <Card
             iconType="MaterialCommunityIcons"
@@ -210,6 +271,13 @@ const HomeScreen = () => {
             title={I18n.locale === 'ar' ? 'الطلبات المعلقة اليوم' : 'Pending Requests Today'}
             number={pendingRequests}
             bgColor="#6d071a"
+            onPress={() => {
+              if (user?.role === 'admin') {
+                navigation.navigate('PendingRequests');
+              } else if (user?.role === 'marshal') {
+                navigation.navigate('MyAttendance');
+              }
+            }}
           />
           <Card
             iconType="MaterialCommunityIcons"
@@ -218,20 +286,8 @@ const HomeScreen = () => {
             title={I18n.locale === 'ar' ? 'أحداث اليوم' : "Today's Events"}
             number={todayEventsCount}
             bgColor="#1e293b"
+            onPress={() => navigation.navigate('Events')}
           />
-          {/* قائمة أحداث اليوم */}
-          {todayEventsCount > 0 && (
-            <View style={{marginTop: 8, width: '100%'}}>
-              {todayEvents.map((ev, idx) => (
-                <View key={ev.id || idx} style={{backgroundColor:'#222', borderRadius:12, padding:12, marginBottom:8, shadowColor:'#000', shadowOpacity:0.08, shadowRadius:4, elevation:2}}>
-                  <Text style={{color:'#fff', fontWeight:'bold', fontSize:16, marginBottom:2}}>{ev.titleAr || ev.titleEn || ev.title}</Text>
-                  <Text style={{color:'#aaa', fontSize:13}}>{ev.date}{ev.endDate ? ' - ' + ev.endDate : ''}</Text>
-                  <Text style={{color:'#fff', fontSize:13, marginTop:2}}>{ev.location}</Text>
-                  {/* يمكنك إضافة تفاصيل أكثر هنا حسب الحاجة */}
-                </View>
-              ))}
-            </View>
-          )}
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>
@@ -426,6 +482,28 @@ const styles = StyleSheet.create({
     gap: 16,
     marginHorizontal: 16,
     marginBottom: 16,
+  },
+  marshalActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
+  },
+  marshalActionCard: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  marshalActionText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
   },
   infoCard: {
     width: '100%',
