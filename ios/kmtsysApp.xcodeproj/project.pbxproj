@@ -17,6 +17,7 @@
 
 /* Begin PBXFileReference section */
 		044A4D292ED200AC005E1DDF /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		04766E792EDEB25500A07C5D /* kmtsysApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = kmtsysApp.entitlements; path = kmtsysApp/kmtsysApp.entitlements; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* kmtsysApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kmtsysApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = kmtsysApp/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = kmtsysApp/Info.plist; sourceTree = "<group>"; };
@@ -63,6 +64,7 @@
 		13B07FAE1A68108700A75B9A /* kmtsysApp */ = {
 			isa = PBXGroup;
 			children = (
+				04766E792EDEB25500A07C5D /* kmtsysApp.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -323,6 +325,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = kmtsysApp/kmtsysApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 662XY9YRMR;
 				ENABLE_BITCODE = NO;
@@ -357,6 +360,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = kmtsysApp/kmtsysApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 662XY9YRMR;
 				INFOPLIST_FILE = kmtsysApp/Info.plist;

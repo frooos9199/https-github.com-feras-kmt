@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -8,46 +8,122 @@ import NotificationsScreen from './NotificationsScreen';
 import EventsScreen from './EventsScreen';
 import StatsScreen from './StatsScreen';
 import ProfileScreen from './ProfileScreen';
+import QuickActionsNavigator from './QuickActionsNavigator';
+import AttendanceScreen from './AttendanceScreen';
+import MyAttendanceScreen from './MyAttendanceScreen';
 import I18n from './i18n';
+import { UserContext } from './UserContext';
 
 
 const Tab = createBottomTabNavigator();
 
-const MainTabNavigator = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarActiveTintColor: '#dc2626',
-      tabBarInactiveTintColor: '#fff',
-      tabBarStyle: {
-        backgroundColor: '#1a1a1a',
-        borderTopWidth: 0.5,
-        borderTopColor: '#991b1b',
-        height: 62,
-        paddingBottom: 6,
-        paddingTop: 6,
-      },
-      tabBarIcon: ({ color, size }) => {
-        if (route.name === 'Home') {
-          return <Ionicons name="home" size={size} color={color} />;
-        } else if (route.name === 'Notifications') {
-          return <Ionicons name="notifications" size={size} color={color} />;
-        } else if (route.name === 'Events') {
-          return <MaterialCommunityIcons name="calendar-star" size={size} color={color} />;
-        } else if (route.name === 'Stats') {
-          return <Ionicons name="stats-chart" size={size} color={color} />;
-        } else if (route.name === 'Profile') {
-          return <Ionicons name="person-circle" size={size} color={color} />;
-        }
-        return null;
-      },
-    })}
-  >
-    <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: I18n.t('tab_home') }} />
-    <Tab.Screen name="Events" component={EventsScreen} options={{ tabBarLabel: I18n.t('tab_events') }} />
-    <Tab.Screen name="Stats" component={StatsScreen} options={{ tabBarLabel: I18n.t('tab_stats') }} />
-    <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: I18n.t('tab_profile') }} />
-  </Tab.Navigator>
-);
+const MainTabNavigator = () => {
+  const { user } = useContext(UserContext);
+  const isAdmin = user?.role === 'admin';
+  const isMarshal = user?.role === 'marshal';
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: isAdmin ? '#dc2626' : '#f59e0b',
+        tabBarInactiveTintColor: '#9ca3af',
+        tabBarStyle: {
+          backgroundColor: isAdmin ? '#1a1a1a' : '#111827',
+          borderTopWidth: 1,
+          borderTopColor: isAdmin ? '#991b1b' : '#374151',
+          height: 65,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+        tabBarIcon: ({ color, size, focused }) => {
+          let iconName;
+          let IconComponent = Ionicons;
+
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Events') {
+            IconComponent = MaterialCommunityIcons;
+            iconName = focused ? 'calendar-star' : 'calendar-outline';
+          } else if (route.name === 'Stats') {
+            iconName = focused ? 'stats-chart' : 'stats-chart-outline';
+          } else if (route.name === 'QuickActions') {
+            iconName = focused ? 'flash' : 'flash-outline';
+          } else if (route.name === 'Attendance') {
+            iconName = focused ? 'calendar-sharp' : 'calendar-outline';
+          } else if (route.name === 'MyAttendance') {
+            iconName = focused ? 'list' : 'list-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person-circle' : 'person-circle-outline';
+          }
+
+          return <IconComponent name={iconName} size={size} color={color} />;
+        },
+      })}
+    >
+      {/* Tabs مشتركة للجميع */}
+      <Tab.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{ tabBarLabel: I18n.t('tab_home') || 'Home' }} 
+      />
+      <Tab.Screen 
+        name="Events" 
+        component={EventsScreen} 
+        options={{ tabBarLabel: I18n.t('tab_events') || 'Events' }} 
+      />
+
+      {/* Tabs خاصة بالمارشال */}
+      {isMarshal && (
+        <>
+          <Tab.Screen 
+            name="Attendance" 
+            component={AttendanceScreen} 
+            options={{ 
+              tabBarLabel: I18n.locale === 'ar' ? 'تسجيل' : 'Register',
+              tabBarBadge: undefined,
+            }} 
+          />
+          <Tab.Screen 
+            name="MyAttendance" 
+            component={MyAttendanceScreen} 
+            options={{ 
+              tabBarLabel: I18n.locale === 'ar' ? 'طلباتي' : 'My Requests',
+            }} 
+          />
+        </>
+      )}
+
+      {/* Tabs خاصة بالأدمن */}
+      {isAdmin && (
+        <>
+          <Tab.Screen 
+            name="Stats" 
+            component={StatsScreen} 
+            options={{ tabBarLabel: I18n.t('tab_stats') || 'Stats' }} 
+          />
+          <Tab.Screen 
+            name="QuickActions" 
+            component={QuickActionsNavigator} 
+            options={{ 
+              tabBarLabel: I18n.locale === 'ar' ? 'إجراءات' : 'Actions',
+            }} 
+          />
+        </>
+      )}
+
+      {/* Tab البروفايل للجميع */}
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{ tabBarLabel: I18n.t('tab_profile') || 'Profile' }} 
+      />
+    </Tab.Navigator>
+  );
+};
 
 export default MainTabNavigator;
