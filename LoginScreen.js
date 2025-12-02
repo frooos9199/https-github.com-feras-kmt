@@ -114,8 +114,13 @@ const LoginScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.signupLink} onPress={() => Alert.alert('Coming Soon', 'Sign up feature will be available soon!')}>
-          <Text style={styles.signupText}>Don't have an account? <Text style={{color:'#dc2626',fontWeight:'bold'}}>Sign up</Text></Text>
+        <TouchableOpacity 
+          style={styles.signupLink} 
+          onPress={() => navigation.navigate('Signup')}
+        >
+          <Text style={styles.signupText}>
+            Don't have an account? <Text style={{color:'#dc2626',fontWeight:'bold'}}>Sign up</Text>
+          </Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>

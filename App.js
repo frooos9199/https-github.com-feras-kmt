@@ -7,6 +7,7 @@ import HomeWebView from './HomeWebView';
 import SplashScreen from './SplashScreen';
 import MainTabNavigator from './MainTabNavigator';
 import LoginScreen from './LoginScreen';
+import SignupScreen from './SignupScreen';
 import AddEventScreen from './AddEventScreen';
 import RecentActivityScreen from './RecentActivityScreen';
 import messaging from '@react-native-firebase/messaging';
@@ -144,6 +145,7 @@ const AppContent = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         <Stack.Screen name="AddEvent" component={AddEventScreen} />
         <Stack.Screen name="Attendance" component={AttendanceScreen} />
