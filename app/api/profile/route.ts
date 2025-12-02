@@ -3,17 +3,56 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+
+function verifyJWT(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  
+  if (!authHeader) {
+    return null;
+  }
+  
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return null;
+  }
+  
+  try {
+    const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
+    const decoded = jwt.verify(token, jwtSecret);
+    
+    if (typeof decoded === "string") {
+      return null;
+    }
+    
+    return decoded;
+  } catch (err) {
+    console.error('[Profile verifyJWT] ERROR:', err instanceof Error ? err.message : String(err));
+    return null;
+  }
+}
 
 // GET - Fetch user profile
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Try session first (web)
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    let userId = session?.user?.id;
+
+    // If no session, try JWT (mobile)
+    if (!userId) {
+      const decoded = verifyJWT(request);
+      if (decoded && (decoded as any).id) {
+        userId = (decoded as any).id;
+      }
+    }
+
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: {
         id: true,
         employeeId: true,
@@ -23,6 +62,7 @@ export async function GET() {
         civilId: true,
         dateOfBirth: true,
         nationality: true,
+        bloodType: true,
         image: true,
         licenseFrontImage: true,
         licenseBackImage: true,
@@ -51,14 +91,15 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     console.log("Update request body:", body)
-    const { name, phone, civilId, dateOfBirth, nationality, image, currentPassword, newPassword } = body
-
+    const { name, phone, civilId, dateOfBirth, nationality, bloodType, image, currentPassword, newPassword } = body
+    
     // Build update data
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
     if (phone !== undefined) updateData.phone = phone
     if (civilId !== undefined) updateData.civilId = civilId
     if (nationality !== undefined) updateData.nationality = nationality
+    if (bloodType !== undefined) updateData.bloodType = bloodType
     if (dateOfBirth !== undefined) updateData.dateOfBirth = new Date(dateOfBirth)
     if (image !== undefined) updateData.image = image
 
@@ -97,6 +138,7 @@ export async function PUT(request: NextRequest) {
         civilId: true,
         dateOfBirth: true,
         nationality: true,
+        bloodType: true,
         image: true,
         role: true,
       }
