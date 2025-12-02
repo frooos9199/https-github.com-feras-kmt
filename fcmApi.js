@@ -1,5 +1,5 @@
-// ملف util لمساعدة إرسال التوكن للسيرفر
 import { createAuthHeaders } from './apiConfig';
+import { Alert } from 'react-native';
 
 /**
  * إرسال FCM Token للسيرفر مع JWT Authentication
@@ -20,13 +20,17 @@ export async function sendFcmTokenToServer(fcmToken, userToken) {
     
     if (response.ok) {
       console.log('[FCM API] ✅ FCM Token saved successfully');
+      // عرض رسالة للمستخدم عشان نتأكد إنه اشتغل
+      Alert.alert('✅ Success', 'FCM Token saved successfully!');
       return true;
     } else {
       console.error('[FCM API] ❌ Failed to save FCM Token:', data.error);
+      Alert.alert('❌ Error', `Failed to save FCM Token: ${data.error}`);
       return false;
     }
   } catch (err) {
     console.error('[FCM API] ❌ Error sending FCM Token:', err.message);
+    Alert.alert('❌ Network Error', err.message);
     return false;
   }
 }

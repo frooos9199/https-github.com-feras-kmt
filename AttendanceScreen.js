@@ -97,7 +97,14 @@ const AttendanceScreen = ({ navigation }) => {
           console.log('[ATTENDANCE EVENTS] 📋 Sample event:', JSON.stringify(finalData[0], null, 2));
         }
         
-        setEvents(finalData);
+        // ترتيب الأحداث حسب تاريخ البداية من الأقرب للأبعد
+        const sortedData = finalData.sort((a, b) => {
+          const aDate = a.date ? new Date(a.date) : new Date(0);
+          const bDate = b.date ? new Date(b.date) : new Date(0);
+          return aDate - bDate;
+        });
+        
+        setEvents(sortedData);
       } else {
         const errorText = await response.text();
         console.error('[ATTENDANCE EVENTS] ❌ Error response:', errorText);
@@ -332,31 +339,56 @@ const AttendanceScreen = ({ navigation }) => {
             {I18n.locale === 'ar' ? item.descriptionAr : item.descriptionEn}
           </Text>
 
-          {/* Start Date/Time */}
-          <View style={styles.dateTimeContainer}>
-            <View style={styles.dateRow}>
-              <Text style={styles.dateIcon}>📅</Text>
-              <Text style={styles.dateTextGreen}>{formatDate(item.date)}</Text>
+          {/* تاريخ ووقت البداية */}
+          <View style={{flexDirection:'row', alignItems:'center', marginBottom: 8, backgroundColor: 'rgba(67, 160, 71, 0.15)', padding: 10, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#43A047'}}>
+            <Ionicons name="calendar" size={20} color="#43A047" style={{marginRight: 8}} />
+            <View style={{flex: 1}}>
+              <Text style={{color:'#43A047', fontWeight:'bold', fontSize: 12, marginBottom: 2}}>
+                {I18n.locale === 'ar' ? 'البداية' : 'Start'}
+              </Text>
+              <Text style={{color:'#fff', fontSize: 14, fontWeight: '600'}}>
+                {item.date ? new Date(item.date).toLocaleDateString(I18n.locale === 'ar' ? 'ar-EG' : 'en-US', {
+                  weekday: 'short',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                }) : '-'}
+              </Text>
             </View>
-            <View style={styles.dateRow}>
-              <Text style={styles.dateIcon}>🕐</Text>
-              <Text style={styles.dateTextGreen}>{item.time}</Text>
+            <View style={{alignItems: 'flex-end'}}>
+              <Ionicons name="time" size={18} color="#43A047" />
+              <Text style={{color:'#43A047', fontSize: 15, fontWeight: 'bold', marginTop: 2}}>
+                {item.time || '-'}
+              </Text>
             </View>
           </View>
 
-          {/* End Date/Time */}
+          {/* تاريخ ووقت النهاية */}
           {item.endDate && item.endTime && (
-            <View style={styles.dateTimeContainer}>
-              <View style={styles.dateRow}>
-                <Text style={styles.dateIcon}>🏁</Text>
-                <Text style={styles.dateTextRed}>{formatDate(item.endDate)}</Text>
+            <View style={{flexDirection:'row', alignItems:'center', marginBottom: 8, backgroundColor: 'rgba(229, 57, 53, 0.15)', padding: 10, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#e53935'}}>
+              <Ionicons name="calendar-outline" size={20} color="#e53935" style={{marginRight: 8}} />
+              <View style={{flex: 1}}>
+                <Text style={{color:'#e53935', fontWeight:'bold', fontSize: 12, marginBottom: 2}}>
+                  {I18n.locale === 'ar' ? 'النهاية' : 'End'}
+                </Text>
+                <Text style={{color:'#fff', fontSize: 14, fontWeight: '600'}}>
+                  {new Date(item.endDate).toLocaleDateString(I18n.locale === 'ar' ? 'ar-EG' : 'en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </Text>
               </View>
-              <View style={styles.dateRow}>
-                <Text style={styles.dateIcon}>⏰</Text>
-                <Text style={styles.dateTextRed}>{item.endTime}</Text>
+              <View style={{alignItems: 'flex-end'}}>
+                <Ionicons name="time-outline" size={18} color="#e53935" />
+                <Text style={{color:'#e53935', fontSize: 15, fontWeight: 'bold', marginTop: 2}}>
+                  {item.endTime}
+                </Text>
               </View>
             </View>
           )}
+
 
           {/* Location */}
           <View style={styles.detailRow}>
