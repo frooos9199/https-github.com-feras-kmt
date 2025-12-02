@@ -1,97 +1,138 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🏁 KMT Marshal Management System
 
-# Getting Started
+نظام إدارة المارشالات لحلبة الكويت الدولية (Kuwait Motor Town)
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 📋 نظرة عامة
 
-## Step 1: Start Metro
+نظام شامل لإدارة المارشالات والفعاليات وتسجيل الحضور في حلبة الكويت الدولية. يدعم لغتين (العربية والإنجليزية) مع واجهة عصرية وسهلة الاستخدام.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## ✨ المميزات
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### للمارشالات (Marshals)
+- 📱 عرض الفعاليات القادمة والمتاحة
+- ✅ تسجيل الحضور للفعاليات
+- 📊 عرض سجل الحضور الشخصي
+- 👤 تعديل الملف الشخصي والصورة
+- 🔔 إشعارات فورية للفعاليات الجديدة
+- 🌐 دعم اللغتين العربية والإنجليزية
 
-```sh
-# Using npm
-npm start
+### للمسؤولين (Admins)
+- 👥 إدارة كاملة للمارشالات (إضافة، تعديل، حذف، تفعيل/تعطيل)
+- 📅 إدارة الفعاليات (إنشاء، تعديل، حذف)
+- 📋 متابعة الحضور والغياب لكل فعالية
+- 🖨️ طباعة قوائم الحضور
+- 📊 تقارير وإحصائيات شاملة
+- 🔔 إشعارات تلقائية عند التسجيل أو الحضور
 
-# OR using Yarn
-yarn start
+## 🛠️ التقنيات المستخدمة
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Database**: Prisma ORM with SQLite
+- **Authentication**: NextAuth.js
+- **Styling**: Tailwind CSS v4
+- **Animations**: Framer Motion
+- **UI**: React 19
+
+## 🚀 التثبيت والتشغيل
+
+### المتطلبات
+- Node.js 18+
+- npm, yarn, pnpm, or bun
+
+### الخطوات
+
+```bash
+# 1. استنساخ المشروع
+git clone https://github.com/your-username/kmt.git
+cd kmt
+
+# 2. تثبيت المكتبات
+npm install
+
+# 3. إعداد المتغيرات البيئية
+cp .env.example .env
+
+# 4. تطبيق قاعدة البيانات
+npx prisma migrate dev
+
+# 5. إضافة بيانات تجريبية (اختياري)
+npx tsx prisma/seed.ts
+
+# 6. تشغيل المشروع
+npm run dev
 ```
 
-## Step 2: Build and run your app
+افتح [http://localhost:3000](http://localhost:3000) في المتصفح.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### حسابات تجريبية
 
-### Android
+**Admin:**
+- Email: admin@kmt.kw
+- Password: admin123
 
-```sh
-# Using npm
-npm run android
+**Marshal:**
+- Email: marshal@kmt.kw
+- Password: marshal123
 
-# OR using Yarn
-yarn android
+## 📦 النشر
+
+راجع [DEPLOYMENT.md](./DEPLOYMENT.md) للحصول على دليل شامل للنشر على:
+- ✅ Vercel (مجاني وموصى به)
+- ✅ Railway
+- ✅ VPS/Server
+
+### نشر سريع على Vercel
+
+1. اربط المشروع بـ GitHub
+2. اذهب إلى [vercel.com/new](https://vercel.com/new)
+3. اختر المشروع وأضف المتغيرات البيئية
+4. Deploy!
+
+⚠️ **ملاحظة**: استخدم قاعدة بيانات خارجية (Turso/Neon/PlanetScale) بدلاً من SQLite للإنتاج.
+
+## 🔧 الأوامر
+
+```bash
+npm run dev      # التطوير
+npm run build    # البناء
+npm start        # التشغيل
+
+npx prisma studio        # Prisma Studio
+npx prisma migrate dev   # تطبيق مايجريشن
+npx tsx prisma/seed.ts   # بيانات تجريبية
 ```
 
-### iOS
+## 📁 هيكل المشروع
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```
+kmt/
+├── app/           # Next.js pages & API
+├── components/    # React components
+├── contexts/      # Context providers
+├── lib/           # Utilities & helpers
+├── prisma/        # Database schema
+├── public/        # Static files
+└── types/         # TypeScript types
 ```
 
-Then, and every time you update your native dependencies, run:
+## 🔐 الأمان
 
-```sh
-bundle exec pod install
-```
+- 🔒 تشفير كلمات المرور (bcrypt)
+- 🔑 JWT authentication (NextAuth)
+- 🛡️ حماية المسارات حسب الصلاحيات
+- ✅ التحقق من الإدخالات
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## 🌐 دعم اللغات
 
-```sh
-# Using npm
-npm run ios
+- 🇸🇦 العربية
+- 🇬🇧 الإنجليزية
 
-# OR using Yarn
-yarn ios
-```
+## 📝 الترخيص
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+MIT License
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+---
 
-## Step 3: Modify your app
+**صنع بـ ❤️ في الكويت 🇰🇼**
 
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.

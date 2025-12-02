@@ -21,7 +21,7 @@ interface Marshal {
   image: string | null
   createdAt: string
   isActive: boolean
-  marshalTypes?: string | null
+  marshalTypes?: string | null // إضافة هذا السطر
   _count: {
     attendances: number
   }
@@ -77,24 +77,20 @@ export default function MarshalsManagement() {
     try {
       const res = await fetch("/api/admin/marshals")
       const data = await res.json()
-      // ✅ الإصلاح: التأكد من أن البيانات array
-      setMarshals(Array.isArray(data) ? data : [])
+      setMarshals(data)
     } catch (error) {
       console.error("Error fetching marshals:", error)
-      // ✅ الإصلاح: تعيين array فارغ عند الخطأ
-      setMarshals([])
     } finally {
       setLoading(false)
     }
   }
 
-  // ✅ الإصلاح: التأكد من أن marshals هو array قبل استخدام filter
-  const filteredMarshals = Array.isArray(marshals) ? marshals.filter(marshal =>
+  const filteredMarshals = marshals.filter(marshal =>
     marshal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     marshal.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     marshal.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     marshal.civilId.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : []
+  )
 
   if (status === "loading" || loading) {
     return (
@@ -282,6 +278,7 @@ export default function MarshalsManagement() {
                           )}
                         </div>
                       </td>
+                      {/* الحالة */}
                       <td className="px-6 py-4 text-center">
                         <span className={`inline-block px-3 py-1 rounded-full font-bold text-sm ${marshal.isActive ? 'bg-green-600/20 text-green-600 border border-green-600' : 'bg-red-600/20 text-red-600 border border-red-600'}`}>
                           {marshal.isActive ? (isArabic ? 'نشط' : 'Active') : (isArabic ? 'موقوف' : 'Inactive')}
@@ -304,6 +301,8 @@ export default function MarshalsManagement() {
             </div>
           </div>
         )}
+
+        {/* ...تم حذف قسم أنواع الوظائف أسفل الجدول... */}
       </main>
     </div>
   )
