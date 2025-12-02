@@ -27,8 +27,38 @@ const SignupScreen = ({ navigation }) => {
     civilId: '',
     nationality: '',
     birthdate: '',
+    birthDay: '',
+    birthMonth: '',
+    birthYear: '',
   });
   const [loading, setLoading] = useState(false);
+  const [showNationalityPicker, setShowNationalityPicker] = useState(false);
+
+  // قائمة الجنسيات
+  const nationalities = [
+    { value: 'Kuwaiti', labelAr: 'كويتي', labelEn: 'Kuwaiti' },
+    { value: 'Saudi', labelAr: 'سعودي', labelEn: 'Saudi' },
+    { value: 'Emirati', labelAr: 'إماراتي', labelEn: 'Emirati' },
+    { value: 'Bahraini', labelAr: 'بحريني', labelEn: 'Bahraini' },
+    { value: 'Omani', labelAr: 'عماني', labelEn: 'Omani' },
+    { value: 'Qatari', labelAr: 'قطري', labelEn: 'Qatari' },
+    { value: 'Egyptian', labelAr: 'مصري', labelEn: 'Egyptian' },
+    { value: 'Lebanese', labelAr: 'لبناني', labelEn: 'Lebanese' },
+    { value: 'Jordanian', labelAr: 'أردني', labelEn: 'Jordanian' },
+    { value: 'Syrian', labelAr: 'سوري', labelEn: 'Syrian' },
+    { value: 'Palestinian', labelAr: 'فلسطيني', labelEn: 'Palestinian' },
+    { value: 'Iraqi', labelAr: 'عراقي', labelEn: 'Iraqi' },
+    { value: 'Yemeni', labelAr: 'يمني', labelEn: 'Yemeni' },
+    { value: 'Turkish', labelAr: 'تركي', labelEn: 'Turkish' },
+    { value: 'Iranian', labelAr: 'إيراني', labelEn: 'Iranian' },
+    { value: 'Armenian', labelAr: 'أرميني', labelEn: 'Armenian' },
+    { value: 'Afghan', labelAr: 'أفغاني', labelEn: 'Afghan' },
+    { value: 'Indian', labelAr: 'هندي', labelEn: 'Indian' },
+    { value: 'Pakistani', labelAr: 'باكستاني', labelEn: 'Pakistani' },
+    { value: 'Bangladeshi', labelAr: 'بنغلاديشي', labelEn: 'Bangladeshi' },
+    { value: 'Filipino', labelAr: 'فلبيني', labelEn: 'Filipino' },
+    { value: 'Other', labelAr: 'أخرى', labelEn: 'Other' },
+  ];
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -251,13 +281,51 @@ const SignupScreen = ({ navigation }) => {
               <Text style={styles.label}>
                 {I18n.locale === 'ar' ? 'الجنسية' : 'Nationality'}
               </Text>
-              <TextInput
-                style={styles.input}
-                placeholder={I18n.locale === 'ar' ? 'كويتي' : 'Kuwaiti'}
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={formData.nationality}
-                onChangeText={(text) => updateField('nationality', text)}
-              />
+              <TouchableOpacity
+                style={styles.pickerButton}
+                onPress={() => setShowNationalityPicker(!showNationalityPicker)}
+              >
+                <Text style={[styles.pickerButtonText, !formData.nationality && styles.placeholderText]}>
+                  {formData.nationality 
+                    ? (I18n.locale === 'ar' 
+                        ? nationalities.find(n => n.value === formData.nationality)?.labelAr || formData.nationality
+                        : nationalities.find(n => n.value === formData.nationality)?.labelEn || formData.nationality
+                      )
+                    : (I18n.locale === 'ar' ? 'اختر الجنسية' : 'Select Nationality')
+                  }
+                </Text>
+                <Ionicons 
+                  name={showNationalityPicker ? "chevron-up" : "chevron-down"} 
+                  size={20} 
+                  color="rgba(255,255,255,0.7)" 
+                />
+              </TouchableOpacity>
+
+              {/* قائمة الجنسيات */}
+              {showNationalityPicker && (
+                <ScrollView style={styles.pickerList} nestedScrollEnabled>
+                  {nationalities.map((nat) => (
+                    <TouchableOpacity
+                      key={nat.value}
+                      style={[
+                        styles.pickerItem,
+                        formData.nationality === nat.value && styles.pickerItemSelected
+                      ]}
+                      onPress={() => {
+                        updateField('nationality', nat.value);
+                        setShowNationalityPicker(false);
+                      }}
+                    >
+                      <Text style={styles.pickerItemText}>
+                        {I18n.locale === 'ar' ? nat.labelAr : nat.labelEn}
+                      </Text>
+                      {formData.nationality === nat.value && (
+                        <Ionicons name="checkmark" size={20} color="#22c55e" />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              )}
             </View>
 
             {/* تاريخ الميلاد */}
@@ -265,13 +333,64 @@ const SignupScreen = ({ navigation }) => {
               <Text style={styles.label}>
                 {I18n.locale === 'ar' ? 'تاريخ الميلاد' : 'Birth Date'}
               </Text>
-              <TextInput
-                style={styles.input}
-                placeholder={I18n.locale === 'ar' ? '2000-01-01' : 'YYYY-MM-DD'}
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={formData.birthdate}
-                onChangeText={(text) => updateField('birthdate', text)}
-              />
+              <View style={styles.dateInputContainer}>
+                <TextInput
+                  style={[styles.dateInput, styles.dayInput]}
+                  placeholder={I18n.locale === 'ar' ? 'يوم' : 'DD'}
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  value={formData.birthDay}
+                  onChangeText={(text) => {
+                    // السماح بالأرقام فقط وحد أقصى 2 رقم
+                    const day = text.replace(/[^0-9]/g, '').slice(0, 2);
+                    updateField('birthDay', day);
+                    // تحديث التاريخ الكامل
+                    if (day && formData.birthMonth && formData.birthYear) {
+                      updateField('birthdate', `${formData.birthYear}-${formData.birthMonth.padStart(2, '0')}-${day.padStart(2, '0')}`);
+                    }
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                />
+                <Text style={styles.dateSeparator}>/</Text>
+                <TextInput
+                  style={[styles.dateInput, styles.monthInput]}
+                  placeholder={I18n.locale === 'ar' ? 'شهر' : 'MM'}
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  value={formData.birthMonth}
+                  onChangeText={(text) => {
+                    // السماح بالأرقام فقط وحد أقصى 2 رقم
+                    const month = text.replace(/[^0-9]/g, '').slice(0, 2);
+                    updateField('birthMonth', month);
+                    // تحديث التاريخ الكامل
+                    if (formData.birthDay && month && formData.birthYear) {
+                      updateField('birthdate', `${formData.birthYear}-${month.padStart(2, '0')}-${formData.birthDay.padStart(2, '0')}`);
+                    }
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                />
+                <Text style={styles.dateSeparator}>/</Text>
+                <TextInput
+                  style={[styles.dateInput, styles.yearInput]}
+                  placeholder={I18n.locale === 'ar' ? 'سنة' : 'YYYY'}
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  value={formData.birthYear}
+                  onChangeText={(text) => {
+                    // السماح بالأرقام فقط وحد أقصى 4 أرقام
+                    const year = text.replace(/[^0-9]/g, '').slice(0, 4);
+                    updateField('birthYear', year);
+                    // تحديث التاريخ الكامل
+                    if (formData.birthDay && formData.birthMonth && year) {
+                      updateField('birthdate', `${year}-${formData.birthMonth.padStart(2, '0')}-${formData.birthDay.padStart(2, '0')}`);
+                    }
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                />
+              </View>
+              <Text style={styles.dateHint}>
+                {I18n.locale === 'ar' ? 'مثال: 15 / 06 / 2000' : 'Example: 15 / 06 / 2000'}
+              </Text>
             </View>
 
             {/* كلمة المرور */}
@@ -405,6 +524,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
+  dateInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateInput: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+  },
+  dayInput: {
+    flex: 1,
+  },
+  monthInput: {
+    flex: 1,
+  },
+  yearInput: {
+    flex: 1.5,
+  },
+  dateSeparator: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginHorizontal: 8,
+  },
+  dateHint: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    marginTop: 6,
+    fontStyle: 'italic',
+  },
   signupButton: {
     backgroundColor: '#dc2626',
     borderRadius: 12,
@@ -436,6 +591,47 @@ const styles = StyleSheet.create({
   loginLinkBold: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  pickerButton: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  pickerButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    flex: 1,
+  },
+  placeholderText: {
+    color: 'rgba(255,255,255,0.5)',
+  },
+  pickerList: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 12,
+    marginTop: 8,
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  pickerItem: {
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  pickerItemSelected: {
+    backgroundColor: 'rgba(34,197,94,0.15)',
+  },
+  pickerItemText: {
+    color: '#ffffff',
+    fontSize: 15,
   },
 });
 

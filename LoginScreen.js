@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, I18nManager, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, I18nManager, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import messaging from '@react-native-firebase/messaging';
 import FCMService from './FCMService';
@@ -86,43 +86,55 @@ const LoginScreen = ({ navigation }) => {
       end={{ x: 1, y: 1 }}
       style={styles.container}
     >
-      <View style={styles.logoBox}>
-        <Image source={require('./kmt-logo-white.png')} style={styles.logo} />
-        <Text style={styles.systemTitle}>Marshal Management System</Text>
-        <Text style={styles.clubTitle}>KUWAIT MOTOR TOWN</Text>
-      </View>
-      <View style={styles.formBox}>
-        <Text style={styles.title}>Login</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          textAlign="left"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#888"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          textAlign="left"
-        />
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.signupLink} 
-          onPress={() => navigation.navigate('Signup')}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.signupText}>
-            Don't have an account? <Text style={{color:'#dc2626',fontWeight:'bold'}}>Sign up</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.logoBox}>
+            <Image source={require('./kmt-logo-white.png')} style={styles.logo} />
+            <Text style={styles.systemTitle}>Marshal Management System</Text>
+            <Text style={styles.clubTitle}>KUWAIT MOTOR TOWN</Text>
+          </View>
+          <View style={styles.formBox}>
+            <Text style={styles.title}>Login</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#888"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              textAlign="left"
+              keyboardType="email-address"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#888"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              textAlign="left"
+            />
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.signupLink} 
+              onPress={() => navigation.navigate('Signup')}
+            >
+              <Text style={styles.signupText}>
+                Don't have an account? <Text style={{color:'#dc2626',fontWeight:'bold'}}>Sign up</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 };
@@ -130,9 +142,15 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 0,
+    paddingVertical: 20,
   },
   logoBox: {
     alignItems: 'center',
