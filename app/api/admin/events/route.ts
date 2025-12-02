@@ -5,16 +5,16 @@ import { prisma } from "@/lib/prisma"
 import { notifyMatchingMarshalsAboutNewEvent } from "@/lib/notifications"
 import { sendEmail, newEventEmailTemplate } from "@/lib/email"
 import jwt from "jsonwebtoken"
-// استخراج التوكن والتحقق منه
+
+// Verify JWT token
 function verifyJWT(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader) return null;
   const token = authHeader.split(" ")[1];
   if (!token) return null;
   try {
-    const jwtSecret = process.env.JWT_SECRET || "dev-secret-key";
+    const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
     const decoded = jwt.verify(token, jwtSecret);
-    // إذا كان التوكن من نوع string (غير متوقع)، أعد null
     if (typeof decoded === "string") return null;
     return decoded;
   } catch {
@@ -22,22 +22,34 @@ function verifyJWT(request: NextRequest) {
   }
 }
 
+// Get user from session or JWT
+async function getUser(request: NextRequest) {
+  // Try session first (web)
+  const session = await getServerSession(authOptions);
+  if (session?.user) {
+    return session.user;
+  }
+  
+  // Try JWT (mobile)
+  const jwtUser = verifyJWT(request);
+  return jwtUser;
+}
+
 // GET - Fetch all events
 export async function GET(request: NextRequest) {
   try {
-    const user = verifyJWT(request);
-    console.log("[DEBUG] Decoded user from JWT:", user);
+    const user = await getUser(request);
     if (!user || !["admin", "marshal"].includes((user as any).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // Fetch all events
+    
     const events = await prisma.event.findMany({
       include: {
         _count: {
           select: { 
             attendances: {
               where: {
-                status: 'approved' // Only count approved attendances
+                status: 'approved'
               }
             }
           }
@@ -45,6 +57,7 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { createdAt: "desc" }
     })
+    
     return NextResponse.json(events)
   } catch (error) {
     console.error("Error fetching events:", error)
@@ -55,10 +68,11 @@ export async function GET(request: NextRequest) {
 // POST - Create new event
 export async function POST(request: NextRequest) {
   try {
-    const user = verifyJWT(request);
+    const user = await getUser(request);
     if (!user || (user as any).role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
     const body = await request.json()
     const {
       titleEn,
@@ -118,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Send emails to all marshals (in parallel, continue even if some fail)
     const emailPromises = allMarshals
-      .filter(marshal => marshal.email) // Only marshals with email
+      .filter(marshal => marshal.email)
       .map(marshal => 
         sendEmail({
           to: marshal.email!,
@@ -139,7 +153,6 @@ export async function POST(request: NextRequest) {
         })
       )
 
-    // Wait for all emails to be sent (or fail)
     const emailResults = await Promise.allSettled(emailPromises)
     const successCount = emailResults.filter(r => r.status === 'fulfilled').length
     console.log(`Sent new event emails: ${successCount}/${allMarshals.length} successful`)
@@ -154,13 +167,14 @@ export async function POST(request: NextRequest) {
 // PUT - Update event  
 export async function PUT(request: NextRequest) {
   try {
-    const user = verifyJWT(request);
+    const user = await getUser(request);
     if (!user || (user as any).role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
     const body = await request.json()
     const { id, titleEn, titleAr, descriptionEn, descriptionAr, date, endDate, time, endTime, location, marshalTypes, maxMarshals, status } = body
-
+    
     if (!id) {
       return NextResponse.json({ error: "Event ID required" }, { status: 400 })
     }
@@ -199,10 +213,11 @@ export async function PATCH(request: NextRequest) {
 // DELETE - Delete event
 export async function DELETE(request: NextRequest) {
   try {
-    const user = verifyJWT(request);
+    const user = await getUser(request);
     if (!user || (user as any).role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
 
