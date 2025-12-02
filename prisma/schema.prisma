@@ -27,6 +27,7 @@ model User {
   isActive           Boolean  @default(true) // Active/Suspended status
   marshalTypes       String   @default("") // Comma-separated: "drag-race,drift,circuit"
   role               String   @default("marshal") // "marshal" or "admin"
+  fcmToken           String?  // Firebase Cloud Messaging token for push notifications
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
