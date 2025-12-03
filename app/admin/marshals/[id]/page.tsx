@@ -13,8 +13,6 @@ const MARSHAL_TYPES = [
   { value: "circuit", label: { ar: "حلبة", en: "Circuit" }, color: "bg-blue-700", icon: "🏁" },
   { value: "drift", label: { ar: "دريفت", en: "Drift" }, color: "bg-purple-700", icon: "💨" },
   { value: "drag-race", label: { ar: "سباق الدراج", en: "Drag Race" }, color: "bg-pink-600", icon: "🚦" },
-  { value: "recovery", label: { ar: "الإخلاء", en: "Recovery" }, color: "bg-green-700", icon: "🚚" },
-  { value: "grid", label: { ar: "شبكة الانطلاق", en: "Grid" }, color: "bg-gray-700", icon: "🔢" },
   { value: "pit", label: { ar: "منطقة الصيانة", en: "Pit" }, color: "bg-teal-700", icon: "🛠️" },
 ]
 
