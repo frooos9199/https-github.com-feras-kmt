@@ -424,6 +424,7 @@ export default function ProfilePage() {
         civilId: formData.civilId,
         dateOfBirth: formData.dateOfBirth,
         nationality: formData.nationality,
+        bloodType: formData.bloodType,
       }
 
       if (formData.newPassword) {
