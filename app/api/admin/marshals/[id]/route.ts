@@ -30,7 +30,10 @@ export async function GET(
         civilId: true,
         dateOfBirth: true,
         nationality: true,
+        bloodType: true,
         image: true,
+        civilIdFrontImage: true,
+        civilIdBackImage: true,
         licenseFrontImage: true,
         licenseBackImage: true,
         isActive: true,
@@ -66,14 +69,17 @@ export async function PATCH(
 
     const { id } = await params
     const body = await req.json()
-    const { isActive, name, email, phone, nationality, marshalTypes, employeeId } = body
+    const { isActive, name, email, phone, nationality, marshalTypes, employeeId, civilId, dateOfBirth, bloodType } = body
 
     const updateData: any = {}
     if (typeof isActive === "boolean") updateData.isActive = isActive
     if (name) updateData.name = name
     if (email) updateData.email = email
     if (phone) updateData.phone = phone
+    if (civilId !== undefined) updateData.civilId = civilId
+    if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null
     if (nationality !== undefined) updateData.nationality = nationality
+    if (bloodType !== undefined) updateData.bloodType = bloodType
     if (marshalTypes !== undefined) updateData.marshalTypes = marshalTypes
     if (employeeId !== undefined) {
       // Validate employeeId format
@@ -108,7 +114,10 @@ export async function PATCH(
         civilId: true,
         dateOfBirth: true,
         nationality: true,
+        bloodType: true,
         image: true,
+        civilIdFrontImage: true,
+        civilIdBackImage: true,
         licenseFrontImage: true,
         licenseBackImage: true,
         isActive: true,
