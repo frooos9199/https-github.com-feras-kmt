@@ -21,14 +21,9 @@ export const metadata: Metadata = {
   title: "KMT Marshal System | Kuwait Motor Town",
   description: "Marshal Management System for Kuwait Motor Town",
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/kmt-icon-512.png', type: 'image/png', sizes: '512x512' },
-    ],
-    apple: '/kmt-icon-512.png',
-    shortcut: '/favicon.ico',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
-  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -38,13 +33,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/kmt-icon-512.png" />
-        <link rel="apple-touch-icon" href="/kmt-icon-512.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#dc2626" />
-      </head>
       <body className={`${montserrat.variable} ${roboto.variable} antialiased`}>
         <AuthProvider>
           <LanguageProvider>

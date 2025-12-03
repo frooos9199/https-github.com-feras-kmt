@@ -8,15 +8,10 @@
   "theme_color": "#dc2626",
   "icons": [
     {
-      "src": "/kmt-icon-512.png",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
     }
   ]
 }
