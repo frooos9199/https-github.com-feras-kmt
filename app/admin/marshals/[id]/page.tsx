@@ -363,7 +363,7 @@ export default function AdminMarshalProfile() {
                 </div>
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
-                  <input type="text" value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString('ar-EG') : ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                  <input type="text" value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString(language === "ar" ? 'ar-EG' : 'en-GB') : ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
                 </div>
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
@@ -454,6 +454,13 @@ export default function AdminMarshalProfile() {
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
                 <input type="date" value={formData.dateOfBirth} onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+                {formData.dateOfBirth && (
+                  <p className="text-sm text-gray-400 mt-2">
+                    {language === "ar"
+                      ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
+                      : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
