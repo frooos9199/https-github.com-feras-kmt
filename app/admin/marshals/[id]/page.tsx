@@ -27,7 +27,10 @@ interface MarshalProfile {
   civilId: string | null
   dateOfBirth: string | null
   nationality: string | null
+  bloodType: string | null
   image: string | null
+  civilIdFrontImage: string | null
+  civilIdBackImage: string | null
   licenseFrontImage: string | null
   licenseBackImage: string | null
   isActive: boolean
@@ -45,6 +48,8 @@ export default function AdminMarshalProfile() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadingCivilIdFront, setUploadingCivilIdFront] = useState(false)
+  const [uploadingCivilIdBack, setUploadingCivilIdBack] = useState(false)
   const [uploadingLicenseFront, setUploadingLicenseFront] = useState(false)
   const [uploadingLicenseBack, setUploadingLicenseBack] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
@@ -57,6 +62,7 @@ export default function AdminMarshalProfile() {
     civilId: "",
     dateOfBirth: "",
     nationality: "",
+    bloodType: "",
     marshalTypes: [] as string[],
   })
 
@@ -88,6 +94,7 @@ export default function AdminMarshalProfile() {
           civilId: data.civilId || "",
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
           nationality: data.nationality || "",
+          bloodType: data.bloodType || "",
           marshalTypes: data.marshalTypes ? data.marshalTypes.split(",").filter((t: string) => t) : [],
         })
       } else {
@@ -211,6 +218,7 @@ export default function AdminMarshalProfile() {
         civilId: formData.civilId,
         dateOfBirth: formData.dateOfBirth,
         nationality: formData.nationality,
+        bloodType: formData.bloodType,
         marshalTypes: formData.marshalTypes.join(","),
       }
       const res = await fetch(`/api/admin/marshals/${profile.id}`, {
@@ -228,6 +236,7 @@ export default function AdminMarshalProfile() {
           civilId: data.civilId || "",
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
           nationality: data.nationality || "",
+          bloodType: data.bloodType || "",
           marshalTypes: data.marshalTypes ? data.marshalTypes.split(",").filter((t: string) => t) : [],
         })
         setShowEdit(false)
@@ -370,6 +379,10 @@ export default function AdminMarshalProfile() {
                   <input type="text" value={profile.nationality || ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
                 </div>
                 <div>
+                  <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "فصيلة الدم" : "Blood Type"}</label>
+                  <input type="text" value={profile.bloodType || ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                </div>
+                <div>
                   <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "عدد الحضور" : "Attendance Count"}</label>
                   <input type="text" value={profile._count?.attendances ?? 0} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
                 </div>
@@ -409,6 +422,34 @@ export default function AdminMarshalProfile() {
                         <div className="relative group">
                           <img src={profile.licenseBackImage} alt="License Back" className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700" />
                           <a href={profile.licenseBackImage} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors">{language === "ar" ? "عرض" : "View"}</a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* البطاقة المدنية */}
+              <div className="space-y-4 mt-6">
+                <h3 className="text-lg font-semibold text-white border-b border-zinc-700 pb-2">{language === "ar" ? "البطاقة المدنية (اختياري)" : "Civil ID (Optional)"}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "البطاقة المدنية - الأمام" : "Civil ID - Front"}</label>
+                    <div className="space-y-3">
+                      {profile.civilIdFrontImage && (
+                        <div className="relative group">
+                          <img src={profile.civilIdFrontImage} alt="Civil ID Front" className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700" />
+                          <a href={profile.civilIdFrontImage} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors">{language === "ar" ? "عرض" : "View"}</a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "البطاقة المدنية - الخلف" : "Civil ID - Back"}</label>
+                    <div className="space-y-3">
+                      {profile.civilIdBackImage && (
+                        <div className="relative group">
+                          <img src={profile.civilIdBackImage} alt="Civil ID Back" className="w-full h-48 object-cover rounded-lg border-2 border-zinc-700" />
+                          <a href={profile.civilIdBackImage} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white px-3 py-1 rounded-lg text-sm transition-colors">{language === "ar" ? "عرض" : "View"}</a>
                         </div>
                       )}
                     </div>
@@ -465,6 +506,24 @@ export default function AdminMarshalProfile() {
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
                 <input type="text" value={formData.nationality} onChange={e => setFormData({ ...formData, nationality: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "فصيلة الدم" : "Blood Type"}</label>
+                <select
+                  value={formData.bloodType}
+                  onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
+                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none"
+                >
+                  <option value="">{language === "ar" ? "اختر فصيلة الدم" : "Select Blood Type"}</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>
