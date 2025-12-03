@@ -869,14 +869,50 @@ export default function ProfilePage() {
               <label className="block text-gray-400 mb-2 text-sm">
                 {language === "ar" ? "الجنسية" : "Nationality"}
               </label>
-              <input
-                type="text"
+              <select
                 value={formData.nationality}
                 onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
                 disabled={!editing}
-                placeholder={language === "ar" ? "الكويت" : "Kuwait"}
                 className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
-              />
+              >
+                <option value="">{language === "ar" ? "اختر الجنسية" : "Select Nationality"}</option>
+                <option value={language === "ar" ? "الكويت" : "Kuwait"}>{language === "ar" ? "الكويت" : "Kuwait"}</option>
+                <option value={language === "ar" ? "السعودية" : "Saudi Arabia"}>{language === "ar" ? "السعودية" : "Saudi Arabia"}</option>
+                <option value={language === "ar" ? "الإمارات" : "UAE"}>{language === "ar" ? "الإمارات" : "UAE"}</option>
+                <option value={language === "ar" ? "قطر" : "Qatar"}>{language === "ar" ? "قطر" : "Qatar"}</option>
+                <option value={language === "ar" ? "البحرين" : "Bahrain"}>{language === "ar" ? "البحرين" : "Bahrain"}</option>
+                <option value={language === "ar" ? "عمان" : "Oman"}>{language === "ar" ? "عمان" : "Oman"}</option>
+                <option value={language === "ar" ? "مصر" : "Egypt"}>{language === "ar" ? "مصر" : "Egypt"}</option>
+                <option value={language === "ar" ? "الأردن" : "Jordan"}>{language === "ar" ? "الأردن" : "Jordan"}</option>
+                <option value={language === "ar" ? "لبنان" : "Lebanon"}>{language === "ar" ? "لبنان" : "Lebanon"}</option>
+                <option value={language === "ar" ? "سوريا" : "Syria"}>{language === "ar" ? "سوريا" : "Syria"}</option>
+                <option value={language === "ar" ? "العراق" : "Iraq"}>{language === "ar" ? "العراق" : "Iraq"}</option>
+                <option value={language === "ar" ? "فلسطين" : "Palestine"}>{language === "ar" ? "فلسطين" : "Palestine"}</option>
+                <option value={language === "ar" ? "السودان" : "Sudan"}>{language === "ar" ? "السودان" : "Sudan"}</option>
+                <option value={language === "ar" ? "اليمن" : "Yemen"}>{language === "ar" ? "اليمن" : "Yemen"}</option>
+                <option value={language === "ar" ? "المغرب" : "Morocco"}>{language === "ar" ? "المغرب" : "Morocco"}</option>
+                <option value={language === "ar" ? "الجزائر" : "Algeria"}>{language === "ar" ? "الجزائر" : "Algeria"}</option>
+                <option value={language === "ar" ? "تونس" : "Tunisia"}>{language === "ar" ? "تونس" : "Tunisia"}</option>
+                <option value={language === "ar" ? "ليبيا" : "Libya"}>{language === "ar" ? "ليبيا" : "Libya"}</option>
+                <option value={language === "ar" ? "موريتانيا" : "Mauritania"}>{language === "ar" ? "موريتانيا" : "Mauritania"}</option>
+                <option value={language === "ar" ? "الصومال" : "Somalia"}>{language === "ar" ? "الصومال" : "Somalia"}</option>
+                <option value={language === "ar" ? "جيبوتي" : "Djibouti"}>{language === "ar" ? "جيبوتي" : "Djibouti"}</option>
+                <option value={language === "ar" ? "جزر القمر" : "Comoros"}>{language === "ar" ? "جزر القمر" : "Comoros"}</option>
+                <option value={language === "ar" ? "باكستان" : "Pakistan"}>{language === "ar" ? "باكستان" : "Pakistan"}</option>
+                <option value={language === "ar" ? "الهند" : "India"}>{language === "ar" ? "الهند" : "India"}</option>
+                <option value={language === "ar" ? "بنغلاديش" : "Bangladesh"}>{language === "ar" ? "بنغلاديش" : "Bangladesh"}</option>
+                <option value={language === "ar" ? "الفلبين" : "Philippines"}>{language === "ar" ? "الفلبين" : "Philippines"}</option>
+                <option value={language === "ar" ? "إندونيسيا" : "Indonesia"}>{language === "ar" ? "إندونيسيا" : "Indonesia"}</option>
+                <option value={language === "ar" ? "تايلاند" : "Thailand"}>{language === "ar" ? "تايلاند" : "Thailand"}</option>
+                <option value={language === "ar" ? "سريلانكا" : "Sri Lanka"}>{language === "ar" ? "سريلانكا" : "Sri Lanka"}</option>
+                <option value={language === "ar" ? "نيبال" : "Nepal"}>{language === "ar" ? "نيبال" : "Nepal"}</option>
+                <option value={language === "ar" ? "إثيوبيا" : "Ethiopia"}>{language === "ar" ? "إثيوبيا" : "Ethiopia"}</option>
+                <option value={language === "ar" ? "إريتريا" : "Eritrea"}>{language === "ar" ? "إريتريا" : "Eritrea"}</option>
+                <option value={language === "ar" ? "كينيا" : "Kenya"}>{language === "ar" ? "كينيا" : "Kenya"}</option>
+                <option value={language === "ar" ? "أوغندا" : "Uganda"}>{language === "ar" ? "أوغندا" : "Uganda"}</option>
+                <option value={language === "ar" ? "تنزانيا" : "Tanzania"}>{language === "ar" ? "تنزانيا" : "Tanzania"}</option>
+                <option value={language === "ar" ? "أخرى" : "Other"}>{language === "ar" ? "أخرى" : "Other"}</option>
+              </select>
             </div>
 
             {/* Blood Type */}
