@@ -255,7 +255,49 @@ export default function EventsManagement() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event, index) => (
+            {events
+              .sort((a, b) => {
+                const now = new Date();
+                
+                // حساب حالة الحدث
+                const getEventState = (event: Event) => {
+                  const datePart = event.date.split('T')[0];
+                  const start = new Date(datePart + 'T' + event.time);
+                  let end: Date | null = null;
+                  
+                  if (event.endDate && event.endTime) {
+                    const endDatePart = event.endDate.split('T')[0];
+                    end = new Date(endDatePart + 'T' + event.endTime);
+                  }
+                  
+                  // إذا انتهى
+                  if (end && now > end) return 'ended';
+                  // إذا جاري
+                  if (now >= start && (!end || now <= end)) return 'during';
+                  // إذا قادم
+                  return 'before';
+                };
+                
+                const stateA = getEventState(a);
+                const stateB = getEventState(b);
+                
+                // الترتيب: during (0) -> before (1) -> ended (2)
+                const stateOrder: Record<string, number> = {
+                  'during': 0,
+                  'before': 1,
+                  'ended': 2
+                };
+                
+                if (stateOrder[stateA] !== stateOrder[stateB]) {
+                  return stateOrder[stateA] - stateOrder[stateB];
+                }
+                
+                // إذا كانت نفس الحالة، رتب حسب التاريخ
+                const dateA = new Date(a.date + 'T' + a.time);
+                const dateB = new Date(b.date + 'T' + b.time);
+                return dateA.getTime() - dateB.getTime();
+              })
+              .map((event, index) => (
               <motion.div
                 key={event.id}
                 initial={{ opacity: 0, y: 20 }}

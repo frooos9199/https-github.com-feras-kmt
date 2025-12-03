@@ -136,7 +136,61 @@ export default function EventsPage() {
               </p>
             </div>
           ) : (
-            events.map((event, index) => {
+            events
+              .sort((a, b) => {
+                // Function to determine event state
+                const getEventState = (event: any) => {
+                  const now = new Date()
+                  const eventDate = new Date(event.date)
+                  
+                  // Parse event time (HH:MM format)
+                  const [startHours, startMinutes] = event.time.split(':').map(Number)
+                  const eventStart = new Date(eventDate)
+                  eventStart.setHours(startHours, startMinutes, 0, 0)
+                  
+                  // Parse end date and time if available
+                  let eventEnd: Date
+                  if (event.endDate && event.endTime) {
+                    const endDate = new Date(event.endDate)
+                    const [endHours, endMinutes] = event.endTime.split(':').map(Number)
+                    eventEnd = new Date(endDate)
+                    eventEnd.setHours(endHours, endMinutes, 0, 0)
+                  } else {
+                    // If no end time, assume event ends 4 hours after start
+                    eventEnd = new Date(eventStart.getTime() + 4 * 60 * 60 * 1000)
+                  }
+                  
+                  if (now >= eventStart && now <= eventEnd) {
+                    return 'during' // Event is currently happening
+                  } else if (now < eventStart) {
+                    return 'before' // Event hasn't started yet
+                  } else {
+                    return 'ended' // Event has ended
+                  }
+                }
+                
+                const stateA = getEventState(a)
+                const stateB = getEventState(b)
+                
+                // Priority: during (0) > before (1) > ended (2)
+                const stateOrder = { 'during': 0, 'before': 1, 'ended': 2 }
+                
+                if (stateOrder[stateA] !== stateOrder[stateB]) {
+                  return stateOrder[stateA] - stateOrder[stateB]
+                }
+                
+                // If same state, sort by date/time (ascending)
+                const dateA = new Date(a.date)
+                const [hoursA, minutesA] = a.time.split(':').map(Number)
+                dateA.setHours(hoursA, minutesA, 0, 0)
+                
+                const dateB = new Date(b.date)
+                const [hoursB, minutesB] = b.time.split(':').map(Number)
+                dateB.setHours(hoursB, minutesB, 0, 0)
+                
+                return dateA.getTime() - dateB.getTime()
+              })
+              .map((event, index) => {
               const isRegistered = event.attendances.length > 0
               const registrationStatus = isRegistered ? event.attendances[0].status : null
               const isFull = event._count.attendances >= event.maxMarshals
