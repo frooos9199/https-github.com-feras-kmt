@@ -321,7 +321,7 @@ export default function MyAttendancePage() {
                       </div>
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📝</span>
-                        <span>{formatDate(new Date(attendance.registeredAt), language, 'short')}</span>
+                        <span>{formatDate(new Date(attendance.registeredAt), language, 'long')}</span>
                       </div>
                     </div>
 

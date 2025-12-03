@@ -1,33 +1,33 @@
 // Utility functions for date formatting with Arabic support
 
 /**
- * Format date in Arabic with Western numerals (Gregorian calendar)
+ * Convert Western numerals to Arabic numerals
+ */
+const toArabicNumerals = (num: number): string => {
+  const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩']
+  return num.toString().split('').map(digit => arabicNumerals[parseInt(digit)] || digit).join('')
+}
+
+/**
+ * Format date in Arabic with Arabic numerals (Gregorian calendar)
  * @param date - Date to format
  * @param format - 'long' for full date, 'short' for numeric
  * @returns Formatted date string in Arabic
  */
 export const formatDateArabic = (date: Date, format: 'long' | 'short' = 'long'): string => {
-  const months = [
-    'يناير', 'فبراير', 'مارس', 'إبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-  ]
-  
   const day = date.getDate()
-  const month = months[date.getMonth()]
+  const month = date.getMonth() + 1 // Months are 0-indexed
   const year = date.getFullYear()
   
-  if (format === 'long') {
-    return `${day} ${month}، ${year}`
-  } else {
-    return `${day}/${date.getMonth() + 1}/${year}`
-  }
+  // Return numeric format with Arabic numerals: ٤/١٢/٢٠٢٥
+  return `${toArabicNumerals(day)}/${toArabicNumerals(month)}/${toArabicNumerals(year)}`
 }
 
 /**
  * Format date based on language
  * @param date - Date to format
  * @param language - 'ar' or 'en'
- * @param format - 'long' or 'short'
+ * @param format - 'long' or 'short' (ignored, always numeric now)
  * @returns Formatted date string
  */
 export const formatDate = (
@@ -36,12 +36,16 @@ export const formatDate = (
   format: 'long' | 'short' = 'long'
 ): string => {
   if (language === 'ar') {
+    // Arabic: numeric format with Arabic numerals (٤/١٢/٢٠٢٥)
     return formatDateArabic(date, format)
   }
   
-  const options: Intl.DateTimeFormatOptions = format === 'long' 
-    ? { year: 'numeric', month: 'long', day: 'numeric' }
-    : { year: 'numeric', month: 'numeric', day: 'numeric' }
+  // English: numeric format (12/4/2025)
+  const options: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'numeric', 
+    day: 'numeric' 
+  }
     
   return date.toLocaleDateString('en-US', options)
 }
