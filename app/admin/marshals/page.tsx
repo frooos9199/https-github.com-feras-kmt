@@ -77,21 +77,20 @@ export default function MarshalsManagement() {
     try {
       const res = await fetch("/api/admin/marshals")
       const data = await res.json()
-      setMarshals(Array.isArray(data) ? data : [])
+      setMarshals(data)
     } catch (error) {
       console.error("Error fetching marshals:", error)
-      setMarshals([])
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredMarshals = Array.isArray(marshals) ? marshals.filter(marshal =>
+  const filteredMarshals = marshals.filter(marshal =>
     marshal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     marshal.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     marshal.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     marshal.civilId.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : []
+  )
 
   if (status === "loading" || loading) {
     return (

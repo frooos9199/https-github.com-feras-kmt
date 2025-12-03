@@ -32,14 +32,11 @@ function verifyJWT(request: NextRequest) {
   }
 }
 
-// GET - Fetch user profile
 export async function GET(request: NextRequest) {
   try {
-    // Try session first (web)
     const session = await getServerSession(authOptions)
     let userId = session?.user?.id;
 
-    // If no session, try JWT (mobile)
     if (!userId) {
       const decoded = verifyJWT(request);
       if (decoded && (decoded as any).id) {
@@ -64,6 +61,8 @@ export async function GET(request: NextRequest) {
         nationality: true,
         bloodType: true,
         image: true,
+        civilIdFrontImage: true,
+        civilIdBackImage: true,
         licenseFrontImage: true,
         licenseBackImage: true,
         role: true,
@@ -81,7 +80,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT - Update user profile
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -90,10 +88,8 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    console.log("Update request body:", body)
     const { name, phone, civilId, dateOfBirth, nationality, bloodType, image, currentPassword, newPassword } = body
     
-    // Build update data
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
     if (phone !== undefined) updateData.phone = phone
@@ -103,9 +99,6 @@ export async function PUT(request: NextRequest) {
     if (dateOfBirth !== undefined) updateData.dateOfBirth = new Date(dateOfBirth)
     if (image !== undefined) updateData.image = image
 
-    console.log("Update data:", updateData)
-
-    // Handle password update
     if (currentPassword && newPassword) {
       const user = await prisma.user.findUnique({
         where: { id: session.user.id }
@@ -123,9 +116,7 @@ export async function PUT(request: NextRequest) {
       const hashedPassword = await bcrypt.hash(newPassword, 10)
       updateData.password = hashedPassword
     }
-    console.log("Update data:", updateData)
 
-    // Update user
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: updateData,
@@ -140,11 +131,14 @@ export async function PUT(request: NextRequest) {
         nationality: true,
         bloodType: true,
         image: true,
+        civilIdFrontImage: true,
+        civilIdBackImage: true,
+        licenseFrontImage: true,
+        licenseBackImage: true,
         role: true,
       }
     })
 
-    console.log("Updated user:", updatedUser)
     return NextResponse.json(updatedUser)
   } catch (error) {
     console.error("Error updating profile:", error)
