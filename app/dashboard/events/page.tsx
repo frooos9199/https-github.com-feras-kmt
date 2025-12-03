@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import EventCountdown from "@/components/EventCountdown"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -158,13 +159,14 @@ export default function EventsPage() {
                       backgroundRepeat: 'no-repeat'
                     }}
                   >
-                    {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
                     <span className="text-6xl relative z-10">
                       {event.type === "race" && "🏁"}
                       {event.type === "drift" && "🚗"}
                       {event.type === "track-day" && "🏎️"}
                     </span>
                   </div>
+
+                  <EventCountdown event={event} language={language} />
 
                   <div className="p-6">
                     <h3 className="text-2xl font-bold text-white mb-2">

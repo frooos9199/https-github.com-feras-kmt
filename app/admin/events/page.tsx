@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import EventCountdown from "@/components/EventCountdown"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -278,9 +279,9 @@ export default function EventsManagement() {
                         inset: 0
                       }}
                     />
-                    {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
                   </div>
                 </div>
+                <EventCountdown event={event} language={language} />
                 <div className="flex">
                   {/* أيقونات المارشال في الجانب الأيسر */}
                   <div className="flex flex-col items-center justify-center px-3 py-4 gap-2">
