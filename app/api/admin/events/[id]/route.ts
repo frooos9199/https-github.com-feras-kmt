@@ -7,16 +7,23 @@ import jwt from "jsonwebtoken"
 // Verify JWT token
 function verifyJWT(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
+  console.log('[JWT] Auth header:', authHeader ? 'present' : 'missing');
+  
   if (!authHeader) return null;
   const token = authHeader.split(" ")[1];
-  if (!token) return null;
+  if (!token) {
+    console.log('[JWT] Token extraction failed');
+    return null;
+  }
 
   try {
     const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
+    console.log('[JWT] Using secret:', jwtSecret.substring(0, 10) + '...');
     const decoded = jwt.verify(token, jwtSecret) as any;
+    console.log('[JWT] Decoded payload:', decoded);
     return decoded;
-  } catch (error) {
-    console.error('[JWT] Verification failed:', error);
+  } catch (error: any) {
+    console.error('[JWT] Verification failed:', error?.message || error);
     return null;
   }
 }
