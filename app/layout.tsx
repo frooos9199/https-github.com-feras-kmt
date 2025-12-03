@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/kmt-logo-copy.png', type: 'image/png', sizes: '512x512' },
+      { url: '/kmt-icon-512.png', type: 'image/png', sizes: '512x512' },
     ],
-    apple: '/kmt-logo-copy.png',
+    apple: '/kmt-icon-512.png',
     shortcut: '/favicon.ico',
   },
   manifest: '/manifest.json',
@@ -40,8 +40,8 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/kmt-logo-copy.png" />
-        <link rel="apple-touch-icon" href="/kmt-logo-copy.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/kmt-icon-512.png" />
+        <link rel="apple-touch-icon" href="/kmt-icon-512.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#dc2626" />
       </head>
