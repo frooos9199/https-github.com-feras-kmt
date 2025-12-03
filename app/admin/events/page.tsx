@@ -351,7 +351,7 @@ export default function EventsManagement() {
                       {/* تاريخ ووقت البداية - أخضر */}
                       <div className="flex items-center gap-2 text-green-500 font-medium">
                         <span>📅</span>
-                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US")}</span>
+                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "en-GB" : "en-US")}</span>
                         <span>🕐</span>
                         <span>{event.time}</span>
                       </div>
@@ -360,7 +360,7 @@ export default function EventsManagement() {
                       {event.endDate && (
                         <div className="flex items-center gap-2 text-red-500 font-medium">
                           <span>📅</span>
-                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US")}</span>
+                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "en-GB" : "en-US")}</span>
                           {event.endTime && (
                             <>
                               <span>🕐</span>

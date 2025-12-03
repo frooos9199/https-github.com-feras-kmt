@@ -859,7 +859,7 @@ export default function ProfilePage() {
               {formData.dateOfBirth && (
                 <p className="text-sm text-gray-400 mt-2">
                   {language === "ar"
-                    ? new Date(formData.dateOfBirth).toLocaleDateString("ar-SA-u-nu-latn")
+                    ? new Date(formData.dateOfBirth).toLocaleDateString("en-GB")
                     : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
                 </p>
               )}

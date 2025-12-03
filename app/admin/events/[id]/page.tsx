@@ -262,14 +262,14 @@ export default function EventDetails() {
                   <div>
                     <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ البداية" : "Start Date"}</p>
                     <p className="text-white font-medium text-lg">
-                      {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US")}
+                      {new Date(event.date).toLocaleDateString(language === "ar" ? "en-GB" : "en-US")}
                     </p>
                   </div>
                   {event.endDate && (
                     <div>
                       <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ النهاية" : "End Date"}</p>
                       <p className="text-white font-medium text-lg">
-                        {new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US")}
+                        {new Date(event.endDate).toLocaleDateString(language === "ar" ? "en-GB" : "en-US")}
                       </p>
                     </div>
                   )}
@@ -406,7 +406,7 @@ export default function EventDetails() {
                 <div className="bg-purple-600/10 border border-purple-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ الإنشاء" : "Created"}</p>
                   <p className="text-purple-500 font-bold text-lg">
-                    {new Date(event.createdAt).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US")}
+                    {new Date(event.createdAt).toLocaleDateString(language === "ar" ? "en-GB" : "en-US")}
                   </p>
                 </div>
               </div>
