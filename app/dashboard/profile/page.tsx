@@ -906,6 +906,9 @@ export default function ProfilePage() {
                 <option value={language === "ar" ? "تايلاند" : "Thailand"}>{language === "ar" ? "تايلاند" : "Thailand"}</option>
                 <option value={language === "ar" ? "سريلانكا" : "Sri Lanka"}>{language === "ar" ? "سريلانكا" : "Sri Lanka"}</option>
                 <option value={language === "ar" ? "نيبال" : "Nepal"}>{language === "ar" ? "نيبال" : "Nepal"}</option>
+                <option value={language === "ar" ? "إيران" : "Iran"}>{language === "ar" ? "إيران" : "Iran"}</option>
+                <option value={language === "ar" ? "تركيا" : "Turkey"}>{language === "ar" ? "تركيا" : "Turkey"}</option>
+                <option value={language === "ar" ? "أرمينيا" : "Armenia"}>{language === "ar" ? "أرمينيا" : "Armenia"}</option>
                 <option value={language === "ar" ? "إثيوبيا" : "Ethiopia"}>{language === "ar" ? "إثيوبيا" : "Ethiopia"}</option>
                 <option value={language === "ar" ? "إريتريا" : "Eritrea"}>{language === "ar" ? "إريتريا" : "Eritrea"}</option>
                 <option value={language === "ar" ? "كينيا" : "Kenya"}>{language === "ar" ? "كينيا" : "Kenya"}</option>
