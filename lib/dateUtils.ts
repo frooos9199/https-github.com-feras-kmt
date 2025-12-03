@@ -40,12 +40,10 @@ export const formatDate = (
     return formatDateArabic(date, format)
   }
   
-  // English: numeric format (12/4/2025)
-  const options: Intl.DateTimeFormatOptions = { 
-    year: 'numeric', 
-    month: 'numeric', 
-    day: 'numeric' 
-  }
+  // English: numeric format day/month/year (4/12/2025)
+  const day = date.getDate()
+  const month = date.getMonth() + 1
+  const year = date.getFullYear()
     
-  return date.toLocaleDateString('en-US', options)
+  return `${day}/${month}/${year}`
 }
