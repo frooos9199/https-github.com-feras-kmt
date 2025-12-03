@@ -347,18 +347,43 @@ export default function EventsManagement() {
                     <p className="text-gray-400 text-sm mb-3 line-clamp-2">
                       {language === "ar" ? event.descriptionAr : event.descriptionEn}
                     </p>
-                    <div className="space-y-1 text-sm text-gray-300 mb-4">
-                      <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
-                      <div>🕐 {event.time}</div>
+                    <div className="space-y-2 text-sm mb-4">
+                      {/* تاريخ ووقت البداية - أخضر */}
+                      <div className="flex items-center gap-2 text-green-500 font-medium">
+                        <span>📅</span>
+                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                        <span>🕐</span>
+                        <span>{event.time}</span>
+                      </div>
+                      
+                      {/* تاريخ ووقت النهاية - أحمر */}
                       {event.endDate && (
-                        <div className="text-gray-400">
-                          <span>📅 {language === "ar" ? "إلى" : "to"} </span>
+                        <div className="flex items-center gap-2 text-red-500 font-medium">
+                          <span>📅</span>
                           <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
-                          {event.endTime && <span> 🕐 {event.endTime}</span>}
+                          {event.endTime && (
+                            <>
+                              <span>🕐</span>
+                              <span>{event.endTime}</span>
+                            </>
+                          )}
                         </div>
                       )}
-                      <div>📍 {event.location}</div>
-                      <div>👥 {event._count.attendances}/{event.maxMarshals}</div>
+                      
+                      {/* الموقع */}
+                      <div className="text-gray-300">
+                        📍 {event.location}
+                      </div>
+                      
+                      {/* عدد المارشالز - أخضر إذا غير مكتمل، أحمر إذا مكتمل */}
+                      <div className="flex items-center gap-2">
+                        <span>👥</span>
+                        <span className={event._count.attendances >= event.maxMarshals ? "text-red-500 font-bold" : "text-green-500 font-medium"}>
+                          {event._count.attendances}
+                        </span>
+                        <span className="text-gray-400">/</span>
+                        <span className="text-red-500 font-medium">{event.maxMarshals}</span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between mb-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${

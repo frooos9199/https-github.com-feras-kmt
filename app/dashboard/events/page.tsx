@@ -232,38 +232,51 @@ export default function EventsPage() {
                     </p>
 
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-gray-300">
+                      {/* تاريخ ووقت البداية - أخضر */}
+                      <div className="flex items-center gap-2 text-green-500 font-medium">
                         <span>📅</span>
                         <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
                         })}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-300">
                         <span>🕐</span>
                         <span>{event.time}</span>
                       </div>
+                      
+                      {/* تاريخ ووقت النهاية - أحمر */}
                       {event.endDate && (
-                        <div className="flex items-center gap-2 text-gray-400 text-sm">
-                          <span>📅 {language === "ar" ? "إلى" : "to"}</span>
+                        <div className="flex items-center gap-2 text-red-500 font-medium">
+                          <span>📅</span>
                           <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
                           })}</span>
-                          {event.endTime && <span className="ml-2">🕐 {event.endTime}</span>}
+                          {event.endTime && (
+                            <>
+                              <span>🕐</span>
+                              <span>{event.endTime}</span>
+                            </>
+                          )}
                         </div>
                       )}
+                      
+                      {/* الموقع */}
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📍</span>
                         <span>{event.location}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-300">
+                      
+                      {/* عدد المارشالز - أخضر إذا غير مكتمل، أحمر إذا مكتمل */}
+                      <div className="flex items-center gap-2">
                         <span>👥</span>
-                        <span>
-                          {event._count.attendances}/{event.maxMarshals} {language === "ar" ? "مارشال" : "Marshals"}
+                        <span className={event._count.attendances >= event.maxMarshals ? "text-red-500 font-bold" : "text-green-500 font-medium"}>
+                          {event._count.attendances}
                         </span>
+                        <span className="text-gray-400">/</span>
+                        <span className="text-red-500 font-medium">{event.maxMarshals}</span>
+                        <span className="text-gray-400">{language === "ar" ? "مارشال" : "Marshals"}</span>
                       </div>
                     </div>
 
