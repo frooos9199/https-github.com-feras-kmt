@@ -2,6 +2,43 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import jwt from "jsonwebtoken"
+
+// Verify JWT token
+function verifyJWT(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader) return null;
+  const token = authHeader.split(" ")[1];
+  if (!token) return null;
+
+  try {
+    const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
+    const decoded = jwt.verify(token, jwtSecret) as any;
+    return decoded;
+  } catch (error) {
+    console.error('[JWT] Verification failed:', error);
+    return null;
+  }
+}
+
+// Get user from session or JWT
+async function getUser(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (session?.user) {
+    return session.user;
+  }
+
+  const jwtPayload = verifyJWT(request);
+  if (jwtPayload?.userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: jwtPayload.userId },
+      select: { id: true, email: true, role: true, name: true }
+    });
+    return user;
+  }
+
+  return null;
+}
 
 // GET - Fetch single event with registered marshals
 export async function GET(
@@ -9,8 +46,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    const user = await getUser(req);
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -64,8 +101,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    const user = await getUser(req);
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -118,8 +155,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    const user = await getUser(req);
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
