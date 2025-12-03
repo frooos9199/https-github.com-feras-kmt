@@ -390,9 +390,15 @@ export default function AdminMarshalProfile() {
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>
                 <div className="flex flex-wrap gap-2">
                   {profile.marshalTypes && profile.marshalTypes.split(',').filter(t => t).length > 0 ? (
-                    profile.marshalTypes.split(',').filter(t => t).map((type) => (
-                      <span key={type} className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-zinc-800 text-white text-base font-bold border border-zinc-700">{type}</span>
-                    ))
+                    profile.marshalTypes.split(',').filter(t => t).map((type) => {
+                      const marshalType = MARSHAL_TYPES.find(mt => mt.value === type.trim())
+                      return (
+                        <span key={type} className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-zinc-800 text-white text-base font-bold border border-zinc-700">
+                          <span>{marshalType?.icon || "📋"}</span>
+                          <span>{marshalType ? marshalType.label[language] : type}</span>
+                        </span>
+                      )
+                    })
                   ) : (
                     <span className="text-gray-500 text-base">{language === "ar" ? "لا يوجد أنواع وظائف" : "No marshal types"}</span>
                   )}
