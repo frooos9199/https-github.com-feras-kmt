@@ -66,6 +66,7 @@ export async function GET(request: NextRequest) {
         licenseFrontImage: true,
         licenseBackImage: true,
         role: true,
+        marshalTypes: true,
       }
     })
 
