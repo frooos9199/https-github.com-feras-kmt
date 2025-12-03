@@ -1,55 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getAuthUser } from "@/lib/auth-utils"
 import { prisma } from "@/lib/prisma"
-import jwt from "jsonwebtoken"
-
-// Verify JWT token
-function verifyJWT(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  console.log('[JWT] Auth header:', authHeader ? 'present' : 'missing');
-  
-  if (!authHeader) return null;
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-    console.log('[JWT] Token extraction failed');
-    return null;
-  }
-
-  try {
-    const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
-    console.log('[JWT] Using secret:', jwtSecret.substring(0, 10) + '...');
-    const decoded = jwt.verify(token, jwtSecret) as any;
-    console.log('[JWT] Decoded payload:', decoded);
-    return decoded;
-  } catch (error: any) {
-    console.error('[JWT] Verification failed:', error?.message || error);
-    return null;
-  }
-}
-
-// Get user from session or JWT
-async function getUser(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user) {
-    return session.user;
-  }
-
-  const jwtPayload = verifyJWT(request);
-  console.log('[JWT] Payload:', jwtPayload);
-  
-  // JWT contains 'id' not 'userId'
-  if (jwtPayload?.id) {
-    const user = await prisma.user.findUnique({
-      where: { id: jwtPayload.id },
-      select: { id: true, email: true, role: true, name: true }
-    });
-    console.log('[JWT] User found:', user ? user.email : 'null');
-    return user;
-  }
-
-  return null;
-}
 
 // GET - Fetch single event with registered marshals
 export async function GET(
@@ -57,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getUser(req);
+    const user = await getAuthUser(req);
     if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -112,7 +63,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getUser(req);
+    const user = await getAuthUser(req);
     if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -166,7 +117,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getUser(req);
+    const user = await getAuthUser(req);
     if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
