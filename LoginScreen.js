@@ -27,7 +27,6 @@ const LoginScreen = ({ navigation }) => {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-      console.log('LOGIN RESPONSE:', response.status, response.ok, data);
       
       if (!response.ok) {
         throw new Error(data.error || data.message || I18n.t('login_failed'));
@@ -52,13 +51,6 @@ const LoginScreen = ({ navigation }) => {
         birthdate: data.user.birthdate || '',
         phone: data.user.phone || '',
       };
-
-      console.log('[LOGIN] ✅ Saving user data:', {
-        email: userData.email,
-        role: userData.role,
-        hasToken: !!userData.token,
-        tokenPreview: userData.token.substring(0, 30) + '...'
-      });
       
       await setUser(userData);
       
@@ -66,18 +58,16 @@ const LoginScreen = ({ navigation }) => {
       try {
         const fcmToken = await FCMService.getToken();
         if (fcmToken) {
-          console.log('[LOGIN] 📱 FCM Token obtained');
           await sendFcmTokenToServer(fcmToken, userData.token);
         }
       } catch (fcmError) {
-        console.error('[LOGIN] ❌ Failed to get/send FCM token:', fcmError);
+        console.error('[LOGIN] FCM error:', fcmError);
         // Don't block login if FCM fails
       }
       
-      console.log('[LOGIN] ✅ Navigating to MainTabs');
       navigation.replace('MainTabs');
     } catch (err) {
-      console.error('[LOGIN] ❌ Login error:', err);
+      console.error('[LOGIN] Error:', err);
       Alert.alert(I18n.t('error'), err.message || I18n.t('login_failed'));
     }
   };

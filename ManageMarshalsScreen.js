@@ -19,9 +19,11 @@ const ManageMarshalsScreen = () => {
     
     try {
       setError(null);
+      
       const response = await fetch('https://www.kmtsys.com/api/admin/marshals', {
         headers: {
           'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json',
         },
       });
       
@@ -31,9 +33,11 @@ const ManageMarshalsScreen = () => {
         throw new Error(data.error || 'Failed to fetch marshals');
       }
       
-      setMarshals(Array.isArray(data.marshals) ? data.marshals : []);
+      // API returns array directly, not wrapped in {marshals: []}
+      const marshalsArray = Array.isArray(data) ? data : (data.marshals || []);
+      setMarshals(marshalsArray);
     } catch (err) {
-      console.error('[MANAGE MARSHALS]', err);
+      console.error('[MANAGE MARSHALS] ❌ Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

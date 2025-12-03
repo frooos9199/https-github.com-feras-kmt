@@ -30,8 +30,10 @@ const StatsScreen = () => {
   });
 
   // دالة جلب الإحصائيات
-  const fetchStats = async () => {
-    setStats(s => ({ ...s, loading: true, error: null }));
+  const fetchStats = async (isRefreshing = false) => {
+    if (!isRefreshing) {
+      setStats(s => ({ ...s, loading: true, error: null }));
+    }
     
     if (!isAdmin) {
       setStats(s => ({ ...s, unauthorized: true, loading: false, error: null }));
@@ -101,7 +103,7 @@ const StatsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchStats();
+    await fetchStats(true); // تمرير true للإشارة أنها refresh
     setRefreshing(false);
   };
 

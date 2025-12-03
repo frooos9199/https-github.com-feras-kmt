@@ -17,7 +17,6 @@ const EventDetailsScreen = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('[EVENT DETAILS] eventId:', eventId);
     fetchEvent();
   }, [eventId]);
 
@@ -29,18 +28,12 @@ const EventDetailsScreen = () => {
         throw new Error(I18n.locale === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please login first');
       }
       
-      console.log('[EVENT DETAILS] Fetching event:', eventId);
-      console.log('[EVENT DETAILS] Token preview:', user.token.substring(0, 30) + '...');
-      
       const url = `https://www.kmtsys.com/api/admin/events/${eventId}`;
-      console.log('[EVENT DETAILS] URL:', url);
       
       const res = await fetch(url, {
         method: 'GET',
         headers: createAuthHeaders(user.token),
       });
-      
-      console.log('[EVENT DETAILS] Response status:', res.status);
       
       if (!res.ok) {
         const errorData = await res.json();
@@ -48,10 +41,9 @@ const EventDetailsScreen = () => {
       }
       
       const data = await res.json();
-      console.log('[EVENT DETAILS] Event loaded successfully');
       setEvent(data);
     } catch (err) {
-      console.error('[EVENT DETAILS] Fetch error:', err);
+      console.error('[EVENT DETAILS] Error:', err);
       setError(err.message || 'خطأ غير متوقع');
     } finally {
       setLoading(false);
@@ -75,9 +67,13 @@ const EventDetailsScreen = () => {
   const getEventIcon = (marshalTypes) => {
     if (!marshalTypes) return '📅';
     const types = marshalTypes.toLowerCase();
-    if (types.includes('drag')) return '🏁';
-    if (types.includes('drift')) return '🚗';
-    if (types.includes('circuit') || types.includes('track')) return '🏎️';
+    if (types.includes('karting')) return '�️';
+    if (types.includes('motocross')) return '🏍️';
+    if (types.includes('rescue')) return '�';
+    if (types.includes('circuit')) return '🏁';
+    if (types.includes('drift')) return '💨';
+    if (types.includes('drag')) return '🚦';
+    if (types.includes('pit')) return '🛠️';
     return '📅';
   };
 

@@ -6,12 +6,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
 const marshalTypesList = [
-  { key: 'drag-race', labelAr: 'سباق تسارع', labelEn: 'Drag Race' },
-  { key: 'motocross', labelAr: 'موتوكروس', labelEn: 'Motocross' },
-  { key: 'karting', labelAr: 'كارتينج', labelEn: 'Karting' },
-  { key: 'drift', labelAr: 'درفت', labelEn: 'Drift' },
-  { key: 'circuit', labelAr: 'حلبة', labelEn: 'Circuit' },
-  { key: 'rescue', labelAr: 'إنقاذ', labelEn: 'Rescue' },
+  { key: 'karting', labelAr: 'كارتنج', labelEn: 'Karting', icon: '🏎️' },
+  { key: 'motocross', labelAr: 'موتوكروس', labelEn: 'Motocross', icon: '🏍️' },
+  { key: 'rescue', labelAr: 'إنقاذ', labelEn: 'Rescue', icon: '🚑' },
+  { key: 'circuit', labelAr: 'حلبة', labelEn: 'Circuit', icon: '🏁' },
+  { key: 'drift', labelAr: 'دريفت', labelEn: 'Drift', icon: '💨' },
+  { key: 'drag-race', labelAr: 'سباق الدراج', labelEn: 'Drag Race', icon: '🚦' },
+  { key: 'pit', labelAr: 'منطقة الصيانة', labelEn: 'Pit', icon: '🛠️' },
 ];
 
 const AddEventScreen = ({ navigation }) => {

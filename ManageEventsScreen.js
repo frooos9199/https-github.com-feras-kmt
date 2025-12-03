@@ -20,7 +20,6 @@ const ManageEventsScreen = () => {
     
     try {
       setError(null);
-      console.log('[MANAGE EVENTS] Fetching events...');
       
       const response = await fetch('https://www.kmtsys.com/api/admin/events', {
         headers: {
@@ -29,9 +28,7 @@ const ManageEventsScreen = () => {
         },
       });
       
-      console.log('[MANAGE EVENTS] Response status:', response.status);
       const data = await response.json();
-      console.log('[MANAGE EVENTS] Response data:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch events');
@@ -39,7 +36,6 @@ const ManageEventsScreen = () => {
       
       // API يرجع array مباشرة وليس object
       const eventsArray = Array.isArray(data) ? data : (data.events || []);
-      console.log('[MANAGE EVENTS] Events loaded:', eventsArray.length);
       setEvents(eventsArray);
     } catch (err) {
       console.error('[MANAGE EVENTS] Error:', err);
@@ -87,9 +83,13 @@ const ManageEventsScreen = () => {
   const getEventIcon = (marshalTypes) => {
     if (!marshalTypes) return '📅';
     const types = marshalTypes.toLowerCase();
-    if (types.includes('drag')) return '🏁';
-    if (types.includes('drift')) return '🚗';
-    if (types.includes('circuit') || types.includes('track')) return '🏎️';
+    if (types.includes('karting')) return '�️';
+    if (types.includes('motocross')) return '🏍️';
+    if (types.includes('rescue')) return '�';
+    if (types.includes('circuit')) return '🏁';
+    if (types.includes('drift')) return '💨';
+    if (types.includes('drag')) return '🚦';
+    if (types.includes('pit')) return '🛠️';
     return '📅';
   };
 

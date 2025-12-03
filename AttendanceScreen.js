@@ -59,10 +59,14 @@ const AttendanceScreen = ({ navigation }) => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isRefreshing = false) => {
+    if (!isRefreshing) {
+      setLoading(true);
+    }
     await Promise.all([fetchAvailableEvents(), fetchMyAttendance()]);
-    setLoading(false);
+    if (!isRefreshing) {
+      setLoading(false);
+    }
   };
 
   // جلب الأحداث المتاحة للتسجيل
@@ -159,7 +163,7 @@ const AttendanceScreen = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchData();
+    await fetchData(true); // تمرير true للإشارة أنها refresh
     setRefreshing(false);
   };
 

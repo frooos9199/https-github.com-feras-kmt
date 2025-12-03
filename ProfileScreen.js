@@ -187,6 +187,124 @@ const ProfileScreen = () => {
                 <Text style={styles.detailValue}>{displayData?.phone || '---'}</Text>
               </View>
             </View>
+
+            <View style={styles.detailCard}>
+              <View style={styles.detailIconBox}>
+                <Ionicons name="water" size={22} color="#dc2626" />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>{lang === 'ar' ? 'فصيلة الدم' : 'Blood Type'}</Text>
+                <Text style={styles.detailValue}>{displayData?.bloodType || '---'}</Text>
+              </View>
+            </View>
+
+            {displayData?.role === 'marshal' && displayData?.marshalTypes && (
+              <View style={styles.detailCard}>
+                <View style={styles.detailIconBox}>
+                  <Ionicons name="shield-checkmark" size={22} color="#dc2626" />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text style={styles.detailLabel}>{lang === 'ar' ? 'تخصصات المارشال' : 'Marshal Types'}</Text>
+                  <Text style={styles.detailValue}>
+                    {displayData.marshalTypes.split(',').map(type => {
+                      const typeMap = {
+                        'karting': { ar: 'كارتنج 🏎️', en: 'Karting 🏎️' },
+                        'motocross': { ar: 'موتوكروس 🏍️', en: 'Motocross 🏍️' },
+                        'rescue': { ar: 'إنقاذ 🚑', en: 'Rescue 🚑' },
+                        'circuit': { ar: 'حلبة 🏁', en: 'Circuit 🏁' },
+                        'drift': { ar: 'دريفت 💨', en: 'Drift 💨' },
+                        'drag-race': { ar: 'سباق الدراج 🚦', en: 'Drag Race 🚦' },
+                        'pit': { ar: 'منطقة الصيانة 🛠️', en: 'Pit 🛠️' }
+                      };
+                      const trimmedType = type.trim();
+                      return typeMap[trimmedType] ? typeMap[trimmedType][lang] : trimmedType;
+                    }).join(', ')}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Civil ID Images */}
+            {(displayData?.civilIdFrontImage || displayData?.civilIdBackImage) && (
+              <>
+                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                  {lang === 'ar' ? '🪪 صور البطاقة المدنية' : '🪪 Civil ID Images'}
+                </Text>
+                
+                {displayData?.civilIdFrontImage && (
+                  <TouchableOpacity 
+                    style={styles.imageCard}
+                    onPress={() => Linking.openURL(displayData.civilIdFrontImage)}
+                  >
+                    <Image 
+                      source={{ uri: displayData.civilIdFrontImage }} 
+                      style={styles.documentImage}
+                      resizeMode="cover"
+                    />
+                    <Text style={styles.imageLabel}>
+                      {lang === 'ar' ? 'الوجه الأمامي' : 'Front Side'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                {displayData?.civilIdBackImage && (
+                  <TouchableOpacity 
+                    style={styles.imageCard}
+                    onPress={() => Linking.openURL(displayData.civilIdBackImage)}
+                  >
+                    <Image 
+                      source={{ uri: displayData.civilIdBackImage }} 
+                      style={styles.documentImage}
+                      resizeMode="cover"
+                    />
+                    <Text style={styles.imageLabel}>
+                      {lang === 'ar' ? 'الوجه الخلفي' : 'Back Side'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
+
+            {/* License Images */}
+            {(displayData?.licenseFrontImage || displayData?.licenseBackImage) && (
+              <>
+                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                  {lang === 'ar' ? '🚗 صور رخصة القيادة' : '🚗 License Images'}
+                </Text>
+                
+                {displayData?.licenseFrontImage && (
+                  <TouchableOpacity 
+                    style={styles.imageCard}
+                    onPress={() => Linking.openURL(displayData.licenseFrontImage)}
+                  >
+                    <Image 
+                      source={{ uri: displayData.licenseFrontImage }} 
+                      style={styles.documentImage}
+                      resizeMode="cover"
+                    />
+                    <Text style={styles.imageLabel}>
+                      {lang === 'ar' ? 'الوجه الأمامي' : 'Front Side'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                {displayData?.licenseBackImage && (
+                  <TouchableOpacity 
+                    style={styles.imageCard}
+                    onPress={() => Linking.openURL(displayData.licenseBackImage)}
+                  >
+                    <Image 
+                      source={{ uri: displayData.licenseBackImage }} 
+                      style={styles.documentImage}
+                      resizeMode="cover"
+                    />
+                    <Text style={styles.imageLabel}>
+                      {lang === 'ar' ? 'الوجه الخلفي' : 'Back Side'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
           </View>
 
           {/* Logo at Bottom */}
@@ -361,6 +479,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     fontWeight: '600',
+  },
+
+  // Image Cards
+  imageCard: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
+  },
+  documentImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  imageLabel: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
   },
 
   // Bottom Logo

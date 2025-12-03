@@ -8,8 +8,6 @@ import { Alert } from 'react-native';
  */
 export async function sendFcmTokenToServer(fcmToken, userToken) {
   try {
-    console.log('[FCM API] Sending FCM token to server...');
-    
     const response = await fetch('https://www.kmtsys.com/api/user/fcm-token', {
       method: 'PUT',
       headers: createAuthHeaders(userToken),
@@ -19,18 +17,14 @@ export async function sendFcmTokenToServer(fcmToken, userToken) {
     const data = await response.json();
     
     if (response.ok) {
-      console.log('[FCM API] ✅ FCM Token saved successfully');
-      // عرض رسالة للمستخدم عشان نتأكد إنه اشتغل
-      Alert.alert('✅ Success', 'FCM Token saved successfully!');
+      console.log('[FCM API] FCM Token saved successfully');
       return true;
     } else {
-      console.error('[FCM API] ❌ Failed to save FCM Token:', data.error);
-      Alert.alert('❌ Error', `Failed to save FCM Token: ${data.error}`);
+      console.error('[FCM API] Failed to save FCM Token:', data.error);
       return false;
     }
   } catch (err) {
-    console.error('[FCM API] ❌ Error sending FCM Token:', err.message);
-    Alert.alert('❌ Network Error', err.message);
+    console.error('[FCM API] Error sending FCM Token:', err.message);
     return false;
   }
 }

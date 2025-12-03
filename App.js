@@ -1,6 +1,6 @@
 import './firebaseInit';
 import * as React from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeWebView from './HomeWebView';
@@ -20,6 +20,9 @@ import { sendFcmTokenToServer } from './fcmApi';
 import AttendanceScreen from './AttendanceScreen';
 import MyAttendanceScreen from './MyAttendanceScreen';
 import PendingRequestsScreen from './PendingRequestsScreen';
+
+// إخفاء جميع التحذيرات والـ LogBox
+LogBox.ignoreAllLogs(true);
 
 const Stack = createStackNavigator();
 

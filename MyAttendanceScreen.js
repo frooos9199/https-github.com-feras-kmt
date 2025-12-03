@@ -54,8 +54,10 @@ const MyAttendanceScreen = ({ navigation }) => {
     fetchMyAttendance();
   }, []);
 
-  const fetchMyAttendance = async () => {
-    setLoading(true);
+  const fetchMyAttendance = async (isRefreshing = false) => {
+    if (!isRefreshing) {
+      setLoading(true);
+    }
     try {
       if (!user?.token) {
         console.log('[MY ATTENDANCE] ❌ No token available');
@@ -84,13 +86,15 @@ const MyAttendanceScreen = ({ navigation }) => {
     } catch (error) {
       console.error('[MY ATTENDANCE] 💥 Exception:', error);
     } finally {
-      setLoading(false);
+      if (!isRefreshing) {
+        setLoading(false);
+      }
     }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchMyAttendance();
+    await fetchMyAttendance(true); // تمرير true للإشارة أنها refresh
     setRefreshing(false);
   };
 
