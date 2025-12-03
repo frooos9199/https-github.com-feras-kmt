@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 interface UserProfile {
   id: string
@@ -858,9 +859,7 @@ export default function ProfilePage() {
               />
               {formData.dateOfBirth && (
                 <p className="text-sm text-gray-400 mt-2">
-                  {language === "ar"
-                    ? new Date(formData.dateOfBirth).toLocaleDateString("en-GB")
-                    : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
+                  {formatDate(new Date(formData.dateOfBirth), language)}
                 </p>
               )}
             </div>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useLanguage } from "@/contexts/LanguageContext"
 import NotificationBell from "@/components/NotificationBell"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 export default function BroadcastPage() {
   const { data: session, status } = useSession()
@@ -312,7 +313,7 @@ export default function BroadcastPage() {
                 <option value="">-- Select Event --</option>
                 {events.map((event) => (
                   <option key={event.id} value={event.id}>
-                    {event.titleEn} - {new Date(event.date).toLocaleDateString()}
+                    {event.titleEn} - {formatDate(new Date(event.date), language)}
                   </option>
                 ))}
               </select>

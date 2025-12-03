@@ -7,6 +7,7 @@ import EventCountdown from "@/components/EventCountdown"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 interface Event {
   id: string
@@ -351,7 +352,7 @@ export default function EventsManagement() {
                       {/* تاريخ ووقت البداية - أخضر */}
                       <div className="flex items-center gap-2 text-green-500 font-medium">
                         <span>📅</span>
-                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "en-GB" : "en-US")}</span>
+                        <span>{formatDate(new Date(event.date), language)}</span>
                         <span>🕐</span>
                         <span>{event.time}</span>
                       </div>
@@ -360,7 +361,7 @@ export default function EventsManagement() {
                       {event.endDate && (
                         <div className="flex items-center gap-2 text-red-500 font-medium">
                           <span>📅</span>
-                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "en-GB" : "en-US")}</span>
+                          <span>{formatDate(new Date(event.endDate), language)}</span>
                           {event.endTime && (
                             <>
                               <span>🕐</span>

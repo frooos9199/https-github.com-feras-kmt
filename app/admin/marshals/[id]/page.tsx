@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
+import { formatDate } from "@/lib/dateUtils"
 
 const MARSHAL_TYPES = [
   { value: "karting", label: { ar: "كارتنج", en: "Karting" }, color: "bg-yellow-500", icon: "🏎️" },
@@ -370,7 +371,7 @@ export default function AdminMarshalProfile() {
                 </div>
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
-                  <input type="text" value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString(language === "ar" ? 'ar-EG' : 'en-GB') : ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                  <input type="text" value={profile.dateOfBirth ? formatDate(new Date(profile.dateOfBirth), language) : ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
                 </div>
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
@@ -501,9 +502,7 @@ export default function AdminMarshalProfile() {
                 <input type="date" value={formData.dateOfBirth} onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
                 {formData.dateOfBirth && (
                   <p className="text-sm text-gray-400 mt-2">
-                    {language === "ar"
-                      ? new Date(formData.dateOfBirth).toLocaleDateString("en-GB")
-                      : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
+                    {formatDate(new Date(formData.dateOfBirth), language)}
                   </p>
                 )}
               </div>
