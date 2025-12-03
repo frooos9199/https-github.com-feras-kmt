@@ -9,15 +9,25 @@ import jwt from "jsonwebtoken"
 // Verify JWT token
 function verifyJWT(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
-  if (!authHeader) return null;
+  console.log('[JWT] Auth header:', authHeader?.substring(0, 50));
+  if (!authHeader) {
+    console.log('[JWT] No auth header');
+    return null;
+  }
   const token = authHeader.split(" ")[1];
-  if (!token) return null;
+  if (!token) {
+    console.log('[JWT] No token in header');
+    return null;
+  }
   try {
     const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
+    console.log('[JWT] Using secret:', jwtSecret.substring(0, 10) + '...');
     const decoded = jwt.verify(token, jwtSecret);
+    console.log('[JWT] Token verified successfully:', decoded);
     if (typeof decoded === "string") return null;
     return decoded;
-  } catch {
+  } catch (err) {
+    console.error('[JWT] Verification failed:', err instanceof Error ? err.message : String(err));
     return null;
   }
 }
