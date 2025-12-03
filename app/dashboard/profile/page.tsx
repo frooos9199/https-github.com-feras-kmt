@@ -855,6 +855,13 @@ export default function ProfilePage() {
                 disabled={!editing}
                 className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
               />
+              {formData.dateOfBirth && (
+                <p className="text-sm text-gray-400 mt-2">
+                  {language === "ar"
+                    ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
+                    : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
+                </p>
+              )}
             </div>
 
             {/* Nationality */}
