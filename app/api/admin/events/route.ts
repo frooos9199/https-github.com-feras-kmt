@@ -32,7 +32,17 @@ async function getUser(request: NextRequest) {
   
   // Try JWT (mobile)
   const jwtUser = verifyJWT(request);
-  return jwtUser;
+  if (jwtUser) {
+    // JWT payload has { id, email, role } directly
+    return {
+      id: jwtUser.id,
+      email: jwtUser.email,
+      role: jwtUser.role,
+      name: jwtUser.name,
+    };
+  }
+  
+  return null;
 }
 
 // GET - Fetch all events
