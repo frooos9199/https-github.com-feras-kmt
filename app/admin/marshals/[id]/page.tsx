@@ -502,7 +502,7 @@ export default function AdminMarshalProfile() {
                 {formData.dateOfBirth && (
                   <p className="text-sm text-gray-400 mt-2">
                     {language === "ar"
-                      ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
+                      ? new Date(formData.dateOfBirth).toLocaleDateString("ar-SA-u-nu-latn")
                       : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
                   </p>
                 )}

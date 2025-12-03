@@ -308,7 +308,7 @@ export default function MyAttendancePage() {
                     <div className="space-y-2 mb-4 text-sm">
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📅</span>
-                        <span>{new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                        <span>{new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
@@ -324,7 +324,11 @@ export default function MyAttendancePage() {
                       </div>
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📝</span>
-                        <span>{new Date(attendance.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                        <span>{new Date(attendance.registeredAt).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric'
+                        })}</span>
                       </div>
                     </div>
 

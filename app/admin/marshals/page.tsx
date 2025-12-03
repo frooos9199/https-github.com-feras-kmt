@@ -269,7 +269,7 @@ export default function MarshalsManagement() {
                         <div className="text-sm">
                           <p className="text-gray-300">🆔 {marshal.civilId}</p>
                           <p className="text-gray-400">
-                            📅 {new Date(marshal.dateOfBirth).toLocaleDateString(isArabic ? "ar-EG" : "en-US")}
+                            📅 {new Date(marshal.dateOfBirth).toLocaleDateString(isArabic ? "ar-SA-u-nu-latn" : "en-US")}
                           </p>
                           {marshal.nationality && (
                             <p className="text-gray-400">🌍 {marshal.nationality}</p>
@@ -289,7 +289,7 @@ export default function MarshalsManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm text-gray-400">
-                          {new Date(marshal.createdAt).toLocaleDateString(isArabic ? "ar-EG" : "en-US")}
+                          {new Date(marshal.createdAt).toLocaleDateString(isArabic ? "ar-SA-u-nu-latn" : "en-US")}
                         </p>
                       </td>
                     </motion.tr>

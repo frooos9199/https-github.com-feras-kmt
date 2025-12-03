@@ -235,7 +235,7 @@ export default function EventsPage() {
                       {/* تاريخ ووقت البداية - أخضر */}
                       <div className="flex items-center gap-2 text-green-500 font-medium">
                         <span>📅</span>
-                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
@@ -248,7 +248,7 @@ export default function EventsPage() {
                       {event.endDate && (
                         <div className="flex items-center gap-2 text-red-500 font-medium">
                           <span>📅</span>
-                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'

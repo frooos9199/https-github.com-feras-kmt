@@ -307,7 +307,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-gray-500">
-                      {new Date(activity.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                      {new Date(activity.registeredAt).toLocaleDateString(language === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
                         month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
