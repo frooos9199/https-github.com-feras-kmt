@@ -16,6 +16,7 @@ interface Event {
   date: string
   endDate: string | null
   time: string
+  endTime: string | null
   location: string
   marshalTypes: string
   maxMarshals: number
@@ -306,6 +307,13 @@ export default function EventsManagement() {
                     <div className="space-y-1 text-sm text-gray-300 mb-4">
                       <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
                       <div>🕐 {event.time}</div>
+                      {event.endDate && (
+                        <div className="text-gray-400">
+                          <span>📅 {language === "ar" ? "إلى" : "to"} </span>
+                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                          {event.endTime && <span> 🕐 {event.endTime}</span>}
+                        </div>
+                      )}
                       <div>📍 {event.location}</div>
                       <div>👥 {event._count.attendances}/{event.maxMarshals}</div>
                     </div>

@@ -14,7 +14,9 @@ interface Event {
   descriptionEn: string
   descriptionAr: string
   date: string
+  endDate?: string | null
   time: string
+  endTime?: string | null
   location: string
   type: string
   maxMarshals: number
@@ -186,6 +188,17 @@ export default function EventsPage() {
                         <span>🕐</span>
                         <span>{event.time}</span>
                       </div>
+                      {event.endDate && (
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <span>📅 {language === "ar" ? "إلى" : "to"}</span>
+                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}</span>
+                          {event.endTime && <span className="ml-2">🕐 {event.endTime}</span>}
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📍</span>
                         <span>{event.location}</span>
