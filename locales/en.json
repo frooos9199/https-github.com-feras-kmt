@@ -66,6 +66,26 @@
   "noRequests": "No requests",
   "noPendingRequests": "No pending requests",
   "noRequestsForFilter": "No requests for this filter",
-  "registeredAt": "Registered at"
+  "registeredAt": "Registered at",
+  "login": "Login",
+  "email": "Email",
+  "password": "Password",
+  "enter_email_password": "Please enter your email and password",
+  "invalid_response": "Invalid response from server",
+  "login_failed": "Login failed",
+  "fill_required_fields": "Please fill all required fields",
+  "event_added": "Event added successfully",
+  "confirm_delete": "Confirm Delete",
+  "confirm_delete_message": "Are you sure you want to delete this event? This cannot be undone!",
+  "delete": "Delete",
+  "event_deleted": "Event deleted successfully",
+  "delete_failed": "Failed to delete event",
+  "delete_error": "An error occurred while deleting",
+  "upcoming_events": "Upcoming Events",
+  "today_events": "Today's Events",
+  "past_events": "Past Events",
+  "no_permission_stats": "You do not have permission to view statistics. Please contact admin.",
+  "marshals_by_specialty": "Marshals by Specialty",
+  "admins_only": "Admins only"
 }
 

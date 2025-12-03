@@ -1,4 +1,4 @@
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -7,18 +7,31 @@ import { UserContext } from './UserContext';
 import I18n from './i18n';
 
 const actions = [
-  { key: 'manage_events', icon: 'calendar' },
-  { key: 'attendance_requests', icon: 'document-text' },
-  { key: 'manage_marshals', icon: 'flag' },
-  { key: 'broadcast_messages', icon: 'megaphone' },
-  { key: 'backup', icon: 'cloud-upload' },
-  { key: 'reports', icon: 'bar-chart' },
-  { key: 'recent_activity', icon: 'time' },
+  { key: 'manage_events', icon: 'calendar', color: '#3b82f6' },
+  { key: 'attendance_requests', icon: 'document-text', color: '#f59e0b' },
+  { key: 'manage_marshals', icon: 'flag', color: '#10b981' },
+  { key: 'broadcast_messages', icon: 'megaphone', color: '#ec4899' },
+  { key: 'backup', icon: 'cloud-upload', color: '#06b6d4' },
+  { key: 'reports', icon: 'bar-chart', color: '#8b5cf6' },
+  { key: 'recent_activity', icon: 'time', color: '#6b7280' },
 ];
 
 const QuickActionsScreen = () => {
   const { user } = useContext(UserContext);
   const navigation = useNavigation();
+  const [lang, setLang] = useState(I18n.locale);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // مراقبة تغيير اللغة
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (I18n.locale !== lang) {
+        setLang(I18n.locale);
+        setRefreshKey(prev => prev + 1);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [lang]);
 
   const handleActionPress = (key) => {
     if (key === 'recent_activity') {
@@ -58,7 +71,7 @@ const QuickActionsScreen = () => {
         <ScrollView contentContainerStyle={styles.actionsGrid}>
           {actions.map(action => (
             <TouchableOpacity key={action.key} style={styles.actionCard} onPress={() => handleActionPress(action.key)}>
-              <Ionicons name={action.icon} size={36} color="#fff" style={{ marginBottom: 10 }} />
+              <Ionicons name={action.icon} size={36} color={action.color || '#fff'} style={{ marginBottom: 10 }} />
               <Text style={styles.actionLabel}>{I18n.t(action.key)}</Text>
             </TouchableOpacity>
           ))}

@@ -32,18 +32,18 @@ const EventsScreen = ({ navigation }) => {
   const handleDeleteEvent = async (eventId) => {
     try {
       if (!user?.token) {
-        Alert.alert('خطأ', 'يجب تسجيل الدخول أولاً');
+        Alert.alert(I18n.t('error'), I18n.t('notAuthenticated'));
         return;
       }
 
       // في React Native لا يوجد window.confirm، استخدم Alert بدلاً منها
       Alert.alert(
-        'تأكيد الحذف',
-        'هل أنت متأكد أنك تريد حذف هذا الحدث؟ لا يمكن التراجع!',
+        I18n.t('confirm_delete'),
+        I18n.t('confirm_delete_message'),
         [
-          { text: 'إلغاء', style: 'cancel' },
+          { text: I18n.t('cancel'), style: 'cancel' },
           {
-            text: 'حذف',
+            text: I18n.t('delete'),
             style: 'destructive',
             onPress: async () => {
               try {
@@ -54,19 +54,19 @@ const EventsScreen = ({ navigation }) => {
                 
                 if (response.ok) {
                   fetchEvents();
-                  Alert.alert('نجح', 'تم حذف الحدث بنجاح');
+                  Alert.alert(I18n.t('success'), I18n.t('event_deleted'));
                 } else {
-                  Alert.alert('خطأ', 'فشل حذف الحدث!');
+                  Alert.alert(I18n.t('error'), I18n.t('delete_failed'));
                 }
               } catch (err) {
-                Alert.alert('خطأ', 'حدث خطأ أثناء الحذف!');
+                Alert.alert(I18n.t('error'), I18n.t('delete_error'));
               }
             }
           }
         ]
       );
     } catch (err) {
-      Alert.alert('خطأ', 'حدث خطأ أثناء الحذف!');
+      Alert.alert(I18n.t('error'), I18n.t('delete_error'));
     }
   };
   

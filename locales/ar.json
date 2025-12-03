@@ -64,6 +64,26 @@
   "noRequests": "لا توجد طلبات",
   "noPendingRequests": "لا توجد طلبات معلقة",
   "noRequestsForFilter": "لا توجد طلبات بهذا الفلتر",
-  "registeredAt": "تاريخ التسجيل"
+  "registeredAt": "تاريخ التسجيل",
+  "login": "تسجيل الدخول",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "enter_email_password": "الرجاء إدخال البريد الإلكتروني وكلمة المرور",
+  "invalid_response": "استجابة غير صحيحة من الخادم",
+  "login_failed": "فشل تسجيل الدخول",
+  "fill_required_fields": "الرجاء ملء جميع الحقول المطلوبة",
+  "event_added": "تم إضافة الحدث بنجاح",
+  "confirm_delete": "تأكيد الحذف",
+  "confirm_delete_message": "هل أنت متأكد أنك تريد حذف هذا الحدث؟ لا يمكن التراجع!",
+  "delete": "حذف",
+  "event_deleted": "تم حذف الحدث بنجاح",
+  "delete_failed": "فشل حذف الحدث",
+  "delete_error": "حدث خطأ أثناء الحذف",
+  "upcoming_events": "الأحداث القادمة",
+  "today_events": "أحداث اليوم",
+  "past_events": "الأحداث السابقة",
+  "no_permission_stats": "لا تملك صلاحية عرض الإحصائيات. يرجى مراجعة الإدارة.",
+  "marshals_by_specialty": "تصنيف المارشال حسب الاختصاص",
+  "admins_only": "للمدراء فقط"
 }
 

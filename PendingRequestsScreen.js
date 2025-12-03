@@ -74,22 +74,22 @@ const PendingRequestsScreen = ({ navigation }) => {
 
   const handleApprove = (attendanceId, requestInfo) => {
     Alert.alert(
-      I18n.locale === 'ar' ? 'تأكيد الموافقة' : 'Confirm Approval',
-      `${I18n.locale === 'ar' ? 'المارشال: ' : 'Marshal: '}${requestInfo.userName}\n${I18n.locale === 'ar' ? 'الحدث: ' : 'Event: '}${I18n.locale === 'ar' ? requestInfo.eventTitleAr : requestInfo.eventTitleEn}`,
+      I18n.t('confirmApproval'),
+      `${I18n.t('marshalName')}: ${requestInfo.userName}\n${I18n.t('event')}: ${I18n.locale === 'ar' ? requestInfo.eventTitleAr : requestInfo.eventTitleEn}`,
       [
-        { text: I18n.locale === 'ar' ? 'إلغاء' : 'Cancel', style: 'cancel' },
-        { text: I18n.locale === 'ar' ? 'موافقة' : 'Approve', onPress: () => performStatusUpdate(attendanceId, 'approved') }
+        { text: I18n.t('cancel'), style: 'cancel' },
+        { text: I18n.t('approve'), onPress: () => performStatusUpdate(attendanceId, 'approved') }
       ]
     );
   };
 
   const handleReject = (attendanceId, requestInfo) => {
     Alert.alert(
-      I18n.locale === 'ar' ? 'تأكيد الرفض' : 'Confirm Rejection',
-      `${I18n.locale === 'ar' ? 'المارشال: ' : 'Marshal: '}${requestInfo.userName}\n${I18n.locale === 'ar' ? 'الحدث: ' : 'Event: '}${I18n.locale === 'ar' ? requestInfo.eventTitleAr : requestInfo.eventTitleEn}`,
+      I18n.t('confirmRejection'),
+      `${I18n.t('marshalName')}: ${requestInfo.userName}\n${I18n.t('event')}: ${I18n.locale === 'ar' ? requestInfo.eventTitleAr : requestInfo.eventTitleEn}`,
       [
-        { text: I18n.locale === 'ar' ? 'إلغاء' : 'Cancel', style: 'cancel' },
-        { text: I18n.locale === 'ar' ? 'رفض' : 'Reject', style: 'destructive', onPress: () => performStatusUpdate(attendanceId, 'rejected') }
+        { text: I18n.t('cancel'), style: 'cancel' },
+        { text: I18n.t('reject'), style: 'destructive', onPress: () => performStatusUpdate(attendanceId, 'rejected') }
       ]
     );
   };
@@ -98,7 +98,7 @@ const PendingRequestsScreen = ({ navigation }) => {
     setProcessingId(attendanceId);
     try {
       if (!user?.token) {
-        Alert.alert(I18n.locale === 'ar' ? 'خطأ' : 'Error', I18n.locale === 'ar' ? 'غير مسجل الدخول' : 'Not authenticated');
+        Alert.alert(I18n.t('error'), I18n.t('notAuthenticated'));
         return;
       }
 
@@ -120,20 +120,18 @@ const PendingRequestsScreen = ({ navigation }) => {
 
       if (response.ok) {
         Alert.alert(
-          I18n.locale === 'ar' ? 'نجح' : 'Success',
-          newStatus === 'approved'
-            ? (I18n.locale === 'ar' ? 'تمت الموافقة على الطلب' : 'Request approved')
-            : (I18n.locale === 'ar' ? 'تم رفض الطلب' : 'Request rejected')
+          I18n.t('success'),
+          newStatus === 'approved' ? I18n.t('requestApproved') : I18n.t('requestRejected')
         );
         fetchRequests();
       } else {
         const errorData = await response.json();
         console.error('[PENDING REQUESTS] Update error:', errorData);
-        Alert.alert(I18n.locale === 'ar' ? 'خطأ' : 'Error', errorData.error || 'Failed to update');
+        Alert.alert(I18n.t('error'), errorData.error || I18n.t('updateFailed'));
       }
     } catch (error) {
       console.error('[PENDING REQUESTS] Update exception:', error);
-      Alert.alert(I18n.locale === 'ar' ? 'خطأ' : 'Error', I18n.locale === 'ar' ? 'خطأ في الشبكة' : 'Network error');
+      Alert.alert(I18n.t('error'), I18n.t('networkError'));
     } finally {
       setProcessingId(null);
     }
@@ -156,9 +154,9 @@ const PendingRequestsScreen = ({ navigation }) => {
 
   const getStatusText = (status) => {
     const labels = {
-      pending: I18n.locale === 'ar' ? 'قيد الانتظار' : 'Pending',
-      approved: I18n.locale === 'ar' ? 'موافق' : 'Approved',
-      rejected: I18n.locale === 'ar' ? 'مرفوض' : 'Rejected'
+      pending: I18n.t('pending'),
+      approved: I18n.t('approved'),
+      rejected: I18n.t('rejected')
     };
     return labels[status] || status;
   };
@@ -171,16 +169,12 @@ const PendingRequestsScreen = ({ navigation }) => {
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
               <Ionicons name="arrow-back" size={28} color="#fff" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>
-              {I18n.locale === 'ar' ? 'طلبات الحضور' : 'Attendance Requests'}
-            </Text>
+            <Text style={styles.headerTitle}>{I18n.t('attendance_requests')}</Text>
             <View style={{ width: 28 }} />
           </View>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#fff" />
-            <Text style={styles.loadingText}>
-              {I18n.locale === 'ar' ? 'جاري التحميل...' : 'Loading...'}
-            </Text>
+            <Text style={styles.loadingText}>{I18n.t('loading')}</Text>
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -197,9 +191,7 @@ const PendingRequestsScreen = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={28} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>
-            {I18n.locale === 'ar' ? 'طلبات الحضور' : 'Attendance Requests'}
-          </Text>
+          <Text style={styles.headerTitle}>{I18n.t('attendance_requests')}</Text>
           <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>
             <Ionicons name="refresh" size={24} color="#fff" />
           </TouchableOpacity>
@@ -214,9 +206,7 @@ const PendingRequestsScreen = ({ navigation }) => {
               onPress={() => setFilter(filterOption)}
             >
               <Text style={[styles.filterTabText, filter === filterOption && styles.filterTabTextActive]}>
-                {I18n.locale === 'ar'
-                  ? { all: 'الكل', pending: 'معلق', approved: 'موافق', rejected: 'مرفوض' }[filterOption]
-                  : { all: 'All', pending: 'Pending', approved: 'Approved', rejected: 'Rejected' }[filterOption]}
+                {I18n.t(filterOption)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -230,12 +220,8 @@ const PendingRequestsScreen = ({ navigation }) => {
           {filteredRequests.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Ionicons name="checkmark-done-circle-outline" size={80} color="rgba(255,255,255,0.3)" />
-              <Text style={styles.emptyTitle}>
-                {I18n.locale === 'ar' ? 'لا توجد طلبات' : 'No Requests'}
-              </Text>
-              <Text style={styles.emptyDesc}>
-                {I18n.locale === 'ar' ? 'لا توجد طلبات في هذه الفئة' : 'No requests in this category'}
-              </Text>
+              <Text style={styles.emptyTitle}>{I18n.t('noRequests')}</Text>
+              <Text style={styles.emptyDesc}>{I18n.t('noRequestsForFilter')}</Text>
             </View>
           ) : (
             filteredRequests.map((item) => (
@@ -287,8 +273,7 @@ const PendingRequestsScreen = ({ navigation }) => {
                 <View style={styles.requestDateRow}>
                   <Ionicons name="paper-plane-outline" size={14} color="rgba(255,255,255,0.5)" />
                   <Text style={styles.requestDateText}>
-                    {I18n.locale === 'ar' ? 'تاريخ الطلب: ' : 'Requested: '}
-                    {formatDate(item.createdAt)}
+                    {I18n.t('registeredAt')}: {formatDate(item.createdAt)}
                   </Text>
                 </View>
 
@@ -309,9 +294,7 @@ const PendingRequestsScreen = ({ navigation }) => {
                       ) : (
                         <>
                           <Ionicons name="close-circle" size={20} color="#fff" />
-                          <Text style={styles.actionButtonText}>
-                            {I18n.locale === 'ar' ? 'رفض' : 'Reject'}
-                          </Text>
+                          <Text style={styles.actionButtonText}>{I18n.t('reject')}</Text>
                         </>
                       )}
                     </TouchableOpacity>
@@ -329,9 +312,7 @@ const PendingRequestsScreen = ({ navigation }) => {
                       ) : (
                         <>
                           <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                          <Text style={styles.actionButtonText}>
-                            {I18n.locale === 'ar' ? 'موافقة' : 'Approve'}
-                          </Text>
+                          <Text style={styles.actionButtonText}>{I18n.t('approve')}</Text>
                         </>
                       )}
                     </TouchableOpacity>

@@ -68,7 +68,7 @@ const AddEventScreen = ({ navigation }) => {
 
   const handleAddEvent = async () => {
     if (!form.titleEn || !form.titleAr || !form.date) {
-      Alert.alert('Error', 'Please fill all required fields');
+      Alert.alert(I18n.t('error'), I18n.t('fill_required_fields'));
       return;
     }
     setLoading(true);
@@ -86,11 +86,11 @@ const AddEventScreen = ({ navigation }) => {
         }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to add event');
-      Alert.alert('Success', 'Event added successfully');
+      if (!response.ok) throw new Error(data.message || I18n.t('login_failed'));
+      Alert.alert(I18n.t('success'), I18n.t('event_added'));
       navigation.goBack();
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert(I18n.t('error'), err.message);
     } finally {
       setLoading(false);
     }

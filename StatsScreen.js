@@ -13,6 +13,7 @@ const StatsScreen = () => {
   const { user } = useContext(UserContext);
   const isAdmin = user?.role === 'admin';
   const [lang, setLang] = useState(I18n.locale);
+  const [refreshKey, setRefreshKey] = useState(0);
   const avatarSource = user?.avatar ? { uri: user.avatar } : require('./assets/appicon/icon.png');
 
   const [stats, setStats] = useState({
@@ -84,7 +85,18 @@ const StatsScreen = () => {
 
   useEffect(() => {
     if (user?.token) fetchStats();
-  }, [user, lang]);
+  }, [user?.token, isAdmin]);
+
+  // مراقبة تغيير اللغة
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (I18n.locale !== lang) {
+        setLang(I18n.locale);
+        setRefreshKey(prev => prev + 1);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [lang]);
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
@@ -95,12 +107,12 @@ const StatsScreen = () => {
 
   // بناء مصفوفة الإحصائيات ديناميكياً من القيم القادمة من الـ API
   const statsArr = [];
-  if ('totalEvents' in stats) statsArr.push({ label: I18n.locale === 'ar' ? 'إجمالي الأحداث' : 'Total Events', value: stats.totalEvents, icon: 'calendar' });
-  if ('totalMarshals' in stats) statsArr.push({ label: I18n.locale === 'ar' ? 'إجمالي عدد المارشال' : 'Total Marshals', value: stats.totalMarshals, icon: 'people' });
-  if ('pendingAttendance' in stats) statsArr.push({ label: I18n.locale === 'ar' ? 'الحضور المعلق' : 'Pending Attendance', value: stats.pendingAttendance, icon: 'alert-circle' });
-  if ('upcomingEvents' in stats) statsArr.push({ label: I18n.locale === 'ar' ? 'الأحداث القادمة' : 'Upcoming Events', value: stats.upcomingEvents, icon: 'flag' });
-  if ('todayEvents' in stats) statsArr.push({ label: I18n.locale === 'ar' ? 'أحداث اليوم' : "Today's Events", value: stats.todayEvents, icon: 'calendar-today' });
-  if ('pastEvents' in stats) statsArr.push({ label: I18n.locale === 'ar' ? 'الأحداث السابقة' : 'Past Events', value: stats.pastEvents, icon: 'calendar-clock' });
+  if ('totalEvents' in stats) statsArr.push({ label: I18n.t('num_events'), value: stats.totalEvents, icon: 'calendar', color: '#3b82f6' });
+  if ('totalMarshals' in stats) statsArr.push({ label: I18n.t('num_marshals'), value: stats.totalMarshals, icon: 'people', color: '#8b5cf6' });
+  if ('pendingAttendance' in stats) statsArr.push({ label: I18n.t('num_pending_requests'), value: stats.pendingAttendance, icon: 'alert-circle', color: '#f59e0b' });
+  if ('upcomingEvents' in stats) statsArr.push({ label: I18n.t('upcoming_events'), value: stats.upcomingEvents, icon: 'flag', color: '#10b981' });
+  if ('todayEvents' in stats) statsArr.push({ label: I18n.t('today_events'), value: stats.todayEvents, icon: 'today', color: '#06b6d4' });
+  if ('pastEvents' in stats) statsArr.push({ label: I18n.t('past_events'), value: stats.pastEvents, icon: 'time', color: '#6b7280' });
 
   if (stats.unauthorized) {
     return (
@@ -108,9 +120,7 @@ const StatsScreen = () => {
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Ionicons name="alert-circle" size={64} color="#fff" style={{ marginBottom: 18 }} />
           <Text style={{ color: '#fff', fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
-            {I18n.locale === 'ar'
-              ? 'لا تملك صلاحية عرض الإحصائيات. يرجى مراجعة الإدارة.'
-              : 'You do not have permission to view statistics. Please contact admin.'}
+            {I18n.t('no_permission_stats')}
           </Text>
         </SafeAreaView>
       </LinearGradient>
@@ -144,7 +154,7 @@ const StatsScreen = () => {
             <View style={styles.statsGrid}>
               {statsArr.map((stat, idx) => (
                 <View key={idx} style={styles.statCard}>
-                  <Ionicons name={stat.icon} size={36} color="#fff" style={{ marginBottom: 10 }} />
+                  <Ionicons name={stat.icon} size={36} color={stat.color || '#fff'} style={{ marginBottom: 10 }} />
                   <Text style={styles.statValue}>{`${stat.value}`}</Text>
                   <Text style={styles.statLabel}>{stat.label}</Text>
                 </View>
@@ -153,11 +163,11 @@ const StatsScreen = () => {
             {stats.marshalsBySpecialty && Object.keys(stats.marshalsBySpecialty).length > 0 && (
               <View style={{marginTop:24}}>
                 <Text style={{color:'#fff',fontWeight:'bold',fontSize:18,marginBottom:8,textAlign:'center'}}>
-                  {I18n.locale === 'ar' ? 'تصنيف المارشال حسب الاختصاص' : 'Marshals by Specialty'}
+                  {I18n.t('marshals_by_specialty')}
                 </Text>
                 {Object.entries(stats.marshalsBySpecialty).map(([spec, count]) => (
                   <Text key={spec} style={{color:'#fff',fontSize:16,textAlign:'center',marginBottom:4}}>
-                    {I18n.locale === 'ar' ? spec : spec} : {count}
+                    {spec} : {count}
                   </Text>
                 ))}
               </View>

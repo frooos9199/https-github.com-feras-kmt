@@ -20,21 +20,29 @@ const ManageEventsScreen = () => {
     
     try {
       setError(null);
+      console.log('[MANAGE EVENTS] Fetching events...');
+      
       const response = await fetch('https://www.kmtsys.com/api/admin/events', {
         headers: {
           'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json',
         },
       });
       
+      console.log('[MANAGE EVENTS] Response status:', response.status);
       const data = await response.json();
+      console.log('[MANAGE EVENTS] Response data:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch events');
       }
       
-      setEvents(Array.isArray(data.events) ? data.events : []);
+      // API يرجع array مباشرة وليس object
+      const eventsArray = Array.isArray(data) ? data : (data.events || []);
+      console.log('[MANAGE EVENTS] Events loaded:', eventsArray.length);
+      setEvents(eventsArray);
     } catch (err) {
-      console.error('[MANAGE EVENTS]', err);
+      console.error('[MANAGE EVENTS] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

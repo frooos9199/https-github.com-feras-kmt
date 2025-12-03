@@ -7,6 +7,7 @@ import FCMService from './FCMService';
 import { sendFcmTokenToServer } from './fcmApi';
 import { UserContext } from './UserContext';
 import { API_ENDPOINTS } from './apiConfig';
+import I18n from './i18n';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter your email and password');
+      Alert.alert(I18n.t('error'), I18n.t('enter_email_password'));
       return;
     }
     try {
@@ -29,12 +30,12 @@ const LoginScreen = ({ navigation }) => {
       console.log('LOGIN RESPONSE:', response.status, response.ok, data);
       
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'Login failed');
+        throw new Error(data.error || data.message || I18n.t('login_failed'));
       }
 
       // التحقق من وجود التوكن و البيانات
       if (!data.accessToken || !data.user) {
-        throw new Error('Invalid response from server');
+        throw new Error(I18n.t('invalid_response'));
       }
 
       // حفظ بيانات المستخدم مع التوكن
@@ -77,7 +78,7 @@ const LoginScreen = ({ navigation }) => {
       navigation.replace('MainTabs');
     } catch (err) {
       console.error('[LOGIN] ❌ Login error:', err);
-      Alert.alert('Error', err.message || 'Login failed');
+      Alert.alert(I18n.t('error'), err.message || I18n.t('login_failed'));
     }
   };
 
@@ -103,10 +104,10 @@ const LoginScreen = ({ navigation }) => {
             <Text style={styles.clubTitle}>KUWAIT MOTOR TOWN</Text>
           </View>
           <View style={styles.formBox}>
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>{I18n.t('login')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={I18n.t('email')}
               placeholderTextColor="#888"
               value={email}
               onChangeText={setEmail}
@@ -117,7 +118,7 @@ const LoginScreen = ({ navigation }) => {
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
-                placeholder="Password"
+                placeholder={I18n.t('password')}
                 placeholderTextColor="#888"
                 value={password}
                 onChangeText={setPassword}
@@ -136,7 +137,7 @@ const LoginScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
-              <Text style={styles.buttonText}>Login</Text>
+              <Text style={styles.buttonText}>{I18n.t('login')}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.signupLink} 

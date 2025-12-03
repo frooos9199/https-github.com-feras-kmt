@@ -7,8 +7,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { UserContext } from './UserContext';
 import { createAuthHeaders } from './apiConfig';
 
-const API_URL = 'https://www.kmtsys.com/api/admin/events';
-
 const EventDetailsScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -32,7 +30,12 @@ const EventDetailsScreen = () => {
       }
       
       console.log('[EVENT DETAILS] Fetching event:', eventId);
-      const res = await fetch(`${API_URL}/${eventId}`, {
+      console.log('[EVENT DETAILS] Token preview:', user.token.substring(0, 30) + '...');
+      
+      const url = `https://www.kmtsys.com/api/admin/events/${eventId}`;
+      console.log('[EVENT DETAILS] URL:', url);
+      
+      const res = await fetch(url, {
         method: 'GET',
         headers: createAuthHeaders(user.token),
       });
