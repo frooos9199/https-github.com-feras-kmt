@@ -1,54 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getAuthUser } from "@/lib/auth-utils"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, approvalEmailTemplate, rejectionEmailTemplate } from "@/lib/email"
-import jwt from "jsonwebtoken"
-
-// Verify JWT token
-function verifyJWT(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader) return null;
-  const token = authHeader.split(" ")[1];
-  if (!token) return null;
-  try {
-    const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
-    const decoded = jwt.verify(token, jwtSecret);
-    if (typeof decoded === "string") return null;
-    return decoded;
-  } catch {
-    return null;
-  }
-}
-
-// Get user from session or JWT
-async function getUser(request: NextRequest) {
-  // Try session first (web)
-  const session = await getServerSession(authOptions);
-  if (session?.user) {
-    return session.user;
-  }
-  
-  // Try JWT (mobile)
-  const jwtUser = verifyJWT(request);
-  if (jwtUser) {
-    return {
-      id: jwtUser.id,
-      email: jwtUser.email,
-      role: jwtUser.role,
-      name: jwtUser.name,
-    };
-  }
-  
-  return null;
-}
 
 // GET - Fetch all attendance requests
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUser(request);
+    const user = await getAuthUser(request);
     
-    if (!user || (user as any).role !== "admin") {
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -101,9 +61,9 @@ export async function GET(request: NextRequest) {
 // PUT - Update attendance status (approve/reject)
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getUser(request);
+    const user = await getAuthUser(request);
     
-    if (!user || (user as any).role !== "admin") {
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
