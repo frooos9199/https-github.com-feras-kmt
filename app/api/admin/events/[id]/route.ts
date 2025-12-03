@@ -29,11 +29,15 @@ async function getUser(request: NextRequest) {
   }
 
   const jwtPayload = verifyJWT(request);
-  if (jwtPayload?.userId) {
+  console.log('[JWT] Payload:', jwtPayload);
+  
+  // JWT contains 'id' not 'userId'
+  if (jwtPayload?.id) {
     const user = await prisma.user.findUnique({
-      where: { id: jwtPayload.userId },
+      where: { id: jwtPayload.id },
       select: { id: true, email: true, role: true, name: true }
     });
+    console.log('[JWT] User found:', user ? user.email : 'null');
     return user;
   }
 
