@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useLanguage } from "@/contexts/LanguageContext"
 import NotificationBell from "@/components/NotificationBell"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 export default function BroadcastPage() {
   const { data: session, status } = useSession()
@@ -275,15 +276,23 @@ export default function BroadcastPage() {
                 Select Marshal Types
               </label>
               <div className="space-y-2">
-                {["drag-race", "drift", "circuit", "rally"].map((type) => (
-                  <label key={type} className="flex items-center space-x-2 cursor-pointer">
+                {[
+                  {value: 'karting', labelEn: 'Karting', icon: '🏎️'},
+                  {value: 'motocross', labelEn: 'Motocross', icon: '🏍️'},
+                  {value: 'rescue', labelEn: 'Rescue', icon: '🚑'},
+                  {value: 'circuit', labelEn: 'Circuit', icon: '🏁'},
+                  {value: 'drift', labelEn: 'Drift', icon: '💨'},
+                  {value: 'drag-race', labelEn: 'Drag Race', icon: '🚦'},
+                  {value: 'pit', labelEn: 'Pit', icon: '🛠️'}
+                ].map((type) => (
+                  <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={marshalTypes.includes(type)}
-                      onChange={() => handleMarshalTypeToggle(type)}
+                      checked={marshalTypes.includes(type.value)}
+                      onChange={() => handleMarshalTypeToggle(type.value)}
                       className="w-4 h-4 text-red-600 bg-zinc-800 border-zinc-700 rounded focus:ring-red-500"
                     />
-                    <span className="capitalize text-white">{type.replace("-", " ")}</span>
+                    <span className="text-white">{type.icon} {type.labelEn}</span>
                   </label>
                 ))}
               </div>
@@ -304,7 +313,7 @@ export default function BroadcastPage() {
                 <option value="">-- Select Event --</option>
                 {events.map((event) => (
                   <option key={event.id} value={event.id}>
-                    {event.titleEn} - {new Date(event.date).toLocaleDateString()}
+                    {event.titleEn} - {formatDate(new Date(event.date), language)}
                   </option>
                 ))}
               </select>

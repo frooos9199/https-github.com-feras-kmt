@@ -7,6 +7,7 @@ import EventCountdown from "@/components/EventCountdown"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 interface Event {
   id: string
@@ -351,7 +352,7 @@ export default function EventsManagement() {
                       {/* تاريخ ووقت البداية - أخضر */}
                       <div className="flex items-center gap-2 text-green-500 font-medium">
                         <span>📅</span>
-                        <span>{new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                        <span>{formatDate(new Date(event.date), language)}</span>
                         <span>🕐</span>
                         <span>{event.time}</span>
                       </div>
@@ -360,7 +361,7 @@ export default function EventsManagement() {
                       {event.endDate && (
                         <div className="flex items-center gap-2 text-red-500 font-medium">
                           <span>📅</span>
-                          <span>{new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                          <span>{formatDate(new Date(event.endDate), language)}</span>
                           {event.endTime && (
                             <>
                               <span>🕐</span>
@@ -569,12 +570,13 @@ export default function EventsManagement() {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {[
-                      {value: 'drag-race', labelEn: 'Drag Race Marshal', labelAr: 'دراق ريس مارشال', icon: '🏁'},
-                      {value: 'motocross', labelEn: 'Motocross Marshal', labelAr: 'موتور كروس مارشال', icon: '🏍️'},
-                      {value: 'karting', labelEn: 'Karting Marshal', labelAr: 'كارتينق مارشال', icon: '🏎️'},
+                      {value: 'karting', labelEn: 'Karting Marshal', labelAr: 'كارتنج مارشال', icon: '�️'},
+                      {value: 'motocross', labelEn: 'Motocross Marshal', labelAr: 'موتوكروس مارشال', icon: '🏍️'},
+                      {value: 'rescue', labelEn: 'Rescue Marshal', labelAr: 'إنقاذ مارشال', icon: '🚑'},
+                      {value: 'circuit', labelEn: 'Circuit Marshal', labelAr: 'حلبة مارشال', icon: '�'},
                       {value: 'drift', labelEn: 'Drift Marshal', labelAr: 'دريفت مارشال', icon: '💨'},
-                      {value: 'circuit', labelEn: 'Circuit Marshal', labelAr: 'سيركت مارشال', icon: '🏁'},
-                      {value: 'rescue', labelEn: 'Rescue Marshal', labelAr: 'ريسك يو مارشال', icon: '🚑'}
+                      {value: 'drag-race', labelEn: 'Drag Race Marshal', labelAr: 'سباق الدراج مارشال', icon: '🚦'},
+                      {value: 'pit', labelEn: 'Pit Marshal', labelAr: 'منطقة الصيانة مارشال', icon: '�️'}
                     ].map((type) => (
                       <label key={type.value} className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg cursor-pointer hover:bg-zinc-800 transition-colors">
                         <input

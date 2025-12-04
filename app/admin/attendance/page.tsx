@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 interface AttendanceRequest {
   id: string
@@ -222,7 +223,7 @@ export default function AttendanceManagement() {
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-                            <span>📅 {new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                            <span>📅 {formatDate(new Date(attendance.event.date), language)}</span>
                             <span>🕐 {attendance.event.time}</span>
                             <span>📍 {attendance.event.location}</span>
                           </div>
@@ -267,7 +268,7 @@ export default function AttendanceManagement() {
 
                       {/* Registration Date */}
                       <p className="text-xs text-gray-500">
-                        {new Date(attendance.registeredAt).toLocaleString(language === "ar" ? "ar-EG" : "en-US")}
+                        {new Date(attendance.registeredAt).toLocaleString(language === "ar" ? "en-GB" : "en-US")}
                       </p>
                     </div>
                   </div>

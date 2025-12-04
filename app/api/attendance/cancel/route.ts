@@ -1,22 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { getAuthUser } from "@/lib/auth-utils"
 import { sendEmail, marshalCancellationEmailTemplate } from "@/lib/email"
 import { createNotification } from "@/lib/notifications"
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser(request)
 
-    if (!session || !session.user) {
+    if (!user?.id) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       )
     }
 
-    const { attendanceId, reason } = await req.json()
+    const { attendanceId, reason } = await request.json()
 
     if (!attendanceId) {
       return NextResponse.json(
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify the attendance belongs to the current user
-    if (attendance.userId !== session.user.id) {
+    if (attendance.userId !== user.id) {
       return NextResponse.json(
         { error: "Unauthorized to cancel this registration" },
         { status: 403 }

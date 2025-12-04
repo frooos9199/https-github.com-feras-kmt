@@ -14,21 +14,20 @@ export async function GET() {
     // Get user's marshal types
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { marshalTypes: true }
+      select: { marshalTypes: true, role: true }
     })
 
     const userTypes = user?.marshalTypes ? user.marshalTypes.split(',').filter((t: string) => t) : []
 
-    // Get all upcoming active events
+    // Get all active events (not cancelled)
     const allEvents = await prisma.event.findMany({
       where: {
-        date: {
-          gte: new Date()
-        },
-        status: "active"
+        status: {
+          in: ["active", "completed"]
+        }
       },
       orderBy: {
-        date: "asc"
+        date: "desc"
       },
       include: {
         attendances: {
@@ -48,13 +47,18 @@ export async function GET() {
       }
     })
 
-    // Filter events based on user's marshal types
-    const filteredEvents = allEvents.filter((event: any) => {
-      if (!event.marshalTypes) return false
-      const eventTypes = event.marshalTypes.split(',').filter((t: string) => t)
-      // Check if user has at least one matching type
-      return eventTypes.some((eventType: string) => userTypes.includes(eventType))
-    })
+    // Filter events based on user's marshal types (only if user has types)
+    let filteredEvents = allEvents
+    
+    if (userTypes.length > 0) {
+      filteredEvents = allEvents.filter((event: any) => {
+        if (!event.marshalTypes) return true // Show events without specific types
+        const eventTypes = event.marshalTypes.split(',').filter((t: string) => t)
+        if (eventTypes.length === 0) return true // Show if event has no types
+        // Check if user has at least one matching type
+        return eventTypes.some((eventType: string) => userTypes.includes(eventType))
+      })
+    }
 
     return NextResponse.json(filteredEvents)
   } catch (error) {

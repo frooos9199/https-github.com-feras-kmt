@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "../auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { getAuthUser } from "@/lib/auth-utils"
 
 // GET - Fetch user notifications
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser(request)
     
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -17,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const notifications = await prisma.notification.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         ...(unreadOnly && { isRead: false })
       },
       orderBy: { createdAt: "desc" },
@@ -34,9 +33,9 @@ export async function GET(request: NextRequest) {
 // PATCH - Mark notification(s) as read
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser(request)
     
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -47,7 +46,7 @@ export async function PATCH(request: NextRequest) {
       // Mark all user notifications as read
       await prisma.notification.updateMany({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           isRead: false
         },
         data: { isRead: true }
@@ -57,7 +56,7 @@ export async function PATCH(request: NextRequest) {
       await prisma.notification.update({
         where: {
           id: notificationId,
-          userId: session.user.id
+          userId: user.id
         },
         data: { isRead: true }
       })
@@ -75,9 +74,9 @@ export async function PATCH(request: NextRequest) {
 // DELETE - Delete notification
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser(request)
     
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -91,7 +90,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.notification.delete({
       where: {
         id: notificationId,
-        userId: session.user.id
+        userId: user.id
       }
     })
 

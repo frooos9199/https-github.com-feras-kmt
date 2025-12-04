@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 interface Marshal {
   id: string
@@ -34,8 +35,6 @@ const MARSHAL_TYPES = [
   { value: "circuit", label: { ar: "حلبة", en: "Circuit" }, color: "bg-blue-700", icon: "🏁" },
   { value: "drift", label: { ar: "دريفت", en: "Drift" }, color: "bg-purple-700", icon: "💨" },
   { value: "drag-race", label: { ar: "سباق الدراج", en: "Drag Race" }, color: "bg-pink-600", icon: "🚦" },
-  { value: "recovery", label: { ar: "الإخلاء", en: "Recovery" }, color: "bg-green-700", icon: "🚚" },
-  { value: "grid", label: { ar: "شبكة الانطلاق", en: "Grid" }, color: "bg-gray-700", icon: "🔢" },
   { value: "pit", label: { ar: "منطقة الصيانة", en: "Pit" }, color: "bg-teal-700", icon: "🛠️" },
 ]
 
@@ -271,7 +270,7 @@ export default function MarshalsManagement() {
                         <div className="text-sm">
                           <p className="text-gray-300">🆔 {marshal.civilId}</p>
                           <p className="text-gray-400">
-                            📅 {new Date(marshal.dateOfBirth).toLocaleDateString(isArabic ? "ar-EG" : "en-US")}
+                            📅 {formatDate(new Date(marshal.dateOfBirth), isArabic ? "ar" : "en")}
                           </p>
                           {marshal.nationality && (
                             <p className="text-gray-400">🌍 {marshal.nationality}</p>
@@ -291,7 +290,7 @@ export default function MarshalsManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm text-gray-400">
-                          {new Date(marshal.createdAt).toLocaleDateString(isArabic ? "ar-EG" : "en-US")}
+                          {formatDate(new Date(marshal.createdAt), isArabic ? "ar" : "en")}
                         </p>
                       </td>
                     </motion.tr>

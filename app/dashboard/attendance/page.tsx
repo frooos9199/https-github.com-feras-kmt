@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 interface AttendanceRecord {
   id: string
@@ -51,11 +52,22 @@ export default function MyAttendancePage() {
 
   const fetchAttendances = async () => {
     try {
+      console.log('[ATTENDANCE PAGE] Fetching attendances...')
       const res = await fetch("/api/attendance/my-attendance")
+      console.log('[ATTENDANCE PAGE] Response status:', res.status)
+      
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error('[ATTENDANCE PAGE] Error response:', errorText)
+        throw new Error(`HTTP ${res.status}: ${errorText}`)
+      }
+      
       const data = await res.json()
+      console.log('[ATTENDANCE PAGE] Received data:', data.length, 'records')
+      console.log('[ATTENDANCE PAGE] Sample:', data[0])
       setAttendances(data)
     } catch (error) {
-      console.error("Error fetching attendances:", error)
+      console.error("[ATTENDANCE PAGE] Error fetching attendances:", error)
     } finally {
       setLoading(false)
     }
@@ -297,11 +309,7 @@ export default function MyAttendancePage() {
                     <div className="space-y-2 mb-4 text-sm">
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📅</span>
-                        <span>{new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}</span>
+                        <span>{formatDate(new Date(attendance.event.date), language, 'long')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>🕐</span>
@@ -313,7 +321,7 @@ export default function MyAttendancePage() {
                       </div>
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📝</span>
-                        <span>{new Date(attendance.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                        <span>{formatDate(new Date(attendance.registeredAt), language, 'long')}</span>
                       </div>
                     </div>
 

@@ -1,0 +1,17 @@
+{
+  "name": "KMT Marshal System",
+  "short_name": "KMT",
+  "description": "Marshal Management System for Kuwait Motor Town",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

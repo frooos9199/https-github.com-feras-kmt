@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import NotificationBell from "@/components/NotificationBell"
+import { formatDate } from "@/lib/dateUtils"
 
 interface AdminStats {
   totalMarshals: number
@@ -307,12 +308,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-gray-500">
-                      {new Date(activity.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {formatDate(new Date(activity.registeredAt), language)}
                     </p>
                   </div>
                 </motion.div>

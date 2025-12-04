@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import { formatDate } from "@/lib/dateUtils"
 
 interface AttendanceRecord {
   user: {
@@ -166,39 +167,19 @@ export default function PrintAttendancePage() {
               <div>
                 <p className="font-semibold mb-2">📅 Date / التاريخ</p>
                 <p className="text-lg">
-                  {new Date(event.date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  {formatDate(new Date(event.date), 'en')}
                 </p>
                 <p className="text-base text-gray-600 mt-1" dir="rtl">
-                  {new Date(event.date).toLocaleDateString('ar-EG', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  {formatDate(new Date(event.date), 'ar')}
                 </p>
                 {event.endDate && (
                   <>
                     <p className="text-sm text-gray-500 mt-2">To / إلى</p>
                     <p className="text-base">
-                      {new Date(event.endDate).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      {formatDate(new Date(event.endDate), 'en')}
                     </p>
                     <p className="text-sm text-gray-600" dir="rtl">
-                      {new Date(event.endDate).toLocaleDateString('ar-EG', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      {formatDate(new Date(event.endDate), 'ar')}
                     </p>
                   </>
                 )}
@@ -282,13 +263,7 @@ export default function PrintAttendancePage() {
             <div>
               <p className="font-semibold mb-2">Print Date / تاريخ الطباعة:</p>
               <p className="text-lg">
-                {new Date().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                {formatDate(new Date(), 'en')}
               </p>
             </div>
           </div>

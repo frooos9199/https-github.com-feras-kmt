@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { formatDate } from "@/lib/dateUtils"
 
 interface Event {
   id: string
@@ -262,14 +263,14 @@ export default function EventDetails() {
                   <div>
                     <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ البداية" : "Start Date"}</p>
                     <p className="text-white font-medium text-lg">
-                      {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                      {formatDate(new Date(event.date), language)}
                     </p>
                   </div>
                   {event.endDate && (
                     <div>
                       <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ النهاية" : "End Date"}</p>
                       <p className="text-white font-medium text-lg">
-                        {new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                        {formatDate(new Date(event.endDate), language)}
                       </p>
                     </div>
                   )}
@@ -406,7 +407,7 @@ export default function EventDetails() {
                 <div className="bg-purple-600/10 border border-purple-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ الإنشاء" : "Created"}</p>
                   <p className="text-purple-500 font-bold text-lg">
-                    {new Date(event.createdAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                    {formatDate(new Date(event.createdAt), language)}
                   </p>
                 </div>
               </div>
@@ -538,12 +539,13 @@ export default function EventDetails() {
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {[
-                    {value: 'drag-race', labelEn: 'Drag Race Marshal', labelAr: 'دراق ريس مارشال', icon: '🏁'},
-                    {value: 'motocross', labelEn: 'Motocross Marshal', labelAr: 'موتور كروس مارشال', icon: '🏍️'},
-                    {value: 'karting', labelEn: 'Karting Marshal', labelAr: 'كارتينق مارشال', icon: '🏎️'},
+                    {value: 'karting', labelEn: 'Karting Marshal', labelAr: 'كارتنج مارشال', icon: '�️'},
+                    {value: 'motocross', labelEn: 'Motocross Marshal', labelAr: 'موتوكروس مارشال', icon: '🏍️'},
+                    {value: 'rescue', labelEn: 'Rescue Marshal', labelAr: 'إنقاذ مارشال', icon: '🚑'},
+                    {value: 'circuit', labelEn: 'Circuit Marshal', labelAr: 'حلبة مارشال', icon: '�'},
                     {value: 'drift', labelEn: 'Drift Marshal', labelAr: 'دريفت مارشال', icon: '💨'},
-                    {value: 'circuit', labelEn: 'Circuit Marshal', labelAr: 'سيركت مارشال', icon: '🏁'},
-                    {value: 'rescue', labelEn: 'Rescue Marshal', labelAr: 'ريسك يو مارشال', icon: '🚑'}
+                    {value: 'drag-race', labelEn: 'Drag Race Marshal', labelAr: 'سباق الدراج مارشال', icon: '🚦'},
+                    {value: 'pit', labelEn: 'Pit Marshal', labelAr: 'منطقة الصيانة مارشال', icon: '�️'}
                   ].map((type) => (
                     <label key={type.value} className="flex items-center gap-3 p-2 bg-zinc-800/50 rounded-lg cursor-pointer hover:bg-zinc-800 transition-colors">
                       <input

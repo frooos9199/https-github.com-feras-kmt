@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { getAuthUser } from "@/lib/auth-utils"
 import { notifyAdminsAboutNewRegistration } from "@/lib/notifications"
 import { sendEmail, registrationEmailTemplate } from "@/lib/email"
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser(request)
     
-    if (!session) {
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { eventId } = await req.json()
+    const { eventId } = await request.json()
 
     // Get event details with max marshals
     const event = await prisma.event.findUnique({
@@ -54,7 +53,7 @@ export async function POST(req: Request) {
     const existing = await prisma.attendance.findUnique({
       where: {
         userId_eventId: {
-          userId: session.user.id,
+          userId: user.id,
           eventId: eventId
         }
       }
@@ -70,7 +69,7 @@ export async function POST(req: Request) {
     // Create attendance
     const attendance = await prisma.attendance.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         eventId: eventId,
         status: "pending"
       },

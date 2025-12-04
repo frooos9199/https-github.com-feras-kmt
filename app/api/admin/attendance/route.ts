@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getAuthUser } from "@/lib/auth-utils"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, approvalEmailTemplate, rejectionEmailTemplate } from "@/lib/email"
 
 // GET - Fetch all attendance requests
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser(request);
     
-    if (!session?.user?.id || session.user.role !== "admin") {
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -62,9 +61,9 @@ export async function GET(request: NextRequest) {
 // PUT - Update attendance status (approve/reject)
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser(request);
     
-    if (!session?.user?.id || session.user.role !== "admin") {
+    if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

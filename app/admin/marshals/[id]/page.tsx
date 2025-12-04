@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
+import { formatDate } from "@/lib/dateUtils"
 
 const MARSHAL_TYPES = [
   { value: "karting", label: { ar: "كارتنج", en: "Karting" }, color: "bg-yellow-500", icon: "🏎️" },
@@ -13,8 +14,6 @@ const MARSHAL_TYPES = [
   { value: "circuit", label: { ar: "حلبة", en: "Circuit" }, color: "bg-blue-700", icon: "🏁" },
   { value: "drift", label: { ar: "دريفت", en: "Drift" }, color: "bg-purple-700", icon: "💨" },
   { value: "drag-race", label: { ar: "سباق الدراج", en: "Drag Race" }, color: "bg-pink-600", icon: "🚦" },
-  { value: "recovery", label: { ar: "الإخلاء", en: "Recovery" }, color: "bg-green-700", icon: "🚚" },
-  { value: "grid", label: { ar: "شبكة الانطلاق", en: "Grid" }, color: "bg-gray-700", icon: "🔢" },
   { value: "pit", label: { ar: "منطقة الصيانة", en: "Pit" }, color: "bg-teal-700", icon: "🛠️" },
 ]
 
@@ -372,7 +371,7 @@ export default function AdminMarshalProfile() {
                 </div>
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
-                  <input type="text" value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString(language === "ar" ? 'ar-EG' : 'en-GB') : ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
+                  <input type="text" value={profile.dateOfBirth ? formatDate(new Date(profile.dateOfBirth), language) : ""} disabled className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white cursor-not-allowed" />
                 </div>
                 <div>
                   <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
@@ -392,9 +391,15 @@ export default function AdminMarshalProfile() {
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>
                 <div className="flex flex-wrap gap-2">
                   {profile.marshalTypes && profile.marshalTypes.split(',').filter(t => t).length > 0 ? (
-                    profile.marshalTypes.split(',').filter(t => t).map((type) => (
-                      <span key={type} className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-zinc-800 text-white text-base font-bold border border-zinc-700">{type}</span>
-                    ))
+                    profile.marshalTypes.split(',').filter(t => t).map((type) => {
+                      const marshalType = MARSHAL_TYPES.find(mt => mt.value === type.trim())
+                      return (
+                        <span key={type} className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-zinc-800 text-white text-base font-bold border border-zinc-700">
+                          <span>{marshalType?.icon || "📋"}</span>
+                          <span>{marshalType ? marshalType.label[language] : type}</span>
+                        </span>
+                      )
+                    })
                   ) : (
                     <span className="text-gray-500 text-base">{language === "ar" ? "لا يوجد أنواع وظائف" : "No marshal types"}</span>
                   )}
@@ -497,9 +502,7 @@ export default function AdminMarshalProfile() {
                 <input type="date" value={formData.dateOfBirth} onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
                 {formData.dateOfBirth && (
                   <p className="text-sm text-gray-400 mt-2">
-                    {language === "ar"
-                      ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
-                      : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
+                    {formatDate(new Date(formData.dateOfBirth), language)}
                   </p>
                 )}
               </div>
