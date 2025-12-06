@@ -16,6 +16,7 @@ export default function SignupPage() {
     phone: "",
     civilId: "",
     dateOfBirth: "",
+    nationality: "",
   })
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -148,7 +149,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                {t("civilId")}
+                {t("civilId")} <span className="text-gray-500 text-xs">(Optional)</span>
               </label>
               <input
                 type="text"
@@ -156,13 +157,12 @@ export default function SignupPage() {
                 value={formData.civilId}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors text-sm"
-                required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                {t("dateOfBirth")}
+                {t("dateOfBirth")} <span className="text-gray-500 text-xs">(Optional)</span>
               </label>
               <input
                 type="date"
@@ -170,7 +170,20 @@ export default function SignupPage() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors text-sm"
-                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Nationality <span className="text-gray-500 text-xs">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                name="nationality"
+                value={formData.nationality}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors text-sm"
+                placeholder="e.g., Kuwait, Saudi Arabia"
               />
             </div>
 

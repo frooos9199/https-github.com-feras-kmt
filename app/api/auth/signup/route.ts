@@ -6,7 +6,7 @@ import { sendEmail, welcomeEmailTemplate } from "@/lib/email"
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { name, email, password, phone, civilId, dateOfBirth } = body
+    const { name, email, password, phone, civilId, dateOfBirth, nationality } = body
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user
+    // Create user with optional fields
     const user = await prisma.user.create({
       data: {
         employeeId,
@@ -57,8 +57,9 @@ export async function POST(req: Request) {
         email,
         password: hashedPassword,
         phone,
-        civilId,
-        dateOfBirth: new Date(dateOfBirth),
+        civilId: civilId || '',
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+        nationality: nationality || null,
         role: "marshal"
       }
     })
