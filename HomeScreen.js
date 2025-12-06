@@ -9,6 +9,15 @@ import { UserContext } from './UserContext';
 import I18n from './i18n';
 import { getEventsEndpoint, createAuthHeaders } from './apiConfig';
 import { useNavigation } from '@react-navigation/native';
+import { 
+  COLORS, 
+  FONT_SIZES, 
+  SPACING, 
+  ICON_SIZES, 
+  BORDER_RADIUS, 
+  SHADOWS,
+  scaleWidth 
+} from './appConfig';
 
 const { width } = Dimensions.get('window');
 
@@ -198,11 +207,17 @@ const HomeScreen = () => {
               <Image source={avatarSource} style={styles.avatar} />
             )}
           </View>
-          <View style={styles.headerRow}>
-            <Text style={styles.welcome}>{I18n.t('welcome')}, {displayName}</Text>
-          </View>
-          <View style={styles.headerRow}>
-            <Text style={styles.subInfo}>{I18n.t('employee_id')}: {displayId}</Text>
+          
+          {/* Welcome Section - Left Aligned */}
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeLabel}>
+              {I18n.locale === 'ar' ? '👋 مرحباً' : '👋 Welcome'}
+            </Text>
+            <Text style={styles.welcomeName}>{displayName}</Text>
+            <View style={styles.employeeIdBadge}>
+              <Ionicons name="id-card-outline" size={16} color="#fbbf24" />
+              <Text style={styles.employeeIdText}>{displayId}</Text>
+            </View>
           </View>
         </View>
 
@@ -219,7 +234,12 @@ const HomeScreen = () => {
             contentContainerStyle={{ paddingVertical: 8 }}
             renderItem={({ item }) => (
               <View style={styles.eventCard}>
-                <MaterialCommunityIcons name="calendar-star" size={28} color="#fff" style={{marginBottom: 6}} />
+                <MaterialCommunityIcons 
+                  name="calendar-star" 
+                  size={ICON_SIZES.regular} 
+                  color={COLORS.white} 
+                  style={{marginBottom: SPACING.tiny}} 
+                />
                 <Text style={styles.eventTitle}>{item.title}</Text>
                 <Text style={styles.eventDate}>{formatDate(item.date)}</Text>
                 <Text style={styles.eventLocation}>{item.location}</Text>
@@ -362,21 +382,53 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerBox: {
-    paddingVertical: 32,
-    paddingHorizontal: 20,
-    marginBottom: 12,
-    // alignItems: 'flex-end',
+    paddingVertical: SPACING.large,
+    paddingHorizontal: SPACING.large,
+    marginBottom: SPACING.tiny,
   },
   headerTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: SPACING.small,
   },
   headerRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  welcomeContainer: {
+    alignItems: 'flex-start',
+    paddingLeft: 4,
+  },
+  welcomeLabel: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  welcomeName: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  employeeIdBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(251, 191, 36, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.3)',
+  },
+  employeeIdText: {
+    color: '#fbbf24',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 6,
   },
   logo: {
     width: 54,
@@ -440,39 +492,35 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   eventCard: {
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: 18,
-    padding: 18,
-    marginRight: 12,
-    minWidth: width * 0.45,
+    backgroundColor: COLORS.cardBg,
+    borderRadius: BORDER_RADIUS.medium,
+    padding: SPACING.medium,
+    marginRight: SPACING.small,
+    minWidth: width * 0.38,
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    ...SHADOWS.small,
   },
   eventTitle: {
-    fontSize: 16,
+    fontSize: FONT_SIZES.regular,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
+    color: COLORS.white,
+    marginBottom: SPACING.tiny,
     textAlign: 'center',
   },
   eventDate: {
-    fontSize: 14,
-    color: '#fff',
+    fontSize: FONT_SIZES.small,
+    color: COLORS.white,
     textAlign: 'center',
   },
   eventLocation: {
-    fontSize: 13,
-    color: '#fff',
+    fontSize: FONT_SIZES.tiny,
+    color: COLORS.offWhite,
     textAlign: 'center',
     marginTop: 2,
   },
   eventStatus: {
-    fontSize: 13,
-    color: '#b71c1c',
+    fontSize: FONT_SIZES.tiny,
+    color: COLORS.primary,
     textAlign: 'center',
     marginTop: 2,
     fontWeight: 'bold',
@@ -541,15 +589,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bellIcon: {
-    backgroundColor: '#b71c1c',
-    borderRadius: 20,
-    padding: 6,
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.circle,
+    width: scaleWidth(40),
+    height: scaleWidth(40),
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 2,
+    ...SHADOWS.small,
   },
 });
 

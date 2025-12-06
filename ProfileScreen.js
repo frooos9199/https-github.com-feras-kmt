@@ -147,37 +147,6 @@ const ProfileScreen = () => {
                 <Text style={styles.detailValue}>{displayData?.employeeId || '---'}</Text>
               </View>
             </View>
-
-            <View style={styles.detailCard}>
-              <View style={styles.detailIconBox}>
-                <Ionicons name="card" size={22} color="#dc2626" />
-              </View>
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>{lang === 'ar' ? 'الرقم المدني' : 'Civil ID'}</Text>
-                <Text style={styles.detailValue}>{displayData?.civilId || '---'}</Text>
-              </View>
-            </View>
-
-            <View style={styles.detailCard}>
-              <View style={styles.detailIconBox}>
-                <Ionicons name="flag" size={22} color="#dc2626" />
-              </View>
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>{lang === 'ar' ? 'الجنسية' : 'Nationality'}</Text>
-                <Text style={styles.detailValue}>{displayData?.nationality || '---'}</Text>
-              </View>
-            </View>
-
-            <View style={styles.detailCard}>
-              <View style={styles.detailIconBox}>
-                <Ionicons name="calendar" size={22} color="#dc2626" />
-              </View>
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>{lang === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth'}</Text>
-                <Text style={styles.detailValue}>{displayData?.birthdate ? new Date(displayData.birthdate).toLocaleDateString() : '---'}</Text>
-              </View>
-            </View>
-
             <View style={styles.detailCard}>
               <View style={styles.detailIconBox}>
                 <Ionicons name="call" size={22} color="#dc2626" />
@@ -198,7 +167,8 @@ const ProfileScreen = () => {
               </View>
             </View>
 
-            {displayData?.role === 'marshal' && displayData?.marshalTypes && (
+            {/* Marshal Types Section - Hidden */}
+            {/* {displayData?.role === 'marshal' && displayData?.marshalTypes && (
               <View style={styles.detailCard}>
                 <View style={styles.detailIconBox}>
                   <Ionicons name="shield-checkmark" size={22} color="#dc2626" />
@@ -222,89 +192,8 @@ const ProfileScreen = () => {
                   </Text>
                 </View>
               </View>
-            )}
+            )} */}
 
-            {/* Civil ID Images */}
-            {(displayData?.civilIdFrontImage || displayData?.civilIdBackImage) && (
-              <>
-                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-                  {lang === 'ar' ? '🪪 صور البطاقة المدنية' : '🪪 Civil ID Images'}
-                </Text>
-                
-                {displayData?.civilIdFrontImage && (
-                  <TouchableOpacity 
-                    style={styles.imageCard}
-                    onPress={() => Linking.openURL(displayData.civilIdFrontImage)}
-                  >
-                    <Image 
-                      source={{ uri: displayData.civilIdFrontImage }} 
-                      style={styles.documentImage}
-                      resizeMode="cover"
-                    />
-                    <Text style={styles.imageLabel}>
-                      {lang === 'ar' ? 'الوجه الأمامي' : 'Front Side'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-
-                {displayData?.civilIdBackImage && (
-                  <TouchableOpacity 
-                    style={styles.imageCard}
-                    onPress={() => Linking.openURL(displayData.civilIdBackImage)}
-                  >
-                    <Image 
-                      source={{ uri: displayData.civilIdBackImage }} 
-                      style={styles.documentImage}
-                      resizeMode="cover"
-                    />
-                    <Text style={styles.imageLabel}>
-                      {lang === 'ar' ? 'الوجه الخلفي' : 'Back Side'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </>
-            )}
-
-            {/* License Images */}
-            {(displayData?.licenseFrontImage || displayData?.licenseBackImage) && (
-              <>
-                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-                  {lang === 'ar' ? '🚗 صور رخصة القيادة' : '🚗 License Images'}
-                </Text>
-                
-                {displayData?.licenseFrontImage && (
-                  <TouchableOpacity 
-                    style={styles.imageCard}
-                    onPress={() => Linking.openURL(displayData.licenseFrontImage)}
-                  >
-                    <Image 
-                      source={{ uri: displayData.licenseFrontImage }} 
-                      style={styles.documentImage}
-                      resizeMode="cover"
-                    />
-                    <Text style={styles.imageLabel}>
-                      {lang === 'ar' ? 'الوجه الأمامي' : 'Front Side'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-
-                {displayData?.licenseBackImage && (
-                  <TouchableOpacity 
-                    style={styles.imageCard}
-                    onPress={() => Linking.openURL(displayData.licenseBackImage)}
-                  >
-                    <Image 
-                      source={{ uri: displayData.licenseBackImage }} 
-                      style={styles.documentImage}
-                      resizeMode="cover"
-                    />
-                    <Text style={styles.imageLabel}>
-                      {lang === 'ar' ? 'الوجه الخلفي' : 'Back Side'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </>
-            )}
           </View>
 
           {/* Logo at Bottom */}
