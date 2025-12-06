@@ -264,7 +264,10 @@ const SignupScreen = ({ navigation }) => {
             {/* الرقم المدني */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                {I18n.locale === 'ar' ? 'الرقم المدني' : 'Civil ID'}
+                {I18n.locale === 'ar' ? 'الرقم المدني' : 'Civil ID'}{' '}
+                <Text style={styles.optionalText}>
+                  {I18n.locale === 'ar' ? '(اختياري)' : '(Optional)'}
+                </Text>
               </Text>
               <TextInput
                 style={styles.input}
@@ -279,7 +282,10 @@ const SignupScreen = ({ navigation }) => {
             {/* الجنسية */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                {I18n.locale === 'ar' ? 'الجنسية' : 'Nationality'}
+                {I18n.locale === 'ar' ? 'الجنسية' : 'Nationality'}{' '}
+                <Text style={styles.optionalText}>
+                  {I18n.locale === 'ar' ? '(اختياري)' : '(Optional)'}
+                </Text>
               </Text>
               <TouchableOpacity
                 style={styles.pickerButton}
@@ -331,7 +337,10 @@ const SignupScreen = ({ navigation }) => {
             {/* تاريخ الميلاد */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                {I18n.locale === 'ar' ? 'تاريخ الميلاد' : 'Birth Date'}
+                {I18n.locale === 'ar' ? 'تاريخ الميلاد' : 'Birth Date'}{' '}
+                <Text style={styles.optionalText}>
+                  {I18n.locale === 'ar' ? '(اختياري)' : '(Optional)'}
+                </Text>
               </Text>
               <View style={styles.dateInputContainer}>
                 <TextInput
@@ -514,6 +523,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
     marginBottom: 8,
+  },
+  optionalText: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: 'rgba(255,255,255,0.6)',
+    fontStyle: 'italic',
   },
   input: {
     backgroundColor: 'rgba(255,255,255,0.1)',
