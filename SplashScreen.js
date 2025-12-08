@@ -1,10 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
 import { View, Image, StyleSheet, Text, ActivityIndicator, Animated, Easing } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserContext } from './UserContext';
 
 const SplashScreen = ({ navigation }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const { setUser } = useContext(UserContext);
 
   useEffect(() => {
     Animated.parallel([
@@ -20,10 +23,31 @@ const SplashScreen = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start();
-    const timer = setTimeout(() => {
-      navigation.replace('Login');
-    }, 2500);
-    return () => clearTimeout(timer);
+    
+    // فحص Session
+    const checkSession = async () => {
+      try {
+        const userSession = await AsyncStorage.getItem('userSession');
+        if (userSession) {
+          const userData = JSON.parse(userSession);
+          await setUser(userData);
+          setTimeout(() => {
+            navigation.replace('MainTabs');
+          }, 2500);
+        } else {
+          setTimeout(() => {
+            navigation.replace('Login');
+          }, 2500);
+        }
+      } catch (error) {
+        console.error('[SPLASH] Session check error:', error);
+        setTimeout(() => {
+          navigation.replace('Login');
+        }, 2500);
+      }
+    };
+    
+    checkSession();
   }, [navigation]);
 
   return (

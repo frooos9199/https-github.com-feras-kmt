@@ -1,8 +1,10 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Linking, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
 import { createAuthHeaders } from './apiConfig';
@@ -11,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 const appLogo = require('./assets/splash/kmt-logo.png');
 
 const ProfileScreen = () => {
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const navigation = useNavigation();
   const [lang, setLang] = useState(I18n.locale);
   const [profileData, setProfileData] = useState(null);
@@ -22,6 +24,44 @@ const ProfileScreen = () => {
     I18n.locale = newLang;
     setLang(newLang);
   }, [lang]);
+
+  const handleSignOut = async () => {
+    Alert.alert(
+      lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out',
+      lang === 'ar' ? 'هل أنت متأكد من تسجيل الخروج؟' : 'Are you sure you want to sign out?',
+      [
+        {
+          text: lang === 'ar' ? 'إلغاء' : 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // حذف Session
+              await AsyncStorage.removeItem('userSession');
+              // حذف بيانات Keychain
+              await Keychain.resetGenericPassword();
+              // تصفير بيانات المستخدم
+              setUser(null);
+              // الانتقال إلى Login
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } catch (error) {
+              console.error('[SIGN OUT] Error:', error);
+              Alert.alert(
+                lang === 'ar' ? 'خطأ' : 'Error',
+                lang === 'ar' ? 'حدث خطأ أثناء تسجيل الخروج' : 'An error occurred during sign out'
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
 
   // جلب بيانات البروفايل من API
   useEffect(() => {
@@ -195,6 +235,18 @@ const ProfileScreen = () => {
             )} */}
 
           </View>
+
+          {/* Sign Out Button */}
+          <TouchableOpacity 
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="log-out-outline" size={24} color="#dc2626" />
+            <Text style={styles.signOutText}>
+              {lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
+            </Text>
+          </TouchableOpacity>
 
           {/* Logo at Bottom */}
           <View style={styles.bottomLogoBox}>
@@ -392,6 +444,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 8,
     textAlign: 'center',
+  },
+
+  // Sign Out Button
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(220, 38, 38, 0.12)',
+    borderRadius: 16,
+    padding: 18,
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 20,
+    borderWidth: 1.5,
+    borderColor: 'rgba(220, 38, 38, 0.3)',
+  },
+  signOutText: {
+    color: '#dc2626',
+    fontSize: 17,
+    fontWeight: '700',
+    marginLeft: 10,
+    letterSpacing: 0.5,
   },
 
   // Bottom Logo

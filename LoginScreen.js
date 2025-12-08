@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, I18n
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain';
 import FCMService from './FCMService';
 import { sendFcmTokenToServer } from './fcmApi';
 import { UserContext } from './UserContext';
@@ -53,6 +55,15 @@ const LoginScreen = ({ navigation }) => {
       };
       
       await setUser(userData);
+      
+      // حفظ Session في AsyncStorage
+      await AsyncStorage.setItem('userSession', JSON.stringify(userData));
+      
+      // حفظ بيانات الدخول في Keychain (للـ Face ID)
+      await Keychain.setGenericPassword(email, password, {
+        accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+        accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+      });
       
       // Get FCM token and send to server
       try {
