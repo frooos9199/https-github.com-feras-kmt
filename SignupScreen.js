@@ -24,41 +24,8 @@ const SignupScreen = ({ navigation }) => {
     confirmPassword: '',
     employeeId: '',
     phone: '',
-    civilId: '',
-    nationality: '',
-    birthdate: '',
-    birthDay: '',
-    birthMonth: '',
-    birthYear: '',
   });
   const [loading, setLoading] = useState(false);
-  const [showNationalityPicker, setShowNationalityPicker] = useState(false);
-
-  // قائمة الجنسيات
-  const nationalities = [
-    { value: 'Kuwaiti', labelAr: 'كويتي', labelEn: 'Kuwaiti' },
-    { value: 'Saudi', labelAr: 'سعودي', labelEn: 'Saudi' },
-    { value: 'Emirati', labelAr: 'إماراتي', labelEn: 'Emirati' },
-    { value: 'Bahraini', labelAr: 'بحريني', labelEn: 'Bahraini' },
-    { value: 'Omani', labelAr: 'عماني', labelEn: 'Omani' },
-    { value: 'Qatari', labelAr: 'قطري', labelEn: 'Qatari' },
-    { value: 'Egyptian', labelAr: 'مصري', labelEn: 'Egyptian' },
-    { value: 'Lebanese', labelAr: 'لبناني', labelEn: 'Lebanese' },
-    { value: 'Jordanian', labelAr: 'أردني', labelEn: 'Jordanian' },
-    { value: 'Syrian', labelAr: 'سوري', labelEn: 'Syrian' },
-    { value: 'Palestinian', labelAr: 'فلسطيني', labelEn: 'Palestinian' },
-    { value: 'Iraqi', labelAr: 'عراقي', labelEn: 'Iraqi' },
-    { value: 'Yemeni', labelAr: 'يمني', labelEn: 'Yemeni' },
-    { value: 'Turkish', labelAr: 'تركي', labelEn: 'Turkish' },
-    { value: 'Iranian', labelAr: 'إيراني', labelEn: 'Iranian' },
-    { value: 'Armenian', labelAr: 'أرميني', labelEn: 'Armenian' },
-    { value: 'Afghan', labelAr: 'أفغاني', labelEn: 'Afghan' },
-    { value: 'Indian', labelAr: 'هندي', labelEn: 'Indian' },
-    { value: 'Pakistani', labelAr: 'باكستاني', labelEn: 'Pakistani' },
-    { value: 'Bangladeshi', labelAr: 'بنغلاديشي', labelEn: 'Bangladeshi' },
-    { value: 'Filipino', labelAr: 'فلبيني', labelEn: 'Filipino' },
-    { value: 'Other', labelAr: 'أخرى', labelEn: 'Other' },
-  ];
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -127,9 +94,6 @@ const SignupScreen = ({ navigation }) => {
           password: formData.password,
           employee_number: formData.employeeId,
           phone: formData.phone || null,
-          civilId: formData.civilId || null,
-          nationality: formData.nationality || null,
-          birthdate: formData.birthdate || null,
           role: 'marshal', // الدور الافتراضي
         }),
       });
@@ -259,147 +223,6 @@ const SignupScreen = ({ navigation }) => {
                 onChangeText={(text) => updateField('phone', text)}
                 keyboardType="phone-pad"
               />
-            </View>
-
-            {/* الرقم المدني */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                {I18n.locale === 'ar' ? 'الرقم المدني' : 'Civil ID'}{' '}
-                <Text style={styles.optionalText}>
-                  {I18n.locale === 'ar' ? '(اختياري)' : '(Optional)'}
-                </Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder={I18n.locale === 'ar' ? 'أدخل الرقم المدني' : 'Enter Civil ID'}
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={formData.civilId}
-                onChangeText={(text) => updateField('civilId', text)}
-                keyboardType="numeric"
-              />
-            </View>
-
-            {/* الجنسية */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                {I18n.locale === 'ar' ? 'الجنسية' : 'Nationality'}{' '}
-                <Text style={styles.optionalText}>
-                  {I18n.locale === 'ar' ? '(اختياري)' : '(Optional)'}
-                </Text>
-              </Text>
-              <TouchableOpacity
-                style={styles.pickerButton}
-                onPress={() => setShowNationalityPicker(!showNationalityPicker)}
-              >
-                <Text style={[styles.pickerButtonText, !formData.nationality && styles.placeholderText]}>
-                  {formData.nationality 
-                    ? (I18n.locale === 'ar' 
-                        ? nationalities.find(n => n.value === formData.nationality)?.labelAr || formData.nationality
-                        : nationalities.find(n => n.value === formData.nationality)?.labelEn || formData.nationality
-                      )
-                    : (I18n.locale === 'ar' ? 'اختر الجنسية' : 'Select Nationality')
-                  }
-                </Text>
-                <Ionicons 
-                  name={showNationalityPicker ? "chevron-up" : "chevron-down"} 
-                  size={20} 
-                  color="rgba(255,255,255,0.7)" 
-                />
-              </TouchableOpacity>
-
-              {/* قائمة الجنسيات */}
-              {showNationalityPicker && (
-                <ScrollView style={styles.pickerList} nestedScrollEnabled>
-                  {nationalities.map((nat) => (
-                    <TouchableOpacity
-                      key={nat.value}
-                      style={[
-                        styles.pickerItem,
-                        formData.nationality === nat.value && styles.pickerItemSelected
-                      ]}
-                      onPress={() => {
-                        updateField('nationality', nat.value);
-                        setShowNationalityPicker(false);
-                      }}
-                    >
-                      <Text style={styles.pickerItemText}>
-                        {I18n.locale === 'ar' ? nat.labelAr : nat.labelEn}
-                      </Text>
-                      {formData.nationality === nat.value && (
-                        <Ionicons name="checkmark" size={20} color="#22c55e" />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </View>
-
-            {/* تاريخ الميلاد */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                {I18n.locale === 'ar' ? 'تاريخ الميلاد' : 'Birth Date'}{' '}
-                <Text style={styles.optionalText}>
-                  {I18n.locale === 'ar' ? '(اختياري)' : '(Optional)'}
-                </Text>
-              </Text>
-              <View style={styles.dateInputContainer}>
-                <TextInput
-                  style={[styles.dateInput, styles.dayInput]}
-                  placeholder={I18n.locale === 'ar' ? 'يوم' : 'DD'}
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  value={formData.birthDay}
-                  onChangeText={(text) => {
-                    // السماح بالأرقام فقط وحد أقصى 2 رقم
-                    const day = text.replace(/[^0-9]/g, '').slice(0, 2);
-                    updateField('birthDay', day);
-                    // تحديث التاريخ الكامل
-                    if (day && formData.birthMonth && formData.birthYear) {
-                      updateField('birthdate', `${formData.birthYear}-${formData.birthMonth.padStart(2, '0')}-${day.padStart(2, '0')}`);
-                    }
-                  }}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                />
-                <Text style={styles.dateSeparator}>/</Text>
-                <TextInput
-                  style={[styles.dateInput, styles.monthInput]}
-                  placeholder={I18n.locale === 'ar' ? 'شهر' : 'MM'}
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  value={formData.birthMonth}
-                  onChangeText={(text) => {
-                    // السماح بالأرقام فقط وحد أقصى 2 رقم
-                    const month = text.replace(/[^0-9]/g, '').slice(0, 2);
-                    updateField('birthMonth', month);
-                    // تحديث التاريخ الكامل
-                    if (formData.birthDay && month && formData.birthYear) {
-                      updateField('birthdate', `${formData.birthYear}-${month.padStart(2, '0')}-${formData.birthDay.padStart(2, '0')}`);
-                    }
-                  }}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                />
-                <Text style={styles.dateSeparator}>/</Text>
-                <TextInput
-                  style={[styles.dateInput, styles.yearInput]}
-                  placeholder={I18n.locale === 'ar' ? 'سنة' : 'YYYY'}
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  value={formData.birthYear}
-                  onChangeText={(text) => {
-                    // السماح بالأرقام فقط وحد أقصى 4 أرقام
-                    const year = text.replace(/[^0-9]/g, '').slice(0, 4);
-                    updateField('birthYear', year);
-                    // تحديث التاريخ الكامل
-                    if (formData.birthDay && formData.birthMonth && year) {
-                      updateField('birthdate', `${year}-${formData.birthMonth.padStart(2, '0')}-${formData.birthDay.padStart(2, '0')}`);
-                    }
-                  }}
-                  keyboardType="number-pad"
-                  maxLength={4}
-                />
-              </View>
-              <Text style={styles.dateHint}>
-                {I18n.locale === 'ar' ? 'مثال: 15 / 06 / 2000' : 'Example: 15 / 06 / 2000'}
-              </Text>
             </View>
 
             {/* كلمة المرور */}
