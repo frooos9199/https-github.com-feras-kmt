@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(220, 38, 38, 0.3)',
   },
   signOutText: {
-    color: '#dc2626',
+    color: '#fff',
     fontSize: 17,
     fontWeight: '700',
     marginLeft: 10,
