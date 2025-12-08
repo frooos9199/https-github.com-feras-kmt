@@ -242,7 +242,7 @@ const ProfileScreen = () => {
             onPress={handleSignOut}
             activeOpacity={0.7}
           >
-            <Ionicons name="log-out-outline" size={24} color="#dc2626" />
+            <Ionicons name="log-out-outline" size={24} color="#fff" />
             <Text style={styles.signOutText}>
               {lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
             </Text>
