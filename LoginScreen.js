@@ -90,7 +90,7 @@ const LoginScreen = ({ navigation }) => {
         >
           <View style={styles.logoBox}>
             <Image source={require('./kmt-logo-white.png')} style={styles.logo} />
-            <Text style={styles.systemTitle}>Marshal Management System</Text>
+            <Text style={styles.systemTitle}>Marshal Club</Text>
             <Text style={styles.clubTitle}>KUWAIT MOTOR TOWN</Text>
           </View>
           <View style={styles.formBox}>
