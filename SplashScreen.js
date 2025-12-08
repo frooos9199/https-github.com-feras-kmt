@@ -35,7 +35,7 @@ const SplashScreen = ({ navigation }) => {
     >
       <Animated.View style={[styles.logoBox, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}> 
         <Image source={require('./assets/appicon/icon.png')} style={styles.logo} resizeMode="contain" />
-  <Text style={styles.title}>Marshal Management System</Text>
+  <Text style={styles.title}>Marshal Club</Text>
   <Text style={styles.subtitle}>KUWAIT MOTOR TOWN</Text>
       </Animated.View>
       <Animated.View style={{ opacity: fadeAnim }}>
