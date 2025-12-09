@@ -2,6 +2,16 @@
 #
 .DS_Store
 
+# ❌ Next.js folders (should NOT be in React Native app!)
+app/api/
+lib/
+public/uploads/
+prisma/
+contexts/
+types/
+.next/
+.vercel/
+
 # Xcode
 #
 build/
