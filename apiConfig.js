@@ -63,13 +63,8 @@ export const API_ENDPOINTS = {
 
 // دالة للحصول على مسار الأحداث حسب دور المستخدم
 export const getEventsEndpoint = (userRole) => {
-  if (userRole === 'admin') {
-    return API_ENDPOINTS.ADMIN.EVENTS;
-  } else if (userRole === 'marshal') {
-    return API_ENDPOINTS.DASHBOARD.EVENTS;
-  } else {
-    return API_ENDPOINTS.USER.EVENTS;
-  }
+  // ✅ الجميع يستخدم نفس API الأحداث (admin/marshal/user)
+  return API_ENDPOINTS.ADMIN.EVENTS;
 };
 
 // دالة للحصول على مسار الإحصائيات حسب دور المستخدم

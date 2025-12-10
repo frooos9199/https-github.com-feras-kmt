@@ -87,6 +87,12 @@
   "no_permission_stats": "You do not have permission to view statistics. Please contact admin.",
   "marshals_by_specialty": "Marshals by Specialty",
   "admins_only": "Admins only",
+  "notifications": "Notifications",
+  "no_notifications": "No notifications",
+  "mark_all_read": "Mark all as read",
+  "unread_notifications": "unread notification",
+  "delete_notification": "Delete",
+  "notification_deleted": "Notification deleted",
   "nationalities": {
     "Kuwaiti": "Kuwaiti",
     "كويتي": "Kuwaiti",

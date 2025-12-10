@@ -9,7 +9,7 @@ import { Alert } from 'react-native';
 export async function sendFcmTokenToServer(fcmToken, userToken) {
   try {
     const response = await fetch('https://www.kmtsys.com/api/user/fcm-token', {
-      method: 'PUT',
+      method: 'POST',
       headers: createAuthHeaders(userToken),
       body: JSON.stringify({ fcmToken }),
     });

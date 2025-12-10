@@ -93,7 +93,9 @@ const EventsScreen = ({ navigation }) => {
       
       if (!user?.token) {
         console.log('[EVENTS] ❌ No token found, cannot fetch events');
+        console.log('[EVENTS] 💡 User needs to login first');
         setRefreshing(false);
+        setEvents([]); // مسح الأحداث القديمة
         return;
       }
 
@@ -128,13 +130,44 @@ const EventsScreen = ({ navigation }) => {
       // معالجة البيانات
       const eventsData = Array.isArray(data) ? data : (data.events || []);
       
-      // ترتيب الأحداث حسب التاريخ من الأقرب للأبعد
+      // ترتيب الأحداث: اليوم → القادمة → المنتهية
       const sorted = eventsData.slice().sort((a, b) => {
-        const aStart = a.date ? new Date(a.date) : new Date(0);
-        const bStart = b.date ? new Date(b.date) : new Date(0);
+        if (!a.date || !b.date) return 0;
         
-        // ترتيب تصاعدي حسب تاريخ البداية (الأقرب أولاً)
-        return aStart - bStart;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        const aStart = new Date(a.date.slice(0, 10));
+        const aEnd = a.endDate ? new Date(a.endDate.slice(0, 10)) : aStart;
+        const bStart = new Date(b.date.slice(0, 10));
+        const bEnd = b.endDate ? new Date(b.endDate.slice(0, 10)) : bStart;
+        
+        // تحديد حالة كل حدث
+        const aIsToday = aStart <= now && now <= aEnd;
+        const bIsToday = bStart <= now && now <= bEnd;
+        const aIsFuture = aStart > now;
+        const bIsFuture = bStart > now;
+        const aIsPast = aEnd < now;
+        const bIsPast = bEnd < now;
+        
+        // الأحداث الجارية اليوم أولاً
+        if (aIsToday && !bIsToday) return -1;
+        if (!aIsToday && bIsToday) return 1;
+        
+        // ثم الأحداث القادمة
+        if (aIsFuture && !bIsFuture && !bIsToday) return -1;
+        if (!aIsFuture && bIsFuture && !aIsToday) return 1;
+        
+        // أخيراً الأحداث المنتهية
+        if (aIsPast && !bIsPast) return 1;
+        if (!aIsPast && bIsPast) return -1;
+        
+        // ترتيب داخل نفس الفئة حسب التاريخ
+        if (aIsToday && bIsToday) return aStart - bStart;
+        if (aIsFuture && bIsFuture) return aStart - bStart;
+        if (aIsPast && bIsPast) return bStart - aStart; // الأحدث من المنتهية أولاً
+        
+        return 0;
       });
       
       setEvents(sorted);

@@ -85,6 +85,12 @@
   "no_permission_stats": "لا تملك صلاحية عرض الإحصائيات. يرجى مراجعة الإدارة.",
   "marshals_by_specialty": "تصنيف المارشال حسب الاختصاص",
   "admins_only": "للمدراء فقط",
+  "notifications": "الإشعارات",
+  "no_notifications": "لا توجد إشعارات",
+  "mark_all_read": "تحديد الكل كمقروء",
+  "unread_notifications": "إشعار غير مقروء",
+  "delete_notification": "حذف",
+  "notification_deleted": "تم حذف الإشعار",
   "nationalities": {
     "Kuwaiti": "كويتي",
     "كويتي": "كويتي",

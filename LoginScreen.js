@@ -17,6 +17,77 @@ const LoginScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { setUser } = useContext(UserContext);
 
+  // محاولة تسجيل الدخول باستخدام Face ID / Touch ID عند فتح الشاشة
+  React.useEffect(() => {
+    const tryBiometricLogin = async () => {
+      try {
+        // التحقق من وجود بيانات محفوظة
+        const credentials = await Keychain.getGenericPassword({
+          authenticationPrompt: {
+            title: I18n.t('biometric_login') || 'Sign in with Face ID',
+            subtitle: I18n.t('biometric_subtitle') || 'Use Face ID to sign in quickly',
+            cancel: I18n.t('cancel') || 'Cancel',
+          },
+        });
+
+        if (credentials && credentials.username && credentials.password) {
+          console.log('[LOGIN] ✅ Found saved credentials, attempting auto-login');
+          setEmail(credentials.username);
+          setPassword(credentials.password);
+          
+          // تسجيل الدخول تلقائياً
+          const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: credentials.username, 
+              password: credentials.password 
+            }),
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok && data.accessToken && data.user) {
+            const userData = {
+              id: data.user.id,
+              name: data.user.name || '',
+              email: data.user.email || credentials.username,
+              employeeId: data.user.employee_number || '',
+              avatar: data.user.image || '',
+              token: data.accessToken,
+              role: data.user.role || 'marshal',
+              civilId: data.user.civilId || '',
+              nationality: data.user.nationality || '',
+              birthdate: data.user.birthdate || '',
+              phone: data.user.phone || '',
+            };
+            
+            await setUser(userData);
+            
+            // Get FCM token
+            try {
+              const fcmToken = await FCMService.getToken();
+              if (fcmToken) {
+                await sendFcmTokenToServer(fcmToken, userData.token);
+              }
+            } catch (fcmError) {
+              console.error('[LOGIN] FCM error:', fcmError);
+            }
+            
+            navigation.replace('MainTabs');
+          }
+        } else {
+          console.log('[LOGIN] ❌ No saved credentials found');
+        }
+      } catch (error) {
+        // المستخدم ألغى Face ID أو حصل خطأ
+        console.log('[LOGIN] Biometric auth cancelled or failed:', error.message);
+      }
+    };
+
+    tryBiometricLogin();
+  }, []);
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert(I18n.t('error'), I18n.t('enter_email_password'));
@@ -54,10 +125,8 @@ const LoginScreen = ({ navigation }) => {
         phone: data.user.phone || '',
       };
       
+      // ✅ setUser تحفظ تلقائياً في AsyncStorage في المكان الصحيح
       await setUser(userData);
-      
-      // حفظ Session في AsyncStorage
-      await AsyncStorage.setItem('userSession', JSON.stringify(userData));
       
       // حفظ بيانات الدخول في Keychain (للـ Face ID)
       await Keychain.setGenericPassword(email, password, {

@@ -22,18 +22,23 @@ export const UserProvider = ({ children }) => {
   // دالة logout
   const logout = async () => {
     try {
-      console.log('[AUTH] Logging out user...');
+      console.log('[USER CONTEXT] 🚪 Logging out user...');
+      
+      // 1️⃣ تصفير الـ state أولاً
       setUserState(null);
+      console.log('[USER CONTEXT] ✅ User state cleared');
       
-      const ip = await fetchPublicIP();
-      if (ip) {
-        await AsyncStorage.removeItem(`user_${ip}`);
-      }
-      await AsyncStorage.removeItem('user_data');
+      // 2️⃣ مسح **كل** مفاتيح AsyncStorage (مش بس المفاتيح المعروفة)
+      const allKeys = await AsyncStorage.getAllKeys();
+      console.log('[USER CONTEXT] 🔍 Storage keys before clear:', allKeys);
+      await AsyncStorage.clear();
+      console.log('[USER CONTEXT] 🗑️ All AsyncStorage cleared');
       
-      console.log('[AUTH] User logged out successfully');
+      console.log('[USER CONTEXT] ✅ Logout completed successfully');
     } catch (error) {
-      console.error('[AUTH] Logout error:', error);
+      console.error('[USER CONTEXT] ❌ Logout error:', error);
+      // تصفير الـ state على أي حال
+      setUserState(null);
     }
   };
 
@@ -81,6 +86,19 @@ export const UserProvider = ({ children }) => {
       if (!data) {
         data = await AsyncStorage.getItem('user_data');
         console.log('[USER CONTEXT] 🔍 Checking general storage:', data ? 'Found' : 'Not found');
+      }
+      
+      // 🔧 Migration: جرب المفتاح القديم (userSession) وانقله
+      if (!data) {
+        data = await AsyncStorage.getItem('userSession');
+        if (data) {
+          console.log('[USER CONTEXT] 🔄 Migrating from old userSession...');
+          // حفظ في المكان الجديد
+          await AsyncStorage.setItem('user_data', data);
+          // حذف القديم
+          await AsyncStorage.removeItem('userSession');
+          console.log('[USER CONTEXT] ✅ Migration completed');
+        }
       }
       
       if (data) {

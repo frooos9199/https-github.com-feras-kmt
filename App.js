@@ -1,6 +1,7 @@
+import 'react-native-gesture-handler';
 import './firebaseInit';
 import * as React from 'react';
-import { Alert, Platform, LogBox } from 'react-native';
+import { Alert, Platform, LogBox, AppState } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeWebView from './HomeWebView';
@@ -20,9 +21,29 @@ import { sendFcmTokenToServer } from './fcmApi';
 import AttendanceScreen from './AttendanceScreen';
 import MyAttendanceScreen from './MyAttendanceScreen';
 import PendingRequestsScreen from './PendingRequestsScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BackgroundFetch from 'react-native-background-fetch';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
 // إخفاء جميع التحذيرات والـ LogBox
 LogBox.ignoreAllLogs(true);
+
+// 🔧 مسح AsyncStorage عند بدء التطبيق (مرة واحدة فقط)
+const clearStorageOnce = async () => {
+  try {
+    const hasCleared = await AsyncStorage.getItem('storage_cleared_v2'); // ✅ غيرنا v1 إلى v2
+    if (!hasCleared) {
+      console.log('[APP] 🗑️ Clearing old AsyncStorage...');
+      await AsyncStorage.clear();
+      await AsyncStorage.setItem('storage_cleared_v2', 'true');
+      console.log('[APP] ✅ AsyncStorage cleared!');
+    }
+  } catch (error) {
+    console.error('[APP] ❌ Error clearing storage:', error);
+  }
+};
+
+clearStorageOnce();
 
 const Stack = createStackNavigator();
 
@@ -36,10 +57,29 @@ const AppContent = () => {
     let unsubscribeForeground;
     let unsubscribeTokenRefresh;
     
+    // 🔧 تفعيل Notifee event listeners
+    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS && detail.notification) {
+        console.log('� [Notifee] Notification tapped:', detail.notification);
+        // Navigate if eventId exists
+        const eventId = detail.notification.data?.eventId;
+        if (eventId && navigationRef.current) {
+          navigationRef.current.navigate('EventDetails', { eventId });
+        }
+      }
+    });
+    
+    console.log('[APP] ✅ Notifee listeners configured');
+    
     (async () => {
       try {
         // Request permission
         console.log('[APP] 🔔 Requesting notification permission...');
+        
+        // Request Notifee permissions (works on both iOS & Android)
+        await notifee.requestPermission();
+        
+        // Also request Firebase permissions
         const authStatus = await messaging().requestPermission();
         const enabled =
           authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -63,39 +103,101 @@ const AppContent = () => {
         console.log('[APP] 🔑 Getting FCM token...');
         const token = await messaging().getToken();
         console.log('[APP] ✅ FCM Token obtained:', token ? 'YES' : 'NO');
+        if (token) {
+          console.log('[APP] 📝 Token (first 30 chars):', token.substring(0, 30));
+        }
         
         // إرسال التوكن للسيرفر إذا كان المستخدم مسجل دخول
         if (user?.token && token) {
           console.log('[APP] 📤 Sending FCM token to server...');
-          await sendFcmTokenToServer(token, user.token);
+          console.log('[APP] 👤 User token exists:', user.token ? 'YES' : 'NO');
+          const saveResult = await sendFcmTokenToServer(token, user.token);
+          console.log('[APP] 💾 FCM Token save result:', saveResult ? 'SUCCESS ✅' : 'FAILED ❌');
+        } else {
+          console.log('[APP] ⚠️ Cannot save FCM token - user not logged in or token missing');
+        }
+
+        // 🔧 تفعيل Background Fetch
+        if (Platform.OS === 'ios') {
+          console.log('[APP] 🔄 Configuring Background Fetch...');
+          
+          BackgroundFetch.configure({
+            minimumFetchInterval: 15, // الحد الأدنى 15 دقيقة
+            stopOnTerminate: false,   // الاستمرار حتى بعد إغلاق التطبيق
+            startOnBoot: true,        // البدء عند إعادة تشغيل الجهاز
+            enableHeadless: true,     // السماح بالعمل في الخلفية الكاملة
+          }, async (taskId) => {
+            console.log('[BACKGROUND FETCH] ✅ Task executing:', taskId);
+            
+            // التحقق من الإشعارات في الخلفية
+            try {
+              const fcmToken = await messaging().getToken();
+              console.log('[BACKGROUND FETCH] 📱 FCM Token:', fcmToken ? 'exists' : 'missing');
+            } catch (error) {
+              console.error('[BACKGROUND FETCH] ❌ Error:', error);
+            }
+            
+            // إنهاء المهمة
+            BackgroundFetch.finish(taskId);
+          }, (taskId) => {
+            // Timeout callback
+            console.log('[BACKGROUND FETCH] ⏱️ Task timeout:', taskId);
+            BackgroundFetch.finish(taskId);
+          });
+
+          // Start background fetch
+          BackgroundFetch.start();
+          console.log('[APP] ✅ Background Fetch started');
         }
       } catch (error) {
         console.error('[APP] ❌ Error in FCM setup:', error);
       }
 
-      // Handle foreground notifications
+      // Handle foreground notifications using Notifee
       unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-        console.log('🔔 Foreground notification:', remoteMessage);
+        console.log('🔔 [FOREGROUND] FCM message received:', remoteMessage);
         
         if (remoteMessage?.notification) {
-          Alert.alert(
-            remoteMessage.notification.title || 'إشعار جديد',
-            remoteMessage.notification.body || '',
-            [
-              { text: 'إغلاق', style: 'cancel' },
-              {
-                text: 'عرض',
-                onPress: () => {
-                  // Navigate to event if eventId exists
-                  if (remoteMessage.data?.eventId && navigationRef.current) {
-                    navigationRef.current.navigate('EventDetails', {
-                      eventId: remoteMessage.data.eventId
-                    });
-                  }
-                }
-              }
-            ]
-          );
+          // Display notification using Notifee
+          try {
+            // Create notification channel for Android
+            const channelId = await notifee.createChannel({
+              id: 'default',
+              name: 'Default Channel',
+              importance: AndroidImportance.HIGH,
+              sound: 'default',
+            });
+
+            // Display the notification
+            await notifee.displayNotification({
+              title: remoteMessage.notification.title || 'إشعار جديد',
+              body: remoteMessage.notification.body || '',
+              data: remoteMessage.data || {},
+              ios: {
+                sound: 'default',
+                badgeCount: 1,
+                foregroundPresentationOptions: {
+                  alert: true,
+                  badge: true,
+                  sound: true,
+                  banner: true,
+                  list: true,
+                },
+              },
+              android: {
+                channelId,
+                sound: 'default',
+                importance: AndroidImportance.HIGH,
+                pressAction: {
+                  id: 'default',
+                },
+              },
+            });
+            
+            console.log('✅ [FOREGROUND] Notification displayed via Notifee');
+          } catch (error) {
+            console.error('❌ [FOREGROUND] Error displaying notification:', error);
+          }
         }
       });
 
@@ -140,6 +242,7 @@ const AppContent = () => {
     return () => {
       if (unsubscribeForeground) unsubscribeForeground();
       if (unsubscribeTokenRefresh) unsubscribeTokenRefresh();
+      if (unsubscribeNotifee) unsubscribeNotifee();
     };
   }, [user?.token]);
 
@@ -160,6 +263,7 @@ const AppContent = () => {
         <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
         <Stack.Screen name="EditEvent" component={EditEventScreen} />
         <Stack.Screen name="PendingRequests" component={PendingRequestsScreen} />
+        <Stack.Screen name="Notifications" component={require('./NotificationsScreen').default} />
       </Stack.Navigator>
     </NavigationContainer>
   );

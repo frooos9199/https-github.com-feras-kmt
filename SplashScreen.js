@@ -27,18 +27,29 @@ const SplashScreen = ({ navigation }) => {
     // فحص Session
     const checkSession = async () => {
       try {
-        const userSession = await AsyncStorage.getItem('userSession');
-        if (userSession) {
-          const userData = JSON.parse(userSession);
-          await setUser(userData);
-          setTimeout(() => {
-            navigation.replace('MainTabs');
-          }, 2500);
-        } else {
-          setTimeout(() => {
-            navigation.replace('Login');
-          }, 2500);
+        // محاولة تحميل بيانات المستخدم من AsyncStorage
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          
+          // التحقق من وجود التوكن
+          if (userData && userData.token) {
+            console.log('[SPLASH] ✅ Found saved user data, auto-login');
+            await setUser(userData);
+            setTimeout(() => {
+              navigation.replace('MainTabs');
+            }, 2500);
+            return;
+          }
         }
+        
+        // إذا ما في بيانات محفوظة، اذهب للـ Login
+        console.log('[SPLASH] ❌ No saved user data, go to login');
+        setTimeout(() => {
+          navigation.replace('Login');
+        }, 2500);
+        
       } catch (error) {
         console.error('[SPLASH] Session check error:', error);
         setTimeout(() => {

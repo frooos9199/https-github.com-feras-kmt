@@ -8,12 +8,12 @@ import * as Keychain from 'react-native-keychain';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
 import { createAuthHeaders } from './apiConfig';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const appLogo = require('./assets/splash/kmt-logo.png');
 
 const ProfileScreen = () => {
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, logout } = useContext(UserContext);
   const navigation = useNavigation();
   const [lang, setLang] = useState(I18n.locale);
   const [profileData, setProfileData] = useState(null);
@@ -39,19 +39,35 @@ const ProfileScreen = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // حذف Session
-              await AsyncStorage.removeItem('userSession');
-              // حذف بيانات Keychain
-              await Keychain.resetGenericPassword();
-              // تصفير بيانات المستخدم
-              setUser(null);
-              // الانتقال إلى Login
+              console.log('[LOGOUT] 🚪 Starting complete logout...');
+              
+              // 1️⃣ استخدام دالة logout من UserContext (تمسح user_<IP>)
+              await logout();
+              console.log('[LOGOUT] ✅ UserContext logout completed');
+              
+              // 2️⃣ مسح **كل** مفاتيح AsyncStorage (تأكد ما في شي باقي)
+              const allKeys = await AsyncStorage.getAllKeys();
+              console.log('[LOGOUT] 🔍 All storage keys:', allKeys);
+              await AsyncStorage.clear();
+              console.log('[LOGOUT] 🗑️ Cleared all AsyncStorage');
+              
+              // 3️⃣ حذف بيانات Keychain (Face ID / Touch ID)
+              try {
+                await Keychain.resetGenericPassword();
+                console.log('[LOGOUT] 🔐 Cleared Keychain');
+              } catch (e) {
+                console.log('[LOGOUT] ⚠️ Keychain already empty');
+              }
+              
+              // 4️⃣ الانتقال إلى Login (إعادة تعيين كامل للـ navigation)
               navigation.reset({
                 index: 0,
                 routes: [{ name: 'Login' }],
               });
+              
+              console.log('[LOGOUT] ✅ Logout process completed');
             } catch (error) {
-              console.error('[SIGN OUT] Error:', error);
+              console.error('[LOGOUT] ❌ Error:', error);
               Alert.alert(
                 lang === 'ar' ? 'خطأ' : 'Error',
                 lang === 'ar' ? 'حدث خطأ أثناء تسجيل الخروج' : 'An error occurred during sign out'
@@ -64,40 +80,50 @@ const ProfileScreen = () => {
   };
 
   // جلب بيانات البروفايل من API
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        if (!user?.token) {
-          setLoading(false);
-          return;
-        }
-
-        console.log('Fetching profile data...');
-        const response = await fetch('https://www.kmtsys.com/api/profile', {
-          method: 'GET',
-          headers: createAuthHeaders(user.token),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Profile data:', data);
-          // تحويل dateOfBirth إلى birthdate للتوافق
-          if (data.dateOfBirth) {
-            data.birthdate = data.dateOfBirth;
-          }
-          setProfileData(data);
-        } else {
-          console.error('Failed to fetch profile:', response.status);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      } finally {
+  const fetchProfile = useCallback(async () => {
+    try {
+      if (!user?.token) {
         setLoading(false);
+        setProfileData(null);
+        return;
       }
-    };
 
-    fetchProfile();
+      console.log('[PROFILE] 🔄 Fetching profile data...');
+      const response = await fetch('https://www.kmtsys.com/api/profile', {
+        method: 'GET',
+        headers: createAuthHeaders(user.token),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[PROFILE] ✅ Profile data loaded:', {
+          name: data.name,
+          email: data.email,
+          role: data.role
+        });
+        // تحويل dateOfBirth إلى birthdate للتوافق
+        if (data.dateOfBirth) {
+          data.birthdate = data.dateOfBirth;
+        }
+        setProfileData(data);
+      } else {
+        console.error('[PROFILE] ❌ Failed to fetch profile:', response.status);
+        setProfileData(null);
+      }
+    } catch (error) {
+      console.error('[PROFILE] 💥 Error fetching profile:', error);
+      setProfileData(null);
+    } finally {
+      setLoading(false);
+    }
   }, [user?.token]);
+
+  // جلب البيانات عند تغيير المستخدم أو التوكن
+  useEffect(() => {
+    setProfileData(null); // مسح البيانات القديمة
+    setLoading(true);
+    fetchProfile();
+  }, [user?.email, user?.token]); // نستخدم email و token عشان يتحدث عند تغيير المستخدم
 
   // دمج بيانات user مع profileData
   const displayData = profileData || user || {};

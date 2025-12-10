@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -19,8 +19,19 @@ const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
   const { user } = useContext(UserContext);
+  const [lang, setLang] = useState(I18n.locale);
   const isAdmin = user?.role === 'admin';
   const isMarshal = user?.role === 'marshal';
+
+  // تحديث اللغة عند التبديل
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (I18n.locale !== lang) {
+        setLang(I18n.locale);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [lang]);
 
   return (
     <Tab.Navigator
@@ -69,12 +80,12 @@ const MainTabNavigator = () => {
       <Tab.Screen 
         name="Home" 
         component={HomeScreen} 
-        options={{ tabBarLabel: I18n.t('tab_home') || 'Home' }} 
+        options={{ tabBarLabel: lang === 'ar' ? 'الرئيسية' : 'Home' }} 
       />
       <Tab.Screen 
         name="Events" 
         component={EventsScreen} 
-        options={{ tabBarLabel: I18n.t('tab_events') || 'Events' }} 
+        options={{ tabBarLabel: lang === 'ar' ? 'الأحداث' : 'Events' }} 
       />
 
       {/* Tabs خاصة بالمارشال */}
@@ -84,7 +95,7 @@ const MainTabNavigator = () => {
             name="Attendance" 
             component={AttendanceScreen} 
             options={{ 
-              tabBarLabel: I18n.locale === 'ar' ? 'تسجيل' : 'Register',
+              tabBarLabel: lang === 'ar' ? 'تسجيل' : 'Register',
               tabBarBadge: undefined,
             }} 
           />
@@ -92,7 +103,7 @@ const MainTabNavigator = () => {
             name="MyAttendance" 
             component={MyAttendanceScreen} 
             options={{ 
-              tabBarLabel: I18n.locale === 'ar' ? 'طلباتي' : 'My Requests',
+              tabBarLabel: lang === 'ar' ? 'طلباتي' : 'My Requests',
             }} 
           />
         </>
@@ -104,13 +115,13 @@ const MainTabNavigator = () => {
           <Tab.Screen 
             name="Stats" 
             component={StatsScreen} 
-            options={{ tabBarLabel: I18n.t('tab_stats') || 'Stats' }} 
+            options={{ tabBarLabel: lang === 'ar' ? 'الإحصائيات' : 'Stats' }} 
           />
           <Tab.Screen 
             name="QuickActions" 
             component={QuickActionsNavigator} 
             options={{ 
-              tabBarLabel: I18n.locale === 'ar' ? 'إجراءات' : 'Actions',
+              tabBarLabel: lang === 'ar' ? 'إجراءات' : 'Actions',
             }} 
           />
         </>
@@ -120,7 +131,7 @@ const MainTabNavigator = () => {
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen} 
-        options={{ tabBarLabel: I18n.t('tab_profile') || 'Profile' }} 
+        options={{ tabBarLabel: lang === 'ar' ? 'البروفايل' : 'Profile' }} 
       />
     </Tab.Navigator>
   );

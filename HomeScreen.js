@@ -1,14 +1,15 @@
 import './firebaseInit';
 import React, { useContext, useEffect, useState, useRef } from 'react';
 // import messaging from '@react-native-firebase/messaging';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, Dimensions, Image, TouchableOpacity, Modal, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, Dimensions, Image, TouchableOpacity, ScrollView, RefreshControl, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import { UserContext } from './UserContext';
 import I18n from './i18n';
-import { getEventsEndpoint, createAuthHeaders } from './apiConfig';
-import { useNavigation } from '@react-navigation/native';
+import { getEventsEndpoint, createAuthHeaders, API_ENDPOINTS } from './apiConfig';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { 
   COLORS, 
   FONT_SIZES, 
@@ -62,8 +63,9 @@ const HomeScreen = () => {
   const { user } = useContext(UserContext);
   const navigation = useNavigation();
   const [events, setEvents] = useState([]);
-  const [notifModal, setNotifModal] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const [lang, setLang] = useState(I18n.locale);
   // Listen for language change and force re-render
   useEffect(() => {
@@ -73,6 +75,13 @@ const HomeScreen = () => {
     return () => clearInterval(interval);
   }, [lang]);
 
+  // تحديث عدد الإشعارات عند العودة للصفحة الرئيسية
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUnreadNotifications();
+    }, [user?.token])
+  );
+
   useEffect(() => {
     // جلب الفعاليات من API
     const fetchEvents = async () => {
@@ -81,7 +90,8 @@ const HomeScreen = () => {
         console.log('[HOME] User:', user ? { email: user.email, role: user.role, hasToken: !!user.token } : 'null');
         
         if (!user?.token || !user?.role) {
-          console.log('[HOME] ❌ No token or role found');
+          console.log('[HOME] ❌ No token or role found - skipping events fetch');
+          setEvents([]); // مسح الأحداث
           return;
         }
 
@@ -95,14 +105,15 @@ const HomeScreen = () => {
         });
 
         console.log('[HOME] 📊 Response status:', response.status);
-        const data = await response.json();
-        console.log('[HOME] 📦 Response data:', data);
         
         if (!response.ok) {
-          console.log('[HOME] ❌ Events API error:', data.error || 'Unknown error');
+          console.log('[HOME] ❌ Events API error:', response.status);
+          setEvents([]);
           return;
         }
-
+        
+        const data = await response.json();
+        console.log('[HOME] 📦 Response data:', data);
         // معالجة البيانات
         const eventsData = Array.isArray(data) ? data : (data.events || []);
         
@@ -117,10 +128,150 @@ const HomeScreen = () => {
         console.error('[HOME] Error stack:', err);
       }
     };
+
+    // جلب الطلبات المعلقة (للأدمن فقط)
+    const fetchPendingRequests = async () => {
+      if (user?.role !== 'admin' || !user?.token) {
+        setPendingRequestsCount(0);
+        return;
+      }
+
+      try {
+        console.log('[HOME] 🔄 Fetching pending requests...');
+        const response = await fetch(API_ENDPOINTS.ADMIN.ATTENDANCE, {
+          method: 'GET',
+          headers: createAuthHeaders(user.token),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[HOME] 📦 Attendance data:', data);
+          
+          // حساب الطلبات المعلقة
+          const attendanceList = Array.isArray(data) ? data : (data.attendance || []);
+          const pending = attendanceList.filter(a => a.status === 'pending').length;
+          
+          console.log('[HOME] ✅ Pending requests count:', pending);
+          setPendingRequestsCount(pending);
+        } else {
+          console.log('[HOME] ❌ Failed to fetch attendance');
+          setPendingRequestsCount(0);
+        }
+      } catch (err) {
+        console.log('[HOME] 💥 Error fetching pending requests:', err.message);
+        setPendingRequestsCount(0);
+      }
+    };
     
     fetchEvents();
+    fetchPendingRequests();
+    fetchUnreadNotifications();
   }, [user]);
 
+  // دالة لجلب عدد الإشعارات غير المقروءة
+  const fetchUnreadNotifications = async () => {
+    if (!user?.token) {
+      setUnreadNotificationsCount(0);
+      return;
+    }
+
+    try {
+      console.log('[HOME] 🔔 Fetching unread notifications count...');
+      const response = await fetch('https://www.kmtsys.com/api/notifications', {
+        method: 'GET',
+        headers: createAuthHeaders(user.token),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const notifications = Array.isArray(data) ? data : (data.notifications || []);
+        const unreadCount = notifications.filter(n => !n.isRead).length;
+        
+        console.log('[HOME] 🔔 Unread notifications:', unreadCount);
+        setUnreadNotificationsCount(unreadCount);
+        
+        // تحديث Badge على أيقونة التطبيق (iOS فقط)
+        if (Platform.OS === 'ios') {
+          PushNotificationIOS.setApplicationIconBadgeNumber(unreadCount);
+          console.log('[HOME] 📱 App icon badge updated (iOS):', unreadCount);
+        }
+      } else {
+        console.log('[HOME] ❌ Failed to fetch notifications');
+        setUnreadNotificationsCount(0);
+        if (Platform.OS === 'ios') {
+          PushNotificationIOS.setApplicationIconBadgeNumber(0);
+        }
+      }
+    } catch (err) {
+      console.log('[HOME] 💥 Error fetching notifications:', err.message);
+      setUnreadNotificationsCount(0);
+      if (Platform.OS === 'ios') {
+        PushNotificationIOS.setApplicationIconBadgeNumber(0);
+      }
+    }
+  };
+
+  // دالة تحديث البيانات عند السحب للأسفل
+  const onRefresh = async () => {
+    setRefreshing(true);
+    
+    // جلب الأحداث
+    const fetchEvents = async () => {
+      try {
+        if (!user?.token || !user?.role) {
+          setEvents([]);
+          return;
+        }
+
+        const apiUrl = getEventsEndpoint(user.role);
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: createAuthHeaders(user.token),
+        });
+
+        if (!response.ok) {
+          setEvents([]);
+          return;
+        }
+        
+        const data = await response.json();
+        const eventsData = Array.isArray(data) ? data : (data.events || []);
+        
+        if (eventsData.length > 0) {
+          setEvents(eventsData);
+        }
+      } catch (err) {
+        console.log('[HOME] Error refreshing events:', err.message);
+      }
+    };
+
+    // جلب الطلبات المعلقة
+    const fetchPendingRequests = async () => {
+      if (user?.role !== 'admin' || !user?.token) {
+        setPendingRequestsCount(0);
+        return;
+      }
+
+      try {
+        const response = await fetch(API_ENDPOINTS.ADMIN.ATTENDANCE, {
+          method: 'GET',
+          headers: createAuthHeaders(user.token),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const attendanceList = Array.isArray(data) ? data : (data.attendance || []);
+          const pending = attendanceList.filter(a => a.status === 'pending').length;
+          setPendingRequestsCount(pending);
+        }
+      } catch (err) {
+        console.log('[HOME] Error refreshing pending requests:', err.message);
+      }
+    };
+
+    await Promise.all([fetchEvents(), fetchPendingRequests(), fetchUnreadNotifications()]);
+    setRefreshing(false);
+  };
 
 
     // تم تعطيل كود الإشعارات مؤقتاً
@@ -140,63 +291,63 @@ const HomeScreen = () => {
     return start <= today && today <= end;
   });
   const todayEventsCount = todayEvents.length;
-  // الطلبات المعلقة اليوم (status === 'pending' وتاريخ اليوم)
-  const pendingRequests = todayEvents.filter(e => e.status === 'pending').length;
   // الحضور اليوم (status === 'approved' وتاريخ اليوم)
   const attendanceCount = todayEvents.filter(e => e.status === 'approved').length;
+
+  // ترتيب الأحداث: اليوم → القادمة → المنتهية
+  const sortedEvents = [...events].sort((a, b) => {
+    if (!a.date || !b.date) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const aStart = new Date(a.date.slice(0, 10));
+    const aEnd = a.endDate ? new Date(a.endDate.slice(0, 10)) : aStart;
+    const bStart = new Date(b.date.slice(0, 10));
+    const bEnd = b.endDate ? new Date(b.endDate.slice(0, 10)) : bStart;
+    
+    // تحديد حالة كل حدث
+    const aIsToday = aStart <= today && today <= aEnd;
+    const bIsToday = bStart <= today && today <= bEnd;
+    const aIsFuture = aStart > today;
+    const bIsFuture = bStart > today;
+    const aIsPast = aEnd < today;
+    const bIsPast = bEnd < today;
+    
+    // الأحداث الجارية اليوم أولاً
+    if (aIsToday && !bIsToday) return -1;
+    if (!aIsToday && bIsToday) return 1;
+    
+    // ثم الأحداث القادمة
+    if (aIsFuture && !bIsFuture && !bIsToday) return -1;
+    if (!aIsFuture && bIsFuture && !aIsToday) return 1;
+    
+    // أخيراً الأحداث المنتهية
+    if (aIsPast && !bIsPast) return 1;
+    if (!aIsPast && bIsPast) return -1;
+    
+    // ترتيب داخل نفس الفئة حسب التاريخ
+    if (aIsToday && bIsToday) return aStart - bStart;
+    if (aIsFuture && bIsFuture) return aStart - bStart;
+    if (aIsPast && bIsPast) return bStart - aStart; // الأحدث من المنتهية أولاً
+    
+    return 0;
+  });
 
   return (
     <LinearGradient colors={['#000', '#b71c1c']} style={styles.bg}>
       <SafeAreaView style={{ flex: 1 }}>
-        {/* كرت الإشعارات المنبثق */}
-        <Modal
-          visible={notifModal}
-          animationType="fade"
-          transparent
-          onRequestClose={() => setNotifModal(false)}
-        >
-          <Pressable style={styles.modalOverlay} onPress={() => setNotifModal(false)}>
-            <View style={styles.notifCardPopup}>
-              <View style={styles.notifHeaderRow}>
-                <Text style={styles.notifTitle}>الإشعارات</Text>
-                <View style={{flexDirection:'row',alignItems:'center'}}>
-                  {notifications.length > 0 && (
-                    <TouchableOpacity onPress={() => setNotifications([])} style={{marginEnd:12}}>
-                      <Ionicons name="trash" size={20} color="#dc2626" />
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity onPress={() => setNotifModal(false)}>
-                    <Ionicons name="close" size={22} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <ScrollView style={{ maxHeight: 260 }}>
-                {notifications.length === 0 ? (
-                  <Text style={styles.notifEmpty}>لا توجد إشعارات بعد</Text>
-                ) : (
-                  notifications.map(item => (
-                    <View key={item.id} style={styles.notifItemRow}>
-                      <View style={[styles.notifItem,{flex:1}]}> 
-                        <Ionicons name="notifications" size={20} color="#dc2626" style={{marginEnd:8}} />
-                        <View style={{flex:1}}>
-                          <Text style={styles.notifItemTitle}>{item.title}</Text>
-                          <Text style={styles.notifItemBody}>{item.body}</Text>
-                        </View>
-                      </View>
-                      <TouchableOpacity onPress={() => setNotifications(prev => prev.filter(n => n.id !== item.id))} style={styles.notifDeleteBtn}>
-                        <Ionicons name="close-circle" size={20} color="#991b1b" />
-                      </TouchableOpacity>
-                    </View>
-                  ))
-                )}
-              </ScrollView>
-            </View>
-          </Pressable>
-        </Modal>
         <View style={styles.headerBox}>
           <View style={styles.headerTopRow}>
-            <TouchableOpacity style={styles.bellIcon} onPress={() => setNotifModal(true)}>
+            <TouchableOpacity style={styles.bellIcon} onPress={() => navigation.navigate('Notifications')}>
               <Ionicons name="notifications" size={28} color="#fff" />
+              {unreadNotificationsCount > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
             <Image source={appLogo} style={styles.logo} />
             {user?.role === 'marshal' ? (
@@ -223,33 +374,70 @@ const HomeScreen = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>{I18n.locale === 'ar' ? 'الفعاليات القادمة' : 'Upcoming Events'}</Text>
-            <View style={styles.badge}><Text style={styles.badgeText}>{events.length}</Text></View>
+            <Text style={styles.sectionTitle}>{I18n.locale === 'ar' ? 'الفعاليات' : 'Events'}</Text>
+            <View style={styles.badge}><Text style={styles.badgeText}>{sortedEvents.length}</Text></View>
           </View>
           <FlatList
-            data={events}
+            data={sortedEvents}
             keyExtractor={item => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingVertical: 8 }}
-            renderItem={({ item }) => (
-              <View style={styles.eventCard}>
-                <MaterialCommunityIcons 
-                  name="calendar-star" 
-                  size={ICON_SIZES.regular} 
-                  color={COLORS.white} 
-                  style={{marginBottom: SPACING.tiny}} 
-                />
-                <Text style={styles.eventTitle}>{item.title}</Text>
-                <Text style={styles.eventDate}>{formatDate(item.date)}</Text>
-                <Text style={styles.eventLocation}>{item.location}</Text>
-                <Text style={styles.eventStatus}>{item.status === 'approved' ? (I18n.locale === 'ar' ? 'مقبول' : 'Approved') : item.status}</Text>
-              </View>
-            )}
+            renderItem={({ item }) => {
+              // تحديد حالة الحدث
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const start = new Date(item.date?.slice(0, 10));
+              const end = item.endDate ? new Date(item.endDate.slice(0, 10)) : start;
+              const isToday = start <= today && today <= end;
+              const isFuture = start > today;
+              const isPast = end < today;
+              
+              // اختيار اللون والحالة
+              let statusColor = '#6b7280';
+              let statusText = '';
+              if (isToday) {
+                statusColor = '#22c55e';
+                statusText = I18n.locale === 'ar' ? '🟢 جاري الآن' : '🟢 Ongoing';
+              } else if (isFuture) {
+                statusColor = '#3b82f6';
+                statusText = I18n.locale === 'ar' ? '🔵 قادم' : '🔵 Upcoming';
+              } else if (isPast) {
+                statusColor = '#6b7280';
+                statusText = I18n.locale === 'ar' ? '⚫ منتهي' : '⚫ Ended';
+              }
+              
+              return (
+                <View style={styles.eventCard}>
+                  <MaterialCommunityIcons 
+                    name="calendar-star" 
+                    size={ICON_SIZES.regular} 
+                    color={COLORS.white} 
+                    style={{marginBottom: SPACING.tiny}} 
+                  />
+                  <Text style={styles.eventTitle}>{item.title}</Text>
+                  <Text style={styles.eventDate}>{formatDate(item.date)}</Text>
+                  <Text style={styles.eventLocation}>{item.location}</Text>
+                  <Text style={[styles.eventStatus, { color: statusColor }]}>{statusText}</Text>
+                </View>
+              );
+            }}
           />
         </View>
 
-        <ScrollView style={{flexGrow:0}} contentContainerStyle={styles.cardsColumn} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={{flexGrow:0}} 
+          contentContainerStyle={styles.cardsColumn} 
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh}
+              colors={['#dc2626']}
+              tintColor="#dc2626"
+            />
+          }
+        >
           {/* Marshal Quick Actions */}
           {user?.role === 'marshal' && (
             <View style={styles.marshalActionsRow}>
@@ -288,8 +476,8 @@ const HomeScreen = () => {
             iconType="MaterialCommunityIcons"
             icon="clock-alert"
             iconColor="#fff"
-            title={I18n.locale === 'ar' ? 'الطلبات المعلقة اليوم' : 'Pending Requests Today'}
-            number={pendingRequests}
+            title={I18n.locale === 'ar' ? 'الطلبات المعلقة' : 'Pending Requests'}
+            number={pendingRequestsCount}
             bgColor="#6d071a"
             onPress={() => {
               if (user?.role === 'admin') {
@@ -596,6 +784,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOWS.small,
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#dc2626',
+    borderRadius: 12,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#000',
+  },
+  notificationBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
 });
 
