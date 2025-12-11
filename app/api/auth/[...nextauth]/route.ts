@@ -1,4 +1,11 @@
-export async function OPTIONS(request) {
+import NextAuth, { NextAuthOptions } from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { prisma } from "@/lib/prisma"
+import bcrypt from "bcryptjs"
+import { rateLimit, getRemainingTime } from "@/lib/rateLimit"
+import { NextRequest } from "next/server"
+
+export async function OPTIONS(request: NextRequest) {
   return new Response(null, {
     status: 204,
     headers: {
@@ -8,12 +15,6 @@ export async function OPTIONS(request) {
     },
   });
 }
-
-import NextAuth, { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
-import { rateLimit, getRemainingTime } from "@/lib/rateLimit"
 
 export const authOptions: NextAuthOptions = {
   providers: [
