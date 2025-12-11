@@ -89,6 +89,9 @@ const ProfileScreen = () => {
       }
 
       console.log('[PROFILE] 🔄 Fetching profile data...');
+      console.log('[PROFILE] 🔑 Token exists:', !!user.token);
+      console.log('[PROFILE] 👤 User email:', user.email);
+      
       const response = await fetch('https://www.kmtsys.com/api/profile', {
         method: 'GET',
         headers: createAuthHeaders(user.token),
@@ -100,6 +103,7 @@ const ProfileScreen = () => {
           name: data.name,
           email: data.email,
           role: data.role,
+          phone: data.phone, // 📱 رقم الهاتف
           bloodType: data.bloodType // 🩸 عرض فصيلة الدم
         });
         // تحويل dateOfBirth إلى birthdate للتوافق
@@ -109,6 +113,22 @@ const ProfileScreen = () => {
         setProfileData(data);
       } else {
         console.error('[PROFILE] ❌ Failed to fetch profile:', response.status);
+        console.error('[PROFILE] 🔍 Response text:', await response.text());
+        
+        // لو التوكن منتهي، نسجل خروج
+        if (response.status === 401) {
+          console.log('[PROFILE] 🚪 Token expired, logging out...');
+          Alert.alert(
+            lang === 'ar' ? 'انتهت الجلسة' : 'Session Expired',
+            lang === 'ar' ? 'يرجى تسجيل الدخول مرة أخرى' : 'Please login again',
+            [
+              {
+                text: 'OK',
+                onPress: () => handleSignOut()
+              }
+            ]
+          );
+        }
         setProfileData(null);
       }
     } catch (error) {
