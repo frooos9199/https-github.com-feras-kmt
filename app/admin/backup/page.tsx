@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,6 +15,14 @@ export default function BackupPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadResult, setUploadResult] = useState<any>(null);
+  const [uploadError, setUploadError] = useState('');
+  const [downloadingImages, setDownloadingImages] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadImagesResult, setUploadImagesResult] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imagesInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect if not admin
   useEffect(() => {
@@ -46,6 +54,141 @@ export default function BackupPage() {
       setError('Failed to create backup. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadExcel = async () => {
+    try {
+      setError('');
+      const response = await fetch('/api/backup/download-excel');
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to download Excel');
+      }
+
+      // Get the blob and create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `KMT_Users_Backup_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err.message || 'Failed to download Excel file');
+    }
+  };
+
+  const downloadImages = async () => {
+    setDownloadingImages(true);
+    try {
+      setError('');
+      const response = await fetch('/api/backup/download-images');
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to download images');
+      }
+
+      // Get the blob and create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `KMT_Images_Backup_${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err.message || 'Failed to download images');
+    } finally {
+      setDownloadingImages(false);
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      setUploadError(language === 'en' ? 'Please select an Excel file (.xlsx or .xls)' : 'الرجاء اختيار ملف Excel (.xlsx أو .xls)');
+      return;
+    }
+
+    setUploadLoading(true);
+    setUploadError('');
+    setUploadResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/backup/upload-excel', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUploadResult(data);
+      } else {
+        setUploadError(data.error || 'Failed to upload file');
+      }
+    } catch (err) {
+      setUploadError('Failed to upload file. Please try again.');
+    } finally {
+      setUploadLoading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleImagesSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.zip')) {
+      setUploadError(language === 'en' ? 'Please select a ZIP file' : 'الرجاء اختيار ملف ZIP');
+      return;
+    }
+
+    setUploadingImages(true);
+    setUploadError('');
+    setUploadImagesResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/backup/upload-images', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUploadImagesResult(data);
+      } else {
+        setUploadError(data.error || 'Failed to upload images');
+      }
+    } catch (err) {
+      setUploadError('Failed to upload images. Please try again.');
+    } finally {
+      setUploadingImages(false);
+      // Reset file input
+      if (imagesInputRef.current) {
+        imagesInputRef.current.value = '';
+      }
     }
   };
 
@@ -179,6 +322,223 @@ export default function BackupPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </motion.div>
+
+        {/* Excel Backup Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 mb-6"
+        >
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <span>📊</span>
+            <span>{language === 'en' ? 'Excel Backup & Restore' : 'النسخ الاحتياطي واستعادة Excel'}</span>
+          </h2>
+          
+          <p className="text-gray-300 mb-6">
+            {language === 'en' 
+              ? 'Download all users data as Excel file or upload Excel file to restore/import users (including passwords).'
+              : 'تحميل بيانات جميع المستخدمين كملف Excel أو رفع ملف Excel لاستعادة/استيراد المستخدمين (بما في ذلك كلمات المرور).'}
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            {/* Download Excel */}
+            <button
+              onClick={downloadExcel}
+              className="flex items-center justify-center gap-3 px-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-lg transition-all"
+            >
+              <span className="text-2xl">📥</span>
+              <span>{language === 'en' ? 'Download Excel' : 'تحميل Excel'}</span>
+            </button>
+
+            {/* Download Images */}
+            <button
+              onClick={downloadImages}
+              disabled={downloadingImages}
+              className={`flex items-center justify-center gap-3 px-6 py-4 rounded-lg font-bold text-lg transition-all ${
+                downloadingImages
+                  ? 'bg-purple-400 cursor-not-allowed'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+              }`}
+            >
+              {downloadingImages ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  <span>{language === 'en' ? 'Downloading...' : 'جاري التحميل...'}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl">📸</span>
+                  <span>{language === 'en' ? 'Download Images' : 'تحميل الصور'}</span>
+                </>
+              )}
+            </button>
+
+            {/* Upload Excel */}
+            <label className="flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-lg transition-all cursor-pointer">
+              {uploadLoading ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  <span>{language === 'en' ? 'Uploading...' : 'جاري الرفع...'}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl">📤</span>
+                  <span>{language === 'en' ? 'Upload Excel' : 'رفع Excel'}</span>
+                </>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileSelect}
+                disabled={uploadLoading}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Second Row: Upload Images */}
+          <div className="grid grid-cols-1 gap-4">
+            <label className="flex items-center justify-center gap-3 px-6 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-bold text-lg transition-all cursor-pointer">
+              {uploadingImages ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  <span>{language === 'en' ? 'Uploading Images...' : 'جاري رفع الصور...'}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl">🖼️</span>
+                  <span>{language === 'en' ? 'Upload Images ZIP' : 'رفع ملف الصور ZIP'}</span>
+                </>
+              )}
+              <input
+                ref={imagesInputRef}
+                type="file"
+                accept=".zip"
+                onChange={handleImagesSelect}
+                disabled={uploadingImages}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Upload Success Result */}
+          {uploadResult && (
+            <div className="mt-6 bg-green-600/10 border border-green-600/30 rounded-xl p-4">
+              <h3 className="text-lg font-bold mb-3 text-green-400">
+                ✅ {language === 'en' ? 'Upload Completed!' : 'تم الرفع بنجاح!'}
+              </h3>
+              
+              <div className="space-y-2 text-gray-300 text-sm">
+                <p>📊 <strong>{language === 'en' ? 'Total:' : 'الإجمالي:'}</strong> {uploadResult.stats?.total || 0}</p>
+                <p>✅ <strong>{language === 'en' ? 'Imported:' : 'تم الاستيراد:'}</strong> {uploadResult.stats?.imported || 0}</p>
+                <p>🔄 <strong>{language === 'en' ? 'Updated:' : 'تم التحديث:'}</strong> {uploadResult.stats?.updated || 0}</p>
+                <p>❌ <strong>{language === 'en' ? 'Failed:' : 'فشل:'}</strong> {uploadResult.stats?.failed || 0}</p>
+                
+                {/* Update Details */}
+                {uploadResult.updateDetails && uploadResult.updateDetails.length > 0 && (
+                  <div className="mt-4 p-4 bg-blue-600/10 border border-blue-600/30 rounded-lg">
+                    <p className="font-bold text-blue-400 mb-3">
+                      📝 {language === 'en' ? 'Update Details:' : 'تفاصيل التحديث:'}
+                    </p>
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {uploadResult.updateDetails.map((detail: any, idx: number) => (
+                        <div key={idx} className="bg-zinc-800/50 p-3 rounded border border-zinc-700">
+                          <p className="font-semibold text-white mb-2">
+                            {detail.employeeId} - {detail.name} ({detail.email})
+                          </p>
+                          <div className="space-y-1 text-xs">
+                            {Object.entries(detail.changes).map(([field, change]: [string, any]) => (
+                              <div key={field} className="flex items-start gap-2">
+                                <span className="text-yellow-400 min-w-[120px]">{field}:</span>
+                                <div className="flex-1">
+                                  <div className="text-red-400">
+                                    ❌ {language === 'en' ? 'Old:' : 'قديم:'} {change.old || 'null'}
+                                  </div>
+                                  <div className="text-green-400">
+                                    ✅ {language === 'en' ? 'New:' : 'جديد:'} {change.new || 'null'}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {uploadResult.errors && uploadResult.errors.length > 0 && (
+                  <div className="mt-3 p-3 bg-red-600/10 border border-red-600/30 rounded">
+                    <p className="font-bold text-red-400 mb-2">{language === 'en' ? 'Errors:' : 'الأخطاء:'}</p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      {uploadResult.errors.slice(0, 5).map((err: string, i: number) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                      {uploadResult.errors.length > 5 && (
+                        <li>...{language === 'en' ? `and ${uploadResult.errors.length - 5} more` : `و ${uploadResult.errors.length - 5} أخرى`}</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Upload Images Success Result */}
+          {uploadImagesResult && (
+            <div className="mt-6 bg-green-600/10 border border-green-600/30 rounded-xl p-4">
+              <h3 className="text-lg font-bold mb-3 text-green-400">
+                ✅ {language === 'en' ? 'Images Upload Completed!' : 'تم رفع الصور بنجاح!'}
+              </h3>
+              
+              <div className="space-y-2 text-gray-300 text-sm">
+                <p>📁 <strong>{language === 'en' ? 'Total Images:' : 'إجمالي الصور:'}</strong> {uploadImagesResult.stats?.total || 0}</p>
+                <p>✅ <strong>{language === 'en' ? 'Uploaded:' : 'تم الرفع:'}</strong> {uploadImagesResult.stats?.uploaded || 0}</p>
+                <p>⏭️ <strong>{language === 'en' ? 'Skipped:' : 'تم التجاهل:'}</strong> {uploadImagesResult.stats?.skipped || 0}</p>
+                <p>❌ <strong>{language === 'en' ? 'Failed:' : 'فشل:'}</strong> {uploadImagesResult.stats?.failed || 0}</p>
+                {uploadImagesResult.errors && uploadImagesResult.errors.length > 0 && (
+                  <div className="mt-3 p-3 bg-red-600/10 border border-red-600/30 rounded">
+                    <p className="font-bold text-red-400 mb-2">{language === 'en' ? 'Errors:' : 'الأخطاء:'}</p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      {uploadImagesResult.errors.slice(0, 5).map((err: string, i: number) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                      {uploadImagesResult.errors.length > 5 && (
+                        <li>...{language === 'en' ? `and ${uploadImagesResult.errors.length - 5} more` : `و ${uploadImagesResult.errors.length - 5} أخرى`}</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Upload Error */}
+          {uploadError && (
+            <div className="mt-6 bg-red-600/10 border border-red-600/30 rounded-xl p-4">
+              <h3 className="text-lg font-bold mb-2 text-red-400">
+                ❌ {language === 'en' ? 'Upload Failed' : 'فشل الرفع'}
+              </h3>
+              <p className="text-gray-300 text-sm">{uploadError}</p>
+            </div>
+          )}
+
+          {/* Important Notes */}
+          <div className="mt-6 p-4 bg-yellow-600/10 border border-yellow-600/30 rounded-xl">
+            <h4 className="font-bold text-yellow-400 mb-2 flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{language === 'en' ? 'Important Notes:' : 'ملاحظات هامة:'}</span>
+            </h4>
+            <ul className="text-sm text-gray-300 space-y-1 list-disc list-inside">
+              <li>{language === 'en' ? 'Excel file contains ALL user data including password hashes' : 'يحتوي ملف Excel على جميع بيانات المستخدمين بما في ذلك كلمات المرور المشفرة'}</li>
+              <li>{language === 'en' ? 'Images ZIP contains ALL profile photos and documents' : 'ملف ZIP يحتوي على جميع الصور الشخصية والمستندات'}</li>
+              <li>{language === 'en' ? 'Uploading will update existing users or create new ones' : 'الرفع سيحدث المستخدمين الموجودين أو ينشئ مستخدمين جدد'}</li>
+              <li>{language === 'en' ? 'Keep backup files secure - they contain sensitive data!' : 'احتفظ بملفات النسخ الاحتياطي بشكل آمن - تحتوي على بيانات حساسة!'}</li>
+            </ul>
           </div>
         </motion.div>
 

@@ -675,17 +675,114 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* Blood Type (Read-only in view mode, shown here) */}
+            {/* Name */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">
+                {language === "ar" ? "الاسم" : "Name"} *
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                disabled={!editing}
+                required
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
+              />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">
+                {language === "ar" ? "رقم الهاتف" : "Phone Number"}
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                disabled={!editing}
+                placeholder="+965 XXXX XXXX"
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
+              />
+            </div>
+
+            {/* Civil ID */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">
+                {language === "ar" ? "الرقم المدني" : "Civil ID"}
+              </label>
+              <input
+                type="text"
+                value={formData.civilId}
+                onChange={(e) => setFormData({ ...formData, civilId: e.target.value })}
+                disabled={!editing}
+                placeholder="XXXXXXXXXXXX"
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
+              />
+            </div>
+
+            {/* Date of Birth */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">
+                {language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}
+              </label>
+              <input
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                disabled={!editing}
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
+              />
+              {/* عرض التاريخ بشكل مقروء حسب اللغة */}
+              {formData.dateOfBirth && (
+                <div className="mt-2 text-gray-400 text-sm">
+                  {language === "ar"
+                    ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
+                    : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
+                </div>
+              )}
+            </div>
+
+            {/* Nationality */}
+            <div>
+              <label className="block text-gray-400 mb-2 text-sm">
+                {language === "ar" ? "الجنسية" : "Nationality"}
+              </label>
+              <select
+                value={formData.nationality}
+                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                disabled={!editing}
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed cursor-pointer"
+              >
+                <option value="">{language === "ar" ? "اختر الجنسية" : "Select Nationality"}</option>
+                {NATIONALITIES.map(nat => (
+                  <option key={nat.value} value={nat.value}>
+                    {language === "ar" ? nat.label.ar : nat.label.en}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Blood Type */}
             <div>
               <label className="block text-gray-400 mb-2 text-sm">
                 {language === "ar" ? "فصيلة الدم" : "Blood Type"}
               </label>
-              <input
-                type="text"
-                value={profile.bloodType || (language === "ar" ? "غير محدد" : "Not specified")}
-                disabled
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-red-400 cursor-not-allowed font-bold"
-              />
+              <select
+                value={formData.bloodType}
+                onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
+                disabled={!editing}
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
+              >
+                <option value="">{language === "ar" ? "اختر فصيلة الدم" : "Select Blood Type"}</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+              </select>
             </div>
 
             {/* License Images */}
@@ -882,116 +979,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Name */}
-            <div>
-              <label className="block text-gray-400 mb-2 text-sm">
-                {language === "ar" ? "الاسم" : "Name"} *
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                disabled={!editing}
-                required
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-gray-400 mb-2 text-sm">
-                {language === "ar" ? "رقم الهاتف" : "Phone Number"}
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                disabled={!editing}
-                placeholder="+965 XXXX XXXX"
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
-              />
-            </div>
-
-            {/* Civil ID */}
-            <div>
-              <label className="block text-gray-400 mb-2 text-sm">
-                {language === "ar" ? "الرقم المدني" : "Civil ID"}
-              </label>
-              <input
-                type="text"
-                value={formData.civilId}
-                onChange={(e) => setFormData({ ...formData, civilId: e.target.value })}
-                disabled={!editing}
-                placeholder="XXXXXXXXXXXX"
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
-              />
-            </div>
-
-            {/* Date of Birth */}
-            <div>
-              <label className="block text-gray-400 mb-2 text-sm">
-                {language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}
-              </label>
-              <input
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                disabled={!editing}
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
-              />
-              {/* عرض التاريخ بشكل مقروء حسب اللغة */}
-              {formData.dateOfBirth && (
-                <div className="mt-2 text-gray-400 text-sm">
-                  {language === "ar"
-                    ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
-                    : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
-                </div>
-              )}
-            </div>
-
-            {/* Nationality */}
-            <div>
-              <label className="block text-gray-400 mb-2 text-sm">
-                {language === "ar" ? "الجنسية" : "Nationality"}
-              </label>
-              <select
-                value={formData.nationality}
-                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                disabled={!editing}
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed cursor-pointer"
-              >
-                <option value="">{language === "ar" ? "اختر الجنسية" : "Select Nationality"}</option>
-                {NATIONALITIES.map(nat => (
-                  <option key={nat.value} value={nat.value}>
-                    {language === "ar" ? nat.label.ar : nat.label.en}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Blood Type */}
-            <div>
-              <label className="block text-gray-400 mb-2 text-sm">
-                {language === "ar" ? "فصيلة الدم" : "Blood Type"}
-              </label>
-              <select
-                value={formData.bloodType}
-                onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
-                disabled={!editing}
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none disabled:cursor-not-allowed"
-              >
-                <option value="">{language === "ar" ? "اختر فصيلة الدم" : "Select Blood Type"}</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-              </select>
             </div>
 
             {/* Password Change Section */}
