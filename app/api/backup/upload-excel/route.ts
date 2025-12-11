@@ -5,15 +5,9 @@ import { prisma } from '@/lib/prisma';
 import * as ExcelJS from 'exceljs';
 import bcrypt from 'bcryptjs';
 
-// Increase size limit for Vercel
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-  maxDuration: 60,
-};
+// Vercel configuration for large files
+export const maxDuration = 60; // 60 seconds timeout
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {

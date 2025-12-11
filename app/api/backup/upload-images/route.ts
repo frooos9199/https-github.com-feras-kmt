@@ -13,15 +13,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Increase size limit for Vercel
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-  maxDuration: 60,
-};
+// Vercel configuration for large files
+export const maxDuration = 60; // 60 seconds timeout
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
