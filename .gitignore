@@ -2,10 +2,6 @@
 #
 .DS_Store
 
-# Next.js build output
-.next/
-.vercel/
-
 # Xcode
 #
 build/
@@ -137,4 +133,6 @@ android/app/*-release-key.keystore
 Network Trash Folder
 Temporary Items
 .apdisk
+.next/
+.vercel
 .env.vercel

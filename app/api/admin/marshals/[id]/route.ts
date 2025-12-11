@@ -3,42 +3,6 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, marshalAccountRemovalEmailTemplate } from "@/lib/email"
-import * as jwt from "jsonwebtoken"
-
-type UserAuth = {
-  id: string;
-  role: string;
-  email: string;
-  name: string;
-} | null;
-
-// Verify Bearer token for mobile app
-async function verifyBearerToken(req: NextRequest): Promise<UserAuth> {
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return null;
-  }
-
-  try {
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET!) as any;
-    
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        role: true,
-        email: true,
-        name: true
-      }
-    });
-
-    return user;
-  } catch (error) {
-    console.error("Bearer token verification failed:", error);
-    return null;
-  }
-}
 
 // GET - Fetch single marshal
 export async function GET(
@@ -46,16 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Try Bearer token first (for mobile app)
-    let user: UserAuth = await verifyBearerToken(req);
-    
-    // Fallback to session (for web)
-    if (!user) {
-      const session = await getServerSession(authOptions);
-      user = session?.user as UserAuth;
-    }
-
-    if (!user || user.role !== "admin") {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -106,16 +62,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Try Bearer token first (for mobile app)
-    let user: UserAuth = await verifyBearerToken(req);
-    
-    // Fallback to session (for web)
-    if (!user) {
-      const session = await getServerSession(authOptions);
-      user = session?.user as UserAuth;
-    }
-
-    if (!user || user.role !== "admin") {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -192,16 +140,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Try Bearer token first (for mobile app)
-    let user: UserAuth = await verifyBearerToken(req);
-    
-    // Fallback to session (for web)
-    if (!user) {
-      const session = await getServerSession(authOptions);
-      user = session?.user as UserAuth;
-    }
-
-    if (!user || user.role !== "admin") {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
