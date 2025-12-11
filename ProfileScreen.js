@@ -113,23 +113,17 @@ const ProfileScreen = () => {
         setProfileData(data);
       } else {
         console.error('[PROFILE] ❌ Failed to fetch profile:', response.status);
-        console.error('[PROFILE] 🔍 Response text:', await response.text());
+        const errorText = await response.text();
+        console.error('[PROFILE] 🔍 Response text:', errorText);
         
-        // لو التوكن منتهي، نسجل خروج
+        // لو التوكن منتهي، نعرض بيانات الـ user من الـ context
         if (response.status === 401) {
-          console.log('[PROFILE] 🚪 Token expired, logging out...');
-          Alert.alert(
-            lang === 'ar' ? 'انتهت الجلسة' : 'Session Expired',
-            lang === 'ar' ? 'يرجى تسجيل الدخول مرة أخرى' : 'Please login again',
-            [
-              {
-                text: 'OK',
-                onPress: () => handleSignOut()
-              }
-            ]
-          );
+          console.log('[PROFILE] ⚠️ Token expired, showing cached user data');
+          // نستخدم بيانات user الموجودة بدل null
+          setProfileData(null); // راح يستخدم displayData = user
+        } else {
+          setProfileData(null);
         }
-        setProfileData(null);
       }
     } catch (error) {
       console.error('[PROFILE] 💥 Error fetching profile:', error);
