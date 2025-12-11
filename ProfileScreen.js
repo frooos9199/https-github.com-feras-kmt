@@ -99,7 +99,8 @@ const ProfileScreen = () => {
         console.log('[PROFILE] ✅ Profile data loaded:', {
           name: data.name,
           email: data.email,
-          role: data.role
+          role: data.role,
+          bloodType: data.bloodType // 🩸 عرض فصيلة الدم
         });
         // تحويل dateOfBirth إلى birthdate للتوافق
         if (data.dateOfBirth) {
@@ -229,7 +230,9 @@ const ProfileScreen = () => {
               </View>
               <View style={styles.detailContent}>
                 <Text style={styles.detailLabel}>{lang === 'ar' ? 'فصيلة الدم' : 'Blood Type'}</Text>
-                <Text style={styles.detailValue}>{displayData?.bloodType || '---'}</Text>
+                <Text style={styles.detailValue}>
+                  {displayData?.bloodType || (lang === 'ar' ? 'غير محدد' : 'Not specified')}
+                </Text>
               </View>
             </View>
 
