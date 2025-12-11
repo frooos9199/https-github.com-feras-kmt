@@ -1,4 +1,14 @@
 {
-  "buildCommand": "npm run build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "buildCommand": "npm install && npm run build",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  },
+  "api": {
+    "bodyParser": {
+      "sizeLimit": "50mb"
+    }
+  }
 }

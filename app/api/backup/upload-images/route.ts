@@ -13,6 +13,16 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Increase size limit for Vercel
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+  maxDuration: 60,
+};
+
 export async function POST(req: NextRequest) {
   try {
     // Check authentication
@@ -26,20 +36,28 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File;
     
     if (!file) {
+      console.error('❌ No file uploaded');
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
+    console.log(`📦 Received file: ${file.name}, size: ${file.size} bytes`);
+
     // Validate file type
     if (!file.name.endsWith('.zip')) {
+      console.error('❌ Invalid file type:', file.name);
       return NextResponse.json({ 
         error: 'Invalid file type. Please upload a ZIP file' 
       }, { status: 400 });
     }
 
     // Read the ZIP file
+    console.log('📂 Reading ZIP file...');
     const buffer = Buffer.from(await file.arrayBuffer());
+    console.log(`✅ ZIP buffer created: ${buffer.length} bytes`);
+    
     const zip = new AdmZip(buffer);
     const zipEntries = zip.getEntries();
+    console.log(`📁 Found ${zipEntries.length} entries in ZIP`);
 
     let uploaded = 0;
     let failed = 0;
@@ -148,9 +166,14 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error uploading images:', error);
+    console.error('❌ Error uploading images:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error details:', errorMessage);
     return NextResponse.json(
-      { error: 'Failed to upload images' },
+      { 
+        error: 'Failed to upload images',
+        details: errorMessage 
+      },
       { status: 500 }
     );
   }
