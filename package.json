@@ -30,8 +30,8 @@
   "devDependencies": {
     "typescript": "^5.7.2",
     "@types/node": "^22.10.2",
-    "@types/react": "^19.0.6",
-    "@types/react-dom": "^19.0.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
