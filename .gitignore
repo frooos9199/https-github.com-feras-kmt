@@ -2,13 +2,7 @@
 #
 .DS_Store
 
-# ❌ Next.js folders (should NOT be in React Native app!)
-app/api/
-lib/
-public/uploads/
-prisma/
-contexts/
-types/
+# Next.js build output
 .next/
 .vercel/
 
@@ -143,3 +137,4 @@ android/app/*-release-key.keystore
 Network Trash Folder
 Temporary Items
 .apdisk
+.env.vercel
