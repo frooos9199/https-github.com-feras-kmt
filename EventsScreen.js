@@ -130,7 +130,7 @@ const EventsScreen = ({ navigation }) => {
       // معالجة البيانات
       const eventsData = Array.isArray(data) ? data : (data.events || []);
       
-      // ترتيب الأحداث: اليوم → القادمة → المنتهية
+      // ترتيب الأحداث: 1️⃣ الحالي (Ongoing) → 2️⃣ القادم (Upcoming) → 3️⃣ المنتهي (Finished)
       const sorted = eventsData.slice().sort((a, b) => {
         if (!a.date || !b.date) return 0;
         
@@ -143,29 +143,29 @@ const EventsScreen = ({ navigation }) => {
         const bEnd = b.endDate ? new Date(b.endDate.slice(0, 10)) : bStart;
         
         // تحديد حالة كل حدث
-        const aIsToday = aStart <= now && now <= aEnd;
-        const bIsToday = bStart <= now && now <= bEnd;
-        const aIsFuture = aStart > now;
-        const bIsFuture = bStart > now;
-        const aIsPast = aEnd < now;
-        const bIsPast = bEnd < now;
+        const aIsOngoing = aStart <= now && now <= aEnd; // جاري (الحالي)
+        const bIsOngoing = bStart <= now && now <= bEnd;
+        const aIsUpcoming = aStart > now; // قادم
+        const bIsUpcoming = bStart > now;
+        const aIsFinished = aEnd < now; // منتهي
+        const bIsFinished = bEnd < now;
         
-        // الأحداث الجارية اليوم أولاً
-        if (aIsToday && !bIsToday) return -1;
-        if (!aIsToday && bIsToday) return 1;
+        // 1️⃣ الأحداث الجارية (Ongoing) أولاً
+        if (aIsOngoing && !bIsOngoing) return -1;
+        if (!aIsOngoing && bIsOngoing) return 1;
         
-        // ثم الأحداث القادمة
-        if (aIsFuture && !bIsFuture && !bIsToday) return -1;
-        if (!aIsFuture && bIsFuture && !aIsToday) return 1;
+        // 2️⃣ ثم الأحداث القادمة (Upcoming)
+        if (aIsUpcoming && !bIsUpcoming && !bIsOngoing) return -1;
+        if (!aIsUpcoming && bIsUpcoming && !aIsOngoing) return 1;
         
-        // أخيراً الأحداث المنتهية
-        if (aIsPast && !bIsPast) return 1;
-        if (!aIsPast && bIsPast) return -1;
+        // 3️⃣ أخيراً الأحداث المنتهية (Finished)
+        if (aIsFinished && !bIsFinished) return 1;
+        if (!aIsFinished && bIsFinished) return -1;
         
         // ترتيب داخل نفس الفئة حسب التاريخ
-        if (aIsToday && bIsToday) return aStart - bStart;
-        if (aIsFuture && bIsFuture) return aStart - bStart;
-        if (aIsPast && bIsPast) return bStart - aStart; // الأحدث من المنتهية أولاً
+        if (aIsOngoing && bIsOngoing) return aStart - bStart; // الأقرب للبداية
+        if (aIsUpcoming && bIsUpcoming) return aStart - bStart; // الأقرب للبداية
+        if (aIsFinished && bIsFinished) return bStart - aStart; // الأحدث من المنتهية أولاً
         
         return 0;
       });
