@@ -58,8 +58,9 @@ const LoginScreen = ({ navigation }) => {
               role: data.user.role || 'marshal',
               civilId: data.user.civilId || '',
               nationality: data.user.nationality || '',
-              birthdate: data.user.birthdate || '',
+              birthdate: data.user.dateOfBirth || data.user.birthdate || '',
               phone: data.user.phone || '',
+              bloodType: data.user.bloodType || '', // 🩸 فصيلة الدم
             };
             
             await setUser(userData);
@@ -121,8 +122,9 @@ const LoginScreen = ({ navigation }) => {
         role: data.user.role || 'marshal',
         civilId: data.user.civilId || '',
         nationality: data.user.nationality || '',
-        birthdate: data.user.birthdate || '',
+        birthdate: data.user.dateOfBirth || data.user.birthdate || '',
         phone: data.user.phone || '',
+        bloodType: data.user.bloodType || '', // 🩸 فصيلة الدم
       };
       
       // ✅ setUser تحفظ تلقائياً في AsyncStorage في المكان الصحيح
