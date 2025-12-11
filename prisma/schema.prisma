@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,16 +11,99 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  password      String?
-  role          String    @default("user")
-  employeeId    String?   @unique
-  marshalTypes  String?
-  phoneNumber   String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                 String   @id @default(cuid())
+  employeeId         String   @unique // KMT-100, KMT-101, etc.
+  name               String
+  email              String   @unique
+  password           String
+  phone              String
+  civilId            String
+  dateOfBirth        DateTime
+  nationality        String? // Nationality field
+  bloodType          String? // Blood type (A+, A-, B+, B-, O+, O-, AB+, AB-)
+  image              String?
+  civilIdImage       String? // Civil ID front image
+  civilIdBackImage   String? // Civil ID back image
+  licenseFrontImage  String? // Driver license front image
+  licenseBackImage   String? // Driver license back image
+  isActive           Boolean  @default(true) // Active/Suspended status
+  marshalTypes       String   @default("") // Comma-separated: "drag-race,drift,circuit"
+  role               String   @default("marshal") // "marshal" or "admin"
+  fcmToken           String?  // Firebase Cloud Messaging token for push notifications
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  @@map("users")
+  attendances   Attendance[]
+  notifications Notification[]
+}
+
+model Event {
+  id            String   @id @default(cuid())
+  titleEn       String
+  titleAr       String
+  descriptionEn String
+  descriptionAr String
+  date          DateTime // Start date
+  endDate       DateTime? // End date for multi-day events
+  time          String
+  endTime       String? // End time for the event
+  location      String
+  image         String?
+  marshalTypes  String   @default("") // Comma-separated: "drag-race,drift,circuit"
+  maxMarshals   Int
+  status        String   @default("active") // "active", "cancelled", "completed"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  attendances Attendance[]
+}
+
+model Attendance {
+  id              String    @id @default(cuid())
+  userId          String
+  eventId         String
+  status          String    @default("pending") // "pending", "approved", "rejected", "cancelled"
+  registeredAt    DateTime  @default(now())
+  notes           String?
+  cancelledAt     DateTime? // When marshal cancelled their registration
+  cancellationReason String? // Why marshal cancelled
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "NEW_EVENT", "REGISTRATION_APPROVED", "REGISTRATION_REJECTED", "EVENT_REMINDER", "EVENT_UPDATED", "EVENT_CANCELLED"
+  titleEn   String
+  titleAr   String
+  messageEn String
+  messageAr String
+  eventId   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model BroadcastMessage {
+  id               String   @id @default(cuid())
+  subject          String
+  message          String
+  recipientFilter  String   // "all", "approved", "pending", "by-type", "by-event"
+  marshalTypes     String?  // For filtering by type: "drag-race,drift,circuit"
+  eventId          String?  // For filtering by event
+  sendEmail        Boolean  @default(true)
+  sendNotification Boolean  @default(true)
+  priority         String   @default("normal") // "normal", "high", "urgent"
+  sentBy           String   // Admin user ID
+  sentAt           DateTime @default(now())
+  recipientCount   Int      @default(0)
+  
+  @@index([sentAt])
 }
