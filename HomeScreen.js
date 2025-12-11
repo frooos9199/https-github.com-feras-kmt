@@ -339,6 +339,16 @@ const HomeScreen = () => {
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.headerBox}>
           <View style={styles.headerTopRow}>
+            <TouchableOpacity style={styles.bellIcon} onPress={() => navigation.navigate('Notifications')}>
+              <Ionicons name="notifications" size={28} color="#fff" />
+              {unreadNotificationsCount > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
             <Image source={appLogo} style={styles.logo} />
             {user?.role === 'marshal' ? (
               <TouchableOpacity onPress={() => navigation.navigate('MyAttendance')}>
@@ -765,6 +775,35 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  bellIcon: {
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.circle,
+    width: scaleWidth(40),
+    height: scaleWidth(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.small,
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#dc2626',
+    borderRadius: 12,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#000',
+  },
+  notificationBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
 });
 
