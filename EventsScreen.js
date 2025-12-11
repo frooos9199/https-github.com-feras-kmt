@@ -414,9 +414,6 @@ const EventsScreen = ({ navigation }) => {
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.headerBox}>
           <View style={styles.headerTopRow}>
-            <TouchableOpacity style={styles.bellIcon}>
-              <Ionicons name="notifications" size={28} color="#fff" />
-            </TouchableOpacity>
             <Image source={appLogo} style={styles.logo} />
             <Image source={avatarSource} style={styles.avatar} />
           </View>
@@ -466,17 +463,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     marginLeft: 0,
     marginRight: 0,
-  },
-  bellIcon: {
-    backgroundColor: '#b71c1c',
-    borderRadius: 20,
-    padding: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
