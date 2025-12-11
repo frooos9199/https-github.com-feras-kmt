@@ -5,8 +5,15 @@ import { prisma } from "@/lib/prisma"
 import { sendEmail, marshalAccountRemovalEmailTemplate } from "@/lib/email"
 import * as jwt from "jsonwebtoken"
 
+type UserAuth = {
+  id: string;
+  role: string;
+  email: string;
+  name: string;
+} | null;
+
 // Verify Bearer token for mobile app
-async function verifyBearerToken(req: NextRequest) {
+async function verifyBearerToken(req: NextRequest): Promise<UserAuth> {
   const authHeader = req.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return null;
@@ -40,12 +47,12 @@ export async function GET(
 ) {
   try {
     // Try Bearer token first (for mobile app)
-    let user = await verifyBearerToken(req);
+    let user: UserAuth = await verifyBearerToken(req);
     
     // Fallback to session (for web)
     if (!user) {
       const session = await getServerSession(authOptions);
-      user = session?.user;
+      user = session?.user as UserAuth;
     }
 
     if (!user || user.role !== "admin") {
@@ -100,12 +107,12 @@ export async function PATCH(
 ) {
   try {
     // Try Bearer token first (for mobile app)
-    let user = await verifyBearerToken(req);
+    let user: UserAuth = await verifyBearerToken(req);
     
     // Fallback to session (for web)
     if (!user) {
       const session = await getServerSession(authOptions);
-      user = session?.user;
+      user = session?.user as UserAuth;
     }
 
     if (!user || user.role !== "admin") {
@@ -186,12 +193,12 @@ export async function DELETE(
 ) {
   try {
     // Try Bearer token first (for mobile app)
-    let user = await verifyBearerToken(req);
+    let user: UserAuth = await verifyBearerToken(req);
     
     // Fallback to session (for web)
     if (!user) {
       const session = await getServerSession(authOptions);
-      user = session?.user;
+      user = session?.user as UserAuth;
     }
 
     if (!user || user.role !== "admin") {
