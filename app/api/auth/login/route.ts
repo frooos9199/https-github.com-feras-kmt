@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
     const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
     const accessToken = jwt.sign(
       {
+        userId: user.id,
         id: user.id,
         email: user.email,
         role: user.role

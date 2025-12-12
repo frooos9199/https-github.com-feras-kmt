@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
-import * as ExcelJS from 'exceljs';
+import ExcelJS from 'exceljs';
 import bcrypt from 'bcryptjs';
 
 // Vercel configuration for large files
@@ -26,9 +26,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Read the Excel file
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(buffer as any);
     
     const worksheet = workbook.getWorksheet('Users Backup');
     if (!worksheet) {

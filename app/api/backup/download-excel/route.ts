@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
-import * as ExcelJS from 'exceljs';
+import ExcelJS from 'exceljs';
 
 export async function GET(req: NextRequest) {
   try {
@@ -129,11 +129,11 @@ export async function GET(req: NextRequest) {
     const filename = `KMT_Users_Backup_${timestamp}.xlsx`;
 
     // Return the file
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as any, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': buffer.length.toString(),
+        'Content-Length': (buffer as any).length.toString(),
       },
     });
 
