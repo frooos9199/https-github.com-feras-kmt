@@ -119,7 +119,12 @@ export async function PATCH(
     if (phone) updateData.phone = phone
     if (nationality !== undefined) updateData.nationality = nationality
     if (bloodType !== undefined) updateData.bloodType = bloodType
-    if (marshalTypes !== undefined) updateData.marshalTypes = marshalTypes
+    if (marshalTypes !== undefined) {
+      // Convert array to comma-separated string for mobile app compatibility
+      updateData.marshalTypes = Array.isArray(marshalTypes) 
+        ? marshalTypes.join(',') 
+        : marshalTypes
+    }
     if (employeeId !== undefined) {
       // Validate employeeId format
       if (!employeeId.startsWith('KMT-')) {
@@ -138,7 +143,8 @@ export async function PATCH(
       updateData.employeeId = employeeId
     }
 
-    const marshal = await prisma.user.update({
+  console.log('[DEBUG] updateData to be sent to Prisma:', updateData)
+  const marshal = await prisma.user.update({
       where: { 
         id,
         role: "marshal"
