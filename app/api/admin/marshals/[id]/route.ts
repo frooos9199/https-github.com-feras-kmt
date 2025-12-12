@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, marshalAccountRemovalEmailTemplate } from "@/lib/email"
+import jwt from "jsonwebtoken"
 
 // GET - Fetch single marshal
 export async function GET(
@@ -10,8 +11,28 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    let userRole: string | null = null
+
+    // Try NextAuth session first (for web)
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    if (session?.user?.role) {
+      userRole = session.user.role
+    } else {
+      // Try JWT from mobile app
+      const authHeader = req.headers.get('authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7)
+        try {
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "kmt-marshal-system-secret-key-2025"
+          const decoded = jwt.verify(token, jwtSecret) as { role: string }
+          userRole = decoded.role
+        } catch (jwtError) {
+          console.error('[MARSHALS] JWT verification failed:', jwtError)
+        }
+      }
+    }
+
+    if (!userRole || userRole !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -62,8 +83,28 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    let userRole: string | null = null
+
+    // Try NextAuth session first (for web)
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    if (session?.user?.role) {
+      userRole = session.user.role
+    } else {
+      // Try JWT from mobile app
+      const authHeader = req.headers.get('authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7)
+        try {
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "kmt-marshal-system-secret-key-2025"
+          const decoded = jwt.verify(token, jwtSecret) as { role: string }
+          userRole = decoded.role
+        } catch (jwtError) {
+          console.error('[MARSHALS] JWT verification failed:', jwtError)
+        }
+      }
+    }
+
+    if (!userRole || userRole !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
