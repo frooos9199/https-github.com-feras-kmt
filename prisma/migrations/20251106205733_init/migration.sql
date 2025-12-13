@@ -6,15 +6,15 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
-    "civilId" TEXT NOT NULL,
-    "dateOfBirth" DATETIME NOT NULL,
+    "civilId" TEXT,
+    "dateOfBirth" TIMESTAMP,
     "nationality" TEXT,
     "image" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "marshalTypes" TEXT NOT NULL DEFAULT '',
     "role" TEXT NOT NULL DEFAULT 'marshal',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL
 );
 
 -- CreateTable
@@ -24,7 +24,7 @@ CREATE TABLE "Event" (
     "titleAr" TEXT NOT NULL,
     "descriptionEn" TEXT NOT NULL,
     "descriptionAr" TEXT NOT NULL,
-    "date" DATETIME NOT NULL,
+    "date" TIMESTAMP NOT NULL,
     "time" TEXT NOT NULL,
     "endTime" TEXT,
     "location" TEXT NOT NULL,
@@ -32,8 +32,8 @@ CREATE TABLE "Event" (
     "marshalTypes" TEXT NOT NULL DEFAULT '',
     "maxMarshals" INTEGER NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'active',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL
 );
 
 -- CreateTable
@@ -42,7 +42,7 @@ CREATE TABLE "Attendance" (
     "userId" TEXT NOT NULL,
     "eventId" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
-    "registeredAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "registeredAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "notes" TEXT,
     CONSTRAINT "Attendance_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "Attendance_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event" ("id") ON DELETE CASCADE ON UPDATE CASCADE
