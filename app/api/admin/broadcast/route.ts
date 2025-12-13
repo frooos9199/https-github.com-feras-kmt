@@ -1,17 +1,42 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import jwt from "jsonwebtoken"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, broadcastEmailTemplate } from "@/lib/email"
 import { sendPushNotification } from "@/lib/firebase-admin"
 
 // POST - Send broadcast message
 export async function POST(request: NextRequest) {
+
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    let userId: string | null = null;
+    let userRole: string | null = null;
+    // Try NextAuth session first (for web)
+    const session = await getServerSession(authOptions);
+    if (session?.user?.id && session.user.role === "admin") {
+      userId = session.user.id;
+      userRole = session.user.role;
+    } else {
+      // Try JWT from mobile app
+      const authHeader = request.headers.get('authorization');
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        try {
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "kmt-marshal-system-secret-key-2025";
+          const decoded = jwt.verify(token, jwtSecret) as { id?: string, role?: string };
+          if (decoded.role === "admin" && decoded.id) {
+            userId = decoded.id;
+            userRole = decoded.role;
+          }
+        } catch (jwtError) {
+          console.error('[BROADCAST] JWT verification failed:', jwtError);
+        }
+      }
+    }
+
+    if (!userId || userRole !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json()
@@ -116,7 +141,7 @@ export async function POST(request: NextRequest) {
           sendEmail: shouldSendEmail,
           sendNotification: shouldSendNotification,
           priority: priority || 'normal',
-          sentBy: session.user.id,
+          sentBy: userId,
           recipientCount: recipients.length
         }
       })
@@ -181,7 +206,9 @@ export async function POST(request: NextRequest) {
           message,
           {
             type: notificationType,
-            priority: priority || 'normal'
+            priority: priority || 'normal',
+            title: subject,
+            body: message
           }
         )
         

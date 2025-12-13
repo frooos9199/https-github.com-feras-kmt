@@ -197,7 +197,7 @@ export default function BroadcastPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+  <main className="min-h-screen relative overflow-y-auto max-w-4xl mx-auto px-4 py-8 pb-32">
         {/* Back Button */}
         <div className="mb-6">
           <Link href="/admin">
