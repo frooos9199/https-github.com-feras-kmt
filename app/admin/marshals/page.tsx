@@ -152,10 +152,10 @@ export default function MarshalsManagement() {
   }
 
   const filteredMarshals = marshals.filter(marshal =>
-    marshal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    marshal.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    marshal.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    marshal.civilId.toLowerCase().includes(searchTerm.toLowerCase())
+    (marshal.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (marshal.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (marshal.employeeId || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (marshal.civilId || "").toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   if (status === "loading" || loading) {
