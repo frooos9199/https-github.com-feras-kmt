@@ -51,6 +51,7 @@ export default function EventDetails() {
   const { language } = useLanguage()
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showRemoveMarshalModal, setShowRemoveMarshalModal] = useState(false)
@@ -151,6 +152,7 @@ export default function EventDetails() {
   const handleDelete = async () => {
     if (!event) return
     try {
+      setError(null)
       const res = await fetch(`/api/admin/events/${event.id}`, {
         method: "DELETE"
       })
@@ -172,14 +174,23 @@ export default function EventDetails() {
       })
       if (res.ok) {
         setShowRemoveMarshalModal(false)
+        } else {
+          const errData = await res.json()
+          setError(errData.error || "حدث خطأ أثناء جلب بيانات الحدث.")
+          setEvent(null)
         setSelectedMarshalId(null)
+<<<<<<< HEAD
         setRemovalReason("")
         fetchEvent()
       }
     } catch (error) {
+=======
+>>>>>>> 5f4758b (resolve conflicts and add DATABASE_URL to prisma schema)
       console.error("Error removing marshal:", error)
     }
-  }
+        setError("حدث خطأ أثناء الاتصال بالخادم.")
+        setEvent(null)
+
 
   const fetchAvailableMarshals = async () => {
     if (!event) return
@@ -216,6 +227,15 @@ export default function EventDetails() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-red-600">
+        <p className="mb-4 text-lg">{error}</p>
+        <Link href="/admin/events" className="btn btn-primary">رجوع لقائمة الأحداث</Link>
       </div>
     )
   }
