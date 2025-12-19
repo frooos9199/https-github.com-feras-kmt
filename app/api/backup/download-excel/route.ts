@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
       { header: 'Is Active', key: 'isActive', width: 12 },
       { header: 'Marshal Types', key: 'marshalTypes', width: 30 },
       { header: 'FCM Token', key: 'fcmToken', width: 60 },
+      { header: 'Registration Date', key: 'registrationDate', width: 15 },
       { header: 'Created At', key: 'createdAt', width: 20 },
       { header: 'Updated At', key: 'updatedAt', width: 20 },
     ];
@@ -102,6 +103,7 @@ export async function GET(req: NextRequest) {
         isActive: user.isActive ? 'Yes' : 'No',
         marshalTypes: user.marshalTypes || '',
         fcmToken: user.fcmToken || '',
+        registrationDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : '', // DD/MM/YYYY format
         createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : '',
         updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString() : '',
       });
