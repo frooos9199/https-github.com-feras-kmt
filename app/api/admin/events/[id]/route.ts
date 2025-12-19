@@ -10,28 +10,41 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    let userId: string | null = null
-    let userRole: string | null = null
+    // Debug: log headers and params
+    console.log('API EVENT GET', {
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries()),
+      params
+    });
+
+    if (req.headers.get("accept")?.includes("text/html")) {
+      console.error('API called with Accept: text/html, returning JSON error');
+      return NextResponse.json({ error: "API route expects JSON, not HTML" }, { status: 400 });
+    }
+
+    let userId: string | null = null;
+    let userRole: string | null = null;
 
     // Try NextAuth session
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
     if (session?.user?.id) {
-      userId = session.user.id
-      userRole = session.user.role
+      userId = session.user.id;
+      userRole = session.user.role;
     } else {
       // Try JWT token
-      const user = await getUserFromToken(req)
+      const user = await getUserFromToken(req);
       if (user) {
-        userId = user.id
-        userRole = user.role
+        userId = user.id;
+        userRole = user.role;
       }
     }
-    
+
     if (!userId || userRole !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      console.error('API unauthorized: userId or role missing', { userId, userRole });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-  const { id } = params
+    const { id } = params;
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
@@ -59,21 +72,20 @@ export async function GET(
           }
         },
         _count: {
-          select: { 
-            attendances: true
-          }
+          select: { attendances: true }
         }
       }
-    })
+    });
 
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 })
+      console.error('API event not found', { id });
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    return NextResponse.json(event)
+    return NextResponse.json(event);
   } catch (error) {
-    console.error("Error fetching event:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error fetching event:", error);
+    return NextResponse.json({ error: "Internal server error", details: String(error) }, { status: 500 });
   }
 }
 
