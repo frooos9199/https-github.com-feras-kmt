@@ -8,6 +8,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { name, email, password, phone, civilId, dateOfBirth } = body
 
+    console.log(`[SIGNUP] Starting signup process for email: ${email}`)
 
     if (!name || !email || !password || !phone) {
       console.error("[SIGNUP] Missing required fields", { name, email, password, phone })
@@ -24,32 +25,15 @@ export async function POST(req: Request) {
       }
     }
 
+    console.log(`[SIGNUP] Processing signup for ${name} (${email})`)
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser) {
       return NextResponse.json({ error: "Email already registered" }, { status: 400 })
     }
 
-    // Generate employee ID
-    const allMarshals = await prisma.user.findMany({ where: { role: 'marshal' }, select: { employeeId: true } })
-    let nextEmployeeNumber = 100
-    if (allMarshals.length > 0) {
-      const employeeNumbers = allMarshals
-        .map(u => {
-          if (u.employeeId && u.employeeId.startsWith('KMT-')) {
-            return parseInt(u.employeeId.split('-')[1])
-          }
-          return 0
-        })
-        .filter(num => !isNaN(num) && num >= 100)
-      if (employeeNumbers.length > 0) {
-        const maxNumber = Math.max(...employeeNumbers)
-        nextEmployeeNumber = maxNumber + 1
-      }
-    }
-    const employeeId = `KMT-${nextEmployeeNumber}`
-
-    // Hash password
+    // Hash password first (outside transaction since it's not DB-related)
     let hashedPassword
     try {
       hashedPassword = await bcrypt.hash(password, 10)
@@ -58,24 +42,65 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Password hash error" }, { status: 500 })
     }
 
-    // Create user
+
+    // Create user with employeeId generation in a single transaction (atomic, always unique and incremented, with retry)
     let user
-    try {
-      user = await prisma.user.create({
-        data: {
-          employeeId,
-          name,
-          email,
-          password: hashedPassword,
-          phone,
-          ...(civilId ? { civilId } : {}),
-          ...(parsedDate ? { dateOfBirth: parsedDate } : {}),
-          role: "marshal"
+    const maxRetries = 10
+    let retryCount = 0
+    while (retryCount < maxRetries) {
+      try {
+        user = await prisma.$transaction(async (tx) => {
+          // Find the highest employeeId in the form KMT-<number>
+          const lastUser = await tx.user.findFirst({
+            where: {
+              employeeId: {
+                startsWith: "KMT-"
+              }
+            },
+            orderBy: {
+              employeeId: 'desc'
+            },
+          })
+          let nextNumber = 100
+          if (lastUser && lastUser.employeeId) {
+            const match = lastUser.employeeId.match(/^KMT-(\d+)/)
+            if (match) {
+              nextNumber = parseInt(match[1], 10) + 1
+            }
+          }
+          const employeeId = `KMT-${nextNumber}`
+          return await tx.user.create({
+            data: {
+              employeeId,
+              name,
+              email,
+              password: hashedPassword,
+              phone,
+              ...(civilId ? { civilId } : {}),
+              ...(parsedDate ? { dateOfBirth: parsedDate } : {}),
+              role: "marshal"
+            }
+          })
+        })
+        break // Success, exit loop
+      } catch (err: any) {
+        if (err.code === 'P2002' && err.meta?.target?.includes('employeeId')) {
+          // Race condition, retry
+          retryCount++
+          await new Promise(res => setTimeout(res, 200))
+          continue
         }
-      })
-    } catch (err) {
-      console.error("[SIGNUP] User create error", err)
-  return NextResponse.json({ error: "Database error: " + ((err as any)?.message || String(err)) }, { status: 500 })
+        if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
+          return NextResponse.json({ error: "Email already registered" }, { status: 400 })
+        }
+        return NextResponse.json({ error: "Database error occurred. Please try again." }, { status: 500 })
+      }
+    }
+
+    if (!user) {
+      return NextResponse.json({
+        error: "Failed to create user account after multiple attempts. Please contact support."
+      }, { status: 500 })
     }
 
     // Create notification for admin
