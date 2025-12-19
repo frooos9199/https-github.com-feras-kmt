@@ -7,7 +7,7 @@ import { getUserFromToken } from "@/lib/auth"
 // GET - Fetch single event with registered marshals
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     let userId: string | null = null
@@ -31,7 +31,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = await params
+  const { id } = params
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
