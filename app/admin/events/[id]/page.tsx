@@ -121,11 +121,13 @@ export default function EventDetails() {
           status: data.status
         })
       } else {
-        router.push("/admin/events")
+        const text = await res.text();
+        console.error('Event fetch failed:', res.status, text);
+        setError(`حدث خطأ في جلب بيانات الحدث: ${res.status}`);
       }
     } catch (error) {
       console.error("Error fetching event:", error)
-      router.push("/admin/events")
+      setError("حدث خطأ في الاتصال بالخادم أو جلب بيانات الحدث.");
     } finally {
       setLoading(false)
     }
