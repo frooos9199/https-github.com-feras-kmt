@@ -56,6 +56,9 @@ export default function EventDetails() {
   const [showRemoveMarshalModal, setShowRemoveMarshalModal] = useState(false)
   const [selectedMarshalId, setSelectedMarshalId] = useState<string | null>(null)
   const [removalReason, setRemovalReason] = useState<string>("")
+  const [showAddMarshalModal, setShowAddMarshalModal] = useState(false)
+  const [availableMarshals, setAvailableMarshals] = useState<any[]>([])
+  const [selectedMarshalToAdd, setSelectedMarshalToAdd] = useState<string | null>(null)
   const [eventId, setEventId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     titleEn: "",
@@ -87,10 +90,10 @@ export default function EventDetails() {
   }, [params])
 
   useEffect(() => {
-    if (session?.user?.role === "admin" && eventId) {
-      fetchEvent()
+    if (showAddMarshalModal && event) {
+      fetchAvailableMarshals()
     }
-  }, [session, eventId])
+  }, [showAddMarshalModal, event])
 
   const fetchEvent = async () => {
     if (!eventId) return
@@ -178,6 +181,37 @@ export default function EventDetails() {
     }
   }
 
+  const fetchAvailableMarshals = async () => {
+    if (!event) return
+    try {
+      const res = await fetch(`/api/admin/events/${event.id}/available-marshals`)
+      if (res.ok) {
+        const data = await res.json()
+        setAvailableMarshals(data)
+      }
+    } catch (error) {
+      console.error("Error fetching available marshals:", error)
+    }
+  }
+
+  const handleAddMarshal = async () => {
+    if (!event || !selectedMarshalToAdd) return
+    try {
+      const res = await fetch(`/api/admin/events/${event.id}/marshals`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedMarshalToAdd })
+      })
+      if (res.ok) {
+        setShowAddMarshalModal(false)
+        setSelectedMarshalToAdd(null)
+        fetchEvent()
+      }
+    } catch (error) {
+      console.error("Error adding marshal:", error)
+    }
+  }
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -233,6 +267,12 @@ export default function EventDetails() {
               </span>
             </div>
             <div className="flex gap-3">
+              <button
+                onClick={() => setShowAddMarshalModal(true)}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all"
+              >
+                ➕ {language === "ar" ? "إضافة مارشال" : "Add Marshal"}
+              </button>
               <button
                 onClick={() => setShowEditModal(true)}
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
@@ -690,8 +730,118 @@ export default function EventDetails() {
         </div>
       )}
 
+      {/* Add Marshal Modal */}
+      {showAddMarshalModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-zinc-900 border border-green-600/50 rounded-2xl p-8 max-w-2xl w-full my-8 max-h-[80vh] overflow-y-auto"
+          >
+            <h3 className="text-2xl font-bold text-white mb-6">
+              ➕ {language === "ar" ? "إضافة مارشال للفعالية" : "Add Marshal to Event"}
+            </h3>
+            
+            <div className="mb-6">
+              <p className="text-gray-300 mb-4">
+                {language === "ar" 
+                  ? "اختر مارشال من القائمة أدناه لإضافته إلى الفعالية:"
+                  : "Select a marshal from the list below to add to the event:"
+                }
+              </p>
+              
+              {availableMarshals.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">
+                  {language === "ar" ? "لا يوجد مارشالات متاحين" : "No available marshals found"}
+                </p>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {availableMarshals.map((marshal) => (
+                    <div
+                      key={marshal.id}
+                      className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 cursor-pointer transition-all ${
+                        selectedMarshalToAdd === marshal.id 
+                          ? 'border-green-600 bg-green-900/20' 
+                          : 'border-zinc-700 hover:bg-zinc-800'
+                      }`}
+                      onClick={() => setSelectedMarshalToAdd(marshal.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        {marshal.image ? (
+                          <img
+                            src={marshal.image}
+                            alt={marshal.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-green-600"
+                          />
+                        ) : (
+                          <div className="w-12 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-white font-bold">
+                            {marshal.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-white font-medium">{marshal.name}</p>
+                          <p className="text-sm text-gray-400">{marshal.employeeId}</p>
+                          <p className="text-sm text-gray-400">{marshal.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {marshal.marshalTypes && (
+                          <div className="flex flex-wrap gap-1">
+                            {marshal.marshalTypes.split(',').filter((t: string) => t).slice(0, 2).map((type: string) => {
+                              const typeIcons: Record<string, string> = {
+                                'karting': '🏎️',
+                                'motocross': '🏍️',
+                                'rescue': '🚑',
+                                'circuit': '🏁',
+                                'drift': '💨',
+                                'drag-race': '🚦',
+                                'pit': '🔧'
+                              }
+                              return (
+                                <span key={type} className="text-sm" title={type}>
+                                  {typeIcons[type] || '�'}
+                                </span>
+                              )
+                            })}
+                          </div>
+                        )}
+                        <input
+                          type="radio"
+                          checked={selectedMarshalToAdd === marshal.id}
+                          onChange={() => setSelectedMarshalToAdd(marshal.id)}
+                          className="w-4 h-4 text-green-600 focus:ring-green-600"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleAddMarshal}
+                disabled={!selectedMarshalToAdd}
+                className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-xl font-bold transition-all disabled:cursor-not-allowed"
+              >
+                {language === "ar" ? "إضافة المارشال" : "Add Marshal"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddMarshalModal(false)
+                  setSelectedMarshalToAdd(null)
+                  setAvailableMarshals([])
+                }}
+                className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold transition-all"
+              >
+                {language === "ar" ? "إلغاء" : "Cancel"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {/* Remove Marshal Modal */}
-      {showRemoveMarshalModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}

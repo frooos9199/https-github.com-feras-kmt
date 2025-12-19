@@ -388,6 +388,56 @@ export function removalEmailTemplate(
   `
 }
 
+export function addedToEventEmailTemplate(
+  userName: string,
+  eventTitle: string,
+  eventDate: string,
+  eventTime: string,
+  location: string
+) {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>${emailStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header header-success">
+      <img src="${LOGO_URL}" alt="KMT Logo" class="logo" />
+      <h1>✅ Added to Event</h1>
+      <p>New Event Assignment</p>
+    </div>
+    
+    <div class="content">
+      <h2>Dear ${userName},</h2>
+      
+      <p>Great news! You have been added to the following event:</p>
+      
+      <div class="event-details">
+        <p><strong>Event:</strong> ${eventTitle}</p>
+        <p><strong>Date:</strong> ${eventDate}</p>
+        <p><strong>Time:</strong> ${eventTime}</p>
+        <p><strong>Location:</strong> ${location}</p>
+      </div>
+      
+      <p>Please make sure to arrive on time and be prepared for your marshal duties. Check your dashboard for any additional event details or updates.</p>
+      
+      <p>Thank you for your service and commitment to Kuwait Motorsport Town events!</p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 Kuwait Motorsport Town - KMT</p>
+      <p>All Rights Reserved</p>
+    </div>
+  </div>
+</body>
+</html>
+  `
+}
+
 export function newEventEmailTemplate(
   userName: string,
   eventTitle: string,

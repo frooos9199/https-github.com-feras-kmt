@@ -1,0 +1,91 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { prisma } from "@/lib/prisma"
+import { sendEmail, addedToEventEmailTemplate } from "@/lib/email"
+
+// POST - Add marshal to event
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { id } = await params
+    const body = await req.json()
+    const { userId } = body
+
+    if (!userId) {
+      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+    }
+
+    // Check if user is already registered for this event
+    const existingAttendance = await prisma.attendance.findFirst({
+      where: {
+        eventId: id,
+        userId: userId
+      }
+    })
+
+    if (existingAttendance) {
+      return NextResponse.json({ error: "Marshal is already registered for this event" }, { status: 400 })
+    }
+
+    // Get event and user details for email
+    const event = await prisma.event.findUnique({
+      where: { id },
+      select: {
+        titleEn: true,
+        titleAr: true,
+        date: true,
+        time: true,
+        location: true
+      }
+    })
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+        email: true
+      }
+    })
+
+    if (!event || !user) {
+      return NextResponse.json({ error: "Event or user not found" }, { status: 404 })
+    }
+
+    // Create attendance record
+    await prisma.attendance.create({
+      data: {
+        userId: userId,
+        eventId: id,
+        status: "approved" // Auto-approve when added by admin
+      }
+    })
+
+    // Send notification email to marshal
+    if (user.email) {
+      await sendEmail({
+        to: user.email,
+        subject: `✅ Added to Event - ${event.titleEn}`,
+        html: addedToEventEmailTemplate(
+          user.name,
+          event.titleEn,
+          new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          event.time,
+          event.location
+        )
+      })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error adding marshal to event:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
