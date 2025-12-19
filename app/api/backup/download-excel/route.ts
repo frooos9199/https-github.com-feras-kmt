@@ -316,7 +316,7 @@ export async function GET(req: NextRequest) {
     // Fetch all broadcast messages
     const broadcastMessages = await prisma.broadcastMessage.findMany({
       orderBy: {
-        createdAt: 'desc'
+        sentAt: 'desc'
       }
     });
 
