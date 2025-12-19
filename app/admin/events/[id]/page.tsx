@@ -174,22 +174,20 @@ export default function EventDetails() {
       })
       if (res.ok) {
         setShowRemoveMarshalModal(false)
-        } else {
-          const errData = await res.json()
-          setError(errData.error || "حدث خطأ أثناء جلب بيانات الحدث.")
-          setEvent(null)
         setSelectedMarshalId(null)
-<<<<<<< HEAD
         setRemovalReason("")
         fetchEvent()
+      } else {
+        const errData = await res.json()
+        setError(errData.error || "حدث خطأ أثناء جلب بيانات الحدث.")
+        setEvent(null)
+        setSelectedMarshalId(null)
       }
     } catch (error) {
-=======
->>>>>>> 5f4758b (resolve conflicts and add DATABASE_URL to prisma schema)
       console.error("Error removing marshal:", error)
+      setError("حدث خطأ أثناء الاتصال بالخادم.")
+      setEvent(null)
     }
-        setError("حدث خطأ أثناء الاتصال بالخادم.")
-        setEvent(null)
 
 
   const fetchAvailableMarshals = async () => {

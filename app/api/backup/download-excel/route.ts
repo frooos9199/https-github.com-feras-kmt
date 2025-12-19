@@ -370,9 +370,19 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error generating Excel:', error);
+    let errorMessage = 'Unknown error';
+    if (error instanceof Error) {
+      errorMessage = error.message + '\n' + error.stack;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else {
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch {}
+    }
+    console.error('Error generating Excel:', errorMessage);
     return NextResponse.json(
-      { error: 'Failed to generate Excel file' },
+      { error: 'Failed to generate Excel file', details: errorMessage },
       { status: 500 }
     );
   }
