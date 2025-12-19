@@ -36,6 +36,19 @@ export async function GET(req: NextRequest) {
         fcmToken: true,
         createdAt: true,
         updatedAt: true,
+        attendances: {
+          include: {
+            event: {
+              select: {
+                id: true,
+                titleEn: true,
+                titleAr: true,
+                date: true,
+                status: true,
+              }
+            }
+          }
+        }
       },
       orderBy: {
         role: 'desc', // Admin first, then marshals
@@ -70,6 +83,7 @@ export async function GET(req: NextRequest) {
       { header: 'Registration Date', key: 'registrationDate', width: 15 },
       { header: 'Created At', key: 'createdAt', width: 20 },
       { header: 'Updated At', key: 'updatedAt', width: 20 },
+      { header: 'Registered Events', key: 'registeredEvents', width: 50 },
     ];
 
     // Style the header row
@@ -106,6 +120,14 @@ export async function GET(req: NextRequest) {
         registrationDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : '', // DD/MM/YYYY format
         createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : '',
         updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString() : '',
+        registeredEvents: user.attendances && user.attendances.length > 0
+          ? user.attendances.map(att => {
+              const event = att.event;
+              const eventDate = event.date ? new Date(event.date).toLocaleDateString('en-GB') : '';
+              const title = event.titleEn || event.titleAr || 'Unknown Event';
+              return `${title} (${eventDate})`;
+            }).join('; ')
+          : 'No events registered',
       });
     });
 
