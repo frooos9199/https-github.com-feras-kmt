@@ -10,8 +10,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
   try {
+    console.log('[API] Remove Marshal from Event', { params: await params, body: await req.clone().json() });
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "admin") {
+  console.error('[API] Unauthorized remove marshal', { session });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -43,11 +45,13 @@ export async function DELETE(
     })
 
     if (!attendance) {
+  console.error('[API] Attendance record not found', { id, userId });
       return NextResponse.json({ error: "Attendance record not found" }, { status: 404 })
     }
 
     // Send removal notification email BEFORE update
     if (attendance.user.email) {
+  console.log('[API] Sending removal email', { to: attendance.user.email });
       await sendEmail({
         to: attendance.user.email,
         subject: `⚠️ Removed from Event - ${attendance.event.titleEn}`,
@@ -61,6 +65,7 @@ export async function DELETE(
     }
 
     // Update the attendance record to cancelled status with reason
+    console.log('[API] Cancelling attendance', { eventId: id, userId });
     await prisma.attendance.updateMany({
       where: {
         eventId: id,
@@ -75,7 +80,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error removing marshal:", error)
+  console.error("Error removing marshal:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

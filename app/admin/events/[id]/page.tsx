@@ -84,11 +84,23 @@ export default function EventDetails() {
     }
   }, [status, session, router])
 
+
   useEffect(() => {
+    console.log('params:', params);
     if (params.id) {
       setEventId(params.id as string)
+      console.log('eventId set:', params.id)
+    } else {
+      console.warn('No id in params!', params)
     }
   }, [params])
+
+  useEffect(() => {
+    console.log('eventId:', eventId)
+    if (eventId) {
+      fetchEvent()
+    }
+  }, [eventId])
 
   useEffect(() => {
     if (showAddMarshalModal && event) {
@@ -101,10 +113,13 @@ export default function EventDetails() {
     setLoading(true)
     try {
       const res = await fetch(`/api/admin/events/${eventId}`, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
       })
+      console.log('API RESPONSE:', res);
       if (res.ok) {
         const data = await res.json()
+        console.log('EVENT DATA:', data);
         setEvent(data)
         setEditForm({
           titleEn: data.titleEn,
@@ -122,15 +137,14 @@ export default function EventDetails() {
         })
       } else {
         const text = await res.text();
-        console.error('Event fetch failed:', res.status, text);
+        console.error('API ERROR:', res.status, text);
         setError(`حدث خطأ في جلب بيانات الحدث: ${res.status}`);
       }
     } catch (error) {
-      console.error("Error fetching event:", error)
-      setError("حدث خطأ في الاتصال بالخادم أو جلب بيانات الحدث.");
-    } finally {
-      setLoading(false)
+      console.error('FETCH ERROR:', error);
+      setError('حدث خطأ في الاتصال بالخادم أو جلب بيانات الحدث.');
     }
+    setLoading(false)
   }
 
   const handleEdit = async () => {

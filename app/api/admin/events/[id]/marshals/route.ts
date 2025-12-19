@@ -10,8 +10,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log('[API] Add Marshal to Event', { params: await params, body: await req.clone().json() });
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "admin") {
+  console.error('[API] Unauthorized add marshal', { session });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -20,6 +22,7 @@ export async function POST(
     const { userId } = body
 
     if (!userId) {
+  console.error('[API] No userId provided', { body });
       return NextResponse.json({ error: "User ID is required" }, { status: 400 })
     }
 
@@ -32,6 +35,7 @@ export async function POST(
     })
 
     if (existingAttendance) {
+  console.error('[API] Marshal already registered', { id, userId });
       return NextResponse.json({ error: "Marshal is already registered for this event" }, { status: 400 })
     }
 
@@ -56,10 +60,12 @@ export async function POST(
     })
 
     if (!event || !user) {
+  console.error('[API] Event or user not found', { event, user });
       return NextResponse.json({ error: "Event or user not found" }, { status: 404 })
     }
 
     // Create attendance record
+    console.log('[API] Creating attendance', { userId, eventId: id });
     await prisma.attendance.create({
       data: {
         userId: userId,
@@ -70,6 +76,7 @@ export async function POST(
 
     // Send notification email to marshal
     if (user.email) {
+  console.log('[API] Sending add-to-event email', { to: user.email });
       await sendEmail({
         to: user.email,
         subject: `✅ Added to Event - ${event.titleEn}`,
@@ -85,7 +92,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error adding marshal to event:", error)
+  console.error("Error adding marshal to event:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
