@@ -4,26 +4,36 @@ import admin from 'firebase-admin';
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
   try {
-    // Use service account from environment variable
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT 
-      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-      : {
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
-        };
+    // Skip initialization during build or with dummy credentials
+    const isBuildTime = process.env.NODE_ENV === 'production' && !process.env.FIREBASE_PROJECT_ID;
+    const hasDummyCredentials = process.env.FIREBASE_PROJECT_ID === 'dummy-project' ||
+                               process.env.FIREBASE_SERVICE_ACCOUNT?.includes('dummy-project');
 
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    
-    console.log('✅ Firebase Admin initialized successfully');
+    if (isBuildTime || hasDummyCredentials) {
+      console.log('⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)');
+    } else {
+      // Use service account from environment variable
+      const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+        ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+        : {
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+          };
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+
+      console.log('✅ Firebase Admin initialized successfully');
+    }
   } catch (error) {
     console.error('❌ Firebase Admin initialization failed:', error);
   }
 }
 
-export const messaging = admin.messaging();
+// Export messaging only if Firebase is initialized
+export const messaging = admin.apps.length > 0 ? admin.messaging() : null;
 
 /**
  * Send push notification to multiple devices
@@ -34,6 +44,11 @@ export async function sendPushNotification(
   body: string,
   data?: { [key: string]: string }
 ) {
+  if (!messaging) {
+    console.log('[FCM] ⚠️ Firebase messaging not initialized, skipping push notification');
+    return { success: 0, failure: tokens.length };
+  }
+
   if (!tokens || tokens.length === 0) {
     console.log('[FCM] No tokens to send to');
     return { success: 0, failure: 0 };
