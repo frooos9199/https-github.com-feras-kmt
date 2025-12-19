@@ -16,8 +16,10 @@ export async function DELETE(
     }
 
     const { id, userId } = await params
+    const body = await req.json()
+    const { reason } = body
 
-    // Get attendance details before deletion for email
+    // Get attendance details before update for email
     const attendance = await prisma.attendance.findFirst({
       where: {
         eventId: id,
@@ -40,8 +42,12 @@ export async function DELETE(
       }
     })
 
-    // Send removal notification email BEFORE deletion
-    if (attendance?.user.email) {
+    if (!attendance) {
+      return NextResponse.json({ error: "Attendance record not found" }, { status: 404 })
+    }
+
+    // Send removal notification email BEFORE update
+    if (attendance.user.email) {
       await sendEmail({
         to: attendance.user.email,
         subject: `⚠️ Removed from Event - ${attendance.event.titleEn}`,
@@ -49,16 +55,21 @@ export async function DELETE(
           attendance.user.name,
           attendance.event.titleEn,
           new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-          undefined // notes - can be added later if needed
+          reason || undefined // Pass the removal reason
         )
       })
     }
 
-    // Delete the attendance record AFTER sending email
-    await prisma.attendance.deleteMany({
+    // Update the attendance record to cancelled status with reason
+    await prisma.attendance.updateMany({
       where: {
         eventId: id,
         userId: userId
+      },
+      data: {
+        status: "cancelled",
+        cancelledAt: new Date(),
+        cancellationReason: reason || "Removed by admin"
       }
     })
 

@@ -28,6 +28,10 @@ interface Event {
   attendances: Array<{
     id: string
     userId: string
+    status: string
+    registeredAt: string
+    cancelledAt: string | null
+    cancellationReason: string | null
     createdAt: string
     user: {
       id: string
@@ -51,6 +55,7 @@ export default function EventDetails() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showRemoveMarshalModal, setShowRemoveMarshalModal] = useState(false)
   const [selectedMarshalId, setSelectedMarshalId] = useState<string | null>(null)
+  const [removalReason, setRemovalReason] = useState<string>("")
   const [eventId, setEventId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     titleEn: "",
@@ -158,11 +163,14 @@ export default function EventDetails() {
     if (!event || !selectedMarshalId) return
     try {
       const res = await fetch(`/api/admin/events/${event.id}/marshals/${selectedMarshalId}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: removalReason })
       })
       if (res.ok) {
         setShowRemoveMarshalModal(false)
         setSelectedMarshalId(null)
+        setRemovalReason("")
         fetchEvent()
       }
     } catch (error) {
@@ -347,7 +355,11 @@ export default function EventDetails() {
                   {event.attendances.map((attendance) => (
                     <div
                       key={attendance.id}
-                      className="flex items-center justify-between bg-zinc-800/50 border border-zinc-700 rounded-xl p-4"
+                      className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 ${
+                        attendance.status === 'cancelled' 
+                          ? 'border-red-600/50 bg-red-900/20' 
+                          : 'border-zinc-700'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         {attendance.user.image ? (
@@ -357,24 +369,51 @@ export default function EventDetails() {
                             className="w-12 h-12 rounded-full object-cover border-2 border-red-600"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white font-bold">
+                          <div className="w-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white font-bold">
                             {attendance.user.name.charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div>
                           <p className="text-white font-medium">{attendance.user.name}</p>
                           <p className="text-sm text-gray-400">{attendance.user.employeeId}</p>
+                          {attendance.status === 'cancelled' && attendance.cancellationReason && (
+                            <p className="text-xs text-red-400 mt-1">
+                              {language === "ar" ? "سبب الإلغاء:" : "Cancelled:"} {attendance.cancellationReason}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedMarshalId(attendance.userId)
-                          setShowRemoveMarshalModal(true)
-                        }}
-                        className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
-                      >
-                        {language === "ar" ? "إزالة" : "Remove"}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          attendance.status === 'approved' 
+                            ? 'bg-green-600/20 text-green-500' 
+                            : attendance.status === 'pending'
+                            ? 'bg-yellow-600/20 text-yellow-500'
+                            : attendance.status === 'rejected'
+                            ? 'bg-red-600/20 text-red-500'
+                            : 'bg-gray-600/20 text-gray-500'
+                        }`}>
+                          {attendance.status === 'approved' 
+                            ? (language === "ar" ? "مؤكد" : "Approved")
+                            : attendance.status === 'pending'
+                            ? (language === "ar" ? "في الانتظار" : "Pending")
+                            : attendance.status === 'rejected'
+                            ? (language === "ar" ? "مرفوض" : "Rejected")
+                            : (language === "ar" ? "ملغي" : "Cancelled")
+                          }
+                        </span>
+                        {attendance.status !== 'cancelled' && (
+                          <button
+                            onClick={() => {
+                              setSelectedMarshalId(attendance.userId)
+                              setShowRemoveMarshalModal(true)
+                            }}
+                            className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
+                          >
+                            {language === "ar" ? "إزالة" : "Remove"}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -662,12 +701,26 @@ export default function EventDetails() {
             <h3 className="text-2xl font-bold text-white mb-4">
               ⚠️ {language === "ar" ? "تأكيد الإزالة" : "Confirm Removal"}
             </h3>
-            <p className="text-gray-300 mb-6">
+            <p className="text-gray-300 mb-4">
               {language === "ar" 
                 ? "هل أنت متأكد من إلغاء تسجيل هذا المارشال من الحدث؟"
                 : "Are you sure you want to remove this marshal from the event?"
               }
             </p>
+            
+            <div className="mb-6">
+              <label className="block text-gray-400 text-sm mb-2">
+                {language === "ar" ? "سبب الإزالة (اختياري)" : "Removal Reason (Optional)"}
+              </label>
+              <textarea
+                value={removalReason}
+                onChange={(e) => setRemovalReason(e.target.value)}
+                placeholder={language === "ar" ? "أدخل سبب الإزالة..." : "Enter removal reason..."}
+                rows={3}
+                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-yellow-600 focus:outline-none resize-none"
+              />
+            </div>
+            
             <div className="flex gap-3">
               <button
                 onClick={handleRemoveMarshal}
@@ -679,6 +732,7 @@ export default function EventDetails() {
                 onClick={() => {
                   setShowRemoveMarshalModal(false)
                   setSelectedMarshalId(null)
+                  setRemovalReason("")
                 }}
                 className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold transition-all"
               >

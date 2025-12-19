@@ -36,10 +36,13 @@ export async function GET(
       where: { id },
       include: {
         attendances: {
-          where: {
-            status: 'approved' // Only show approved attendances
-          },
-          include: {
+          select: {
+            id: true,
+            userId: true,
+            status: true,
+            registeredAt: true,
+            cancelledAt: true,
+            cancellationReason: true,
             user: {
               select: {
                 id: true,
@@ -50,15 +53,14 @@ export async function GET(
                 image: true
               }
             }
+          },
+          orderBy: {
+            registeredAt: 'desc'
           }
         },
         _count: {
           select: { 
-            attendances: {
-              where: {
-                status: 'approved' // Only count approved attendances
-              }
-            }
+            attendances: true
           }
         }
       }

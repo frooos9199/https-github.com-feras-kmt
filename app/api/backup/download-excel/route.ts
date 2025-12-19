@@ -184,30 +184,176 @@ export async function GET(req: NextRequest) {
     };
     attendancesWorksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; // White text
 
-    // Add attendances data
-    attendances.forEach((attendance: any) => {
-      attendancesWorksheet.addRow({
-        id: attendance.id,
-        userId: attendance.userId,
-        employeeId: attendance.user.employeeId || '',
-        userName: attendance.user.name,
-        userEmail: attendance.user.email,
-        eventId: attendance.eventId,
-        eventTitleEn: attendance.event.titleEn,
-        eventTitleAr: attendance.event.titleAr,
-        eventDate: attendance.event.date ? new Date(attendance.event.date).toISOString().split('T')[0] : '',
-        eventTime: attendance.event.time || '',
-        eventLocation: attendance.event.location || '',
-        eventStatus: attendance.event.status || '',
-        status: attendance.status,
-        registeredAt: attendance.registeredAt ? new Date(attendance.registeredAt).toISOString() : '',
-        notes: attendance.notes || '',
-        cancelledAt: attendance.cancelledAt ? new Date(attendance.cancelledAt).toISOString() : '',
-        cancellationReason: attendance.cancellationReason || '',
+    // Create Events worksheet for complete backup restoration
+    const eventsWorksheet = workbook.addWorksheet('Events Backup');
+
+    // Fetch all events
+    const events = await prisma.event.findMany({
+      orderBy: {
+        date: 'desc'
+      }
+    });
+
+    // Define events columns
+    eventsWorksheet.columns = [
+      { header: 'Event ID', key: 'id', width: 15 },
+      { header: 'Title (EN)', key: 'titleEn', width: 30 },
+      { header: 'Title (AR)', key: 'titleAr', width: 30 },
+      { header: 'Description (EN)', key: 'descriptionEn', width: 50 },
+      { header: 'Description (AR)', key: 'descriptionAr', width: 50 },
+      { header: 'Date', key: 'date', width: 15 },
+      { header: 'End Date', key: 'endDate', width: 15 },
+      { header: 'Time', key: 'time', width: 10 },
+      { header: 'End Time', key: 'endTime', width: 10 },
+      { header: 'Location', key: 'location', width: 25 },
+      { header: 'Image', key: 'image', width: 60 },
+      { header: 'Marshal Types', key: 'marshalTypes', width: 30 },
+      { header: 'Max Marshals', key: 'maxMarshals', width: 15 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Created At', key: 'createdAt', width: 20 },
+      { header: 'Updated At', key: 'updatedAt', width: 20 },
+    ];
+
+    // Style events header
+    eventsWorksheet.getRow(1).font = { bold: true, size: 12 };
+    eventsWorksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE60000' }, // Red background
+    };
+    eventsWorksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; // White text
+
+    // Add events data
+    events.forEach((event: any) => {
+      eventsWorksheet.addRow({
+        id: event.id,
+        titleEn: event.titleEn,
+        titleAr: event.titleAr,
+        descriptionEn: event.descriptionEn,
+        descriptionAr: event.descriptionAr,
+        date: event.date ? new Date(event.date).toISOString().split('T')[0] : '',
+        endDate: event.endDate ? new Date(event.endDate).toISOString().split('T')[0] : '',
+        time: event.time || '',
+        endTime: event.endTime || '',
+        location: event.location || '',
+        image: event.image || '',
+        marshalTypes: event.marshalTypes || '',
+        maxMarshals: event.maxMarshals,
+        status: event.status,
+        createdAt: event.createdAt ? new Date(event.createdAt).toISOString() : '',
+        updatedAt: event.updatedAt ? new Date(event.updatedAt).toISOString() : '',
       });
     });
 
-    // Generate the Excel file buffer
+    // Create Notifications worksheet for complete backup restoration
+    const notificationsWorksheet = workbook.addWorksheet('Notifications Backup');
+
+    // Fetch all notifications with user details
+    const notifications = await prisma.notification.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            employeeId: true,
+            name: true,
+            email: true,
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // Define notifications columns
+    notificationsWorksheet.columns = [
+      { header: 'Notification ID', key: 'id', width: 15 },
+      { header: 'User ID', key: 'userId', width: 15 },
+      { header: 'Employee ID', key: 'employeeId', width: 15 },
+      { header: 'User Name', key: 'userName', width: 25 },
+      { header: 'User Email', key: 'userEmail', width: 30 },
+      { header: 'Type', key: 'type', width: 20 },
+      { header: 'Title (EN)', key: 'titleEn', width: 30 },
+      { header: 'Title (AR)', key: 'titleAr', width: 30 },
+      { header: 'Message (EN)', key: 'messageEn', width: 50 },
+      { header: 'Message (AR)', key: 'messageAr', width: 50 },
+      { header: 'Event ID', key: 'eventId', width: 15 },
+      { header: 'Is Read', key: 'isRead', width: 10 },
+      { header: 'Created At', key: 'createdAt', width: 20 },
+    ];
+
+    // Style notifications header
+    notificationsWorksheet.getRow(1).font = { bold: true, size: 12 };
+    notificationsWorksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE60000' }, // Red background
+    };
+    notificationsWorksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; // White text
+
+    // Add notifications data
+    notifications.forEach((notification: any) => {
+      notificationsWorksheet.addRow({
+        id: notification.id,
+        userId: notification.userId,
+        employeeId: notification.user.employeeId || '',
+        userName: notification.user.name,
+        userEmail: notification.user.email,
+        type: notification.type,
+        titleEn: notification.titleEn,
+        titleAr: notification.titleAr,
+        messageEn: notification.messageEn,
+        messageAr: notification.messageAr,
+        eventId: notification.eventId || '',
+        isRead: notification.isRead ? 'Yes' : 'No',
+        createdAt: notification.createdAt ? new Date(notification.createdAt).toISOString() : '',
+      });
+    });
+
+    // Create Broadcast Messages worksheet for complete backup restoration
+    const broadcastWorksheet = workbook.addWorksheet('Broadcast Messages Backup');
+
+    // Fetch all broadcast messages
+    const broadcastMessages = await prisma.broadcastMessage.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // Define broadcast messages columns
+    broadcastWorksheet.columns = [
+      { header: 'Message ID', key: 'id', width: 15 },
+      { header: 'Subject', key: 'subject', width: 30 },
+      { header: 'Message', key: 'message', width: 50 },
+      { header: 'Recipient Filter', key: 'recipientFilter', width: 20 },
+      { header: 'Marshal Types', key: 'marshalTypes', width: 30 },
+      { header: 'Event ID', key: 'eventId', width: 15 },
+      { header: 'Created At', key: 'createdAt', width: 20 },
+      { header: 'Updated At', key: 'updatedAt', width: 20 },
+    ];
+
+    // Style broadcast messages header
+    broadcastWorksheet.getRow(1).font = { bold: true, size: 12 };
+    broadcastWorksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE60000' }, // Red background
+    };
+    broadcastWorksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; // White text
+
+    // Add broadcast messages data
+    broadcastMessages.forEach((broadcast: any) => {
+      broadcastWorksheet.addRow({
+        id: broadcast.id,
+        subject: broadcast.subject,
+        message: broadcast.message,
+        recipientFilter: broadcast.recipientFilter,
+        marshalTypes: broadcast.marshalTypes || '',
+        eventId: broadcast.eventId || '',
+        createdAt: broadcast.createdAt ? new Date(broadcast.createdAt).toISOString() : '',
+        updatedAt: broadcast.updatedAt ? new Date(broadcast.updatedAt).toISOString() : '',
+      });
+    });
     const buffer = await workbook.xlsx.writeBuffer();
 
     // Create filename with timestamp

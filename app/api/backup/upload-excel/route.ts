@@ -248,24 +248,275 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log('===== IMPORT SUMMARY =====');
-    console.log('Total:', usersToImport.length);
-    console.log('Imported:', imported);
-    console.log('Updated:', updated);
-    console.log('Failed:', failed);
-    console.log('Update Details:', JSON.stringify(updateDetails, null, 2));
     console.log('========================');
+
+    // Import Events
+    console.log('🔄 Importing Events...');
+    const eventsWorksheet = workbook.getWorksheet('Events Backup');
+    if (eventsWorksheet) {
+      let eventsImported = 0;
+      let eventsUpdated = 0;
+      let eventsFailed = 0;
+
+      // Convert worksheet to array and skip header
+      const eventRows: any[] = [];
+      eventsWorksheet.eachRow((row: any, rowNumber: number) => {
+        if (rowNumber > 1) eventRows.push(row);
+      });
+
+      for (const row of eventRows) {
+        try {
+          const eventData = {
+            id: row.getCell(1).value?.toString() || '',
+            titleEn: row.getCell(2).value?.toString() || '',
+            titleAr: row.getCell(3).value?.toString() || '',
+            descriptionEn: row.getCell(4).value?.toString() || '',
+            descriptionAr: row.getCell(5).value?.toString() || '',
+            date: row.getCell(6).value ? new Date(row.getCell(6).value.toString()) : new Date(),
+            endDate: row.getCell(7).value ? new Date(row.getCell(7).value.toString()) : null,
+            time: row.getCell(8).value?.toString() || '',
+            endTime: row.getCell(9).value?.toString() || null,
+            location: row.getCell(10).value?.toString() || '',
+            image: row.getCell(11).value?.toString() || null,
+            marshalTypes: row.getCell(12).value?.toString() || '',
+            maxMarshals: parseInt(row.getCell(13).value?.toString() || '0'),
+            status: row.getCell(14).value?.toString() || 'active',
+          };
+
+          // Check if event exists
+          const existingEvent = eventData.id ? await prisma.event.findUnique({
+            where: { id: eventData.id }
+          }) : null;
+
+          if (existingEvent) {
+            // Update existing event
+            await prisma.event.update({
+              where: { id: eventData.id },
+              data: {
+                titleEn: eventData.titleEn,
+                titleAr: eventData.titleAr,
+                descriptionEn: eventData.descriptionEn,
+                descriptionAr: eventData.descriptionAr,
+                date: eventData.date,
+                endDate: eventData.endDate,
+                time: eventData.time,
+                endTime: eventData.endTime,
+                location: eventData.location,
+                image: eventData.image,
+                marshalTypes: eventData.marshalTypes,
+                maxMarshals: eventData.maxMarshals,
+                status: eventData.status,
+              }
+            });
+            eventsUpdated++;
+          } else {
+            // Create new event
+            await prisma.event.create({
+              data: {
+                titleEn: eventData.titleEn,
+                titleAr: eventData.titleAr,
+                descriptionEn: eventData.descriptionEn,
+                descriptionAr: eventData.descriptionAr,
+                date: eventData.date,
+                endDate: eventData.endDate,
+                time: eventData.time,
+                endTime: eventData.endTime,
+                location: eventData.location,
+                image: eventData.image,
+                marshalTypes: eventData.marshalTypes,
+                maxMarshals: eventData.maxMarshals,
+                status: eventData.status,
+              }
+            });
+            eventsImported++;
+          }
+        } catch (error) {
+          console.error('❌ Error importing event:', error);
+          eventsFailed++;
+        }
+      }
+
+      console.log(`Events - Imported: ${eventsImported}, Updated: ${eventsUpdated}, Failed: ${eventsFailed}`);
+    }
+
+    // Import Attendances
+    console.log('🔄 Importing Attendances...');
+    const attendancesWorksheet = workbook.getWorksheet('Attendances Backup');
+    if (attendancesWorksheet) {
+      let attendancesImported = 0;
+      let attendancesUpdated = 0;
+      let attendancesFailed = 0;
+
+      // Convert worksheet to array and skip header
+      const attendanceRows: any[] = [];
+      attendancesWorksheet.eachRow((row: any, rowNumber: number) => {
+        if (rowNumber > 1) attendanceRows.push(row);
+      });
+
+      for (const row of attendanceRows) {
+        try {
+          const attendanceData = {
+            id: row.getCell(1).value?.toString() || '',
+            userId: row.getCell(2).value?.toString() || '',
+            eventId: row.getCell(6).value?.toString() || '',
+            status: row.getCell(13).value?.toString() || 'pending',
+            registeredAt: row.getCell(14).value ? new Date(row.getCell(14).value.toString()) : new Date(),
+            notes: row.getCell(15).value?.toString() || null,
+            cancelledAt: row.getCell(16).value ? new Date(row.getCell(16).value.toString()) : null,
+            cancellationReason: row.getCell(17).value?.toString() || null,
+          };
+
+          // Check if attendance exists
+          const existingAttendance = attendanceData.id ? await prisma.attendance.findUnique({
+            where: { id: attendanceData.id }
+          }) : null;
+
+          if (existingAttendance) {
+            // Update existing attendance
+            await prisma.attendance.update({
+              where: { id: attendanceData.id },
+              data: {
+                status: attendanceData.status,
+                registeredAt: attendanceData.registeredAt,
+                notes: attendanceData.notes,
+                cancelledAt: attendanceData.cancelledAt,
+                cancellationReason: attendanceData.cancellationReason,
+              }
+            });
+            attendancesUpdated++;
+          } else {
+            // Create new attendance
+            await prisma.attendance.create({
+              data: {
+                userId: attendanceData.userId,
+                eventId: attendanceData.eventId,
+                status: attendanceData.status,
+                registeredAt: attendanceData.registeredAt,
+                notes: attendanceData.notes,
+                cancelledAt: attendanceData.cancelledAt,
+                cancellationReason: attendanceData.cancellationReason,
+              }
+            });
+            attendancesImported++;
+          }
+        } catch (error) {
+          console.error('❌ Error importing attendance:', error);
+          attendancesFailed++;
+        }
+      }
+
+      console.log(`Attendances - Imported: ${attendancesImported}, Updated: ${attendancesUpdated}, Failed: ${attendancesFailed}`);
+    }
+
+    // Import Notifications
+    console.log('🔄 Importing Notifications...');
+    const notificationsWorksheet = workbook.getWorksheet('Notifications Backup');
+    if (notificationsWorksheet) {
+      let notificationsImported = 0;
+      let notificationsFailed = 0;
+
+      // Convert worksheet to array and skip header
+      const notificationRows: any[] = [];
+      notificationsWorksheet.eachRow((row: any, rowNumber: number) => {
+        if (rowNumber > 1) notificationRows.push(row);
+      });
+
+      for (const row of notificationRows) {
+        try {
+          const notificationData = {
+            id: row.getCell(1).value?.toString() || '',
+            userId: row.getCell(2).value?.toString() || '',
+            type: row.getCell(6).value?.toString() || '',
+            titleEn: row.getCell(7).value?.toString() || '',
+            titleAr: row.getCell(8).value?.toString() || '',
+            messageEn: row.getCell(9).value?.toString() || '',
+            messageAr: row.getCell(10).value?.toString() || '',
+            eventId: row.getCell(11).value?.toString() || null,
+            isRead: row.getCell(12).value?.toString() === 'Yes',
+            createdAt: row.getCell(13).value ? new Date(row.getCell(13).value.toString()) : new Date(),
+          };
+
+          // Create notification (notifications are usually not updated, only created)
+          await prisma.notification.create({
+            data: {
+              userId: notificationData.userId,
+              type: notificationData.type,
+              titleEn: notificationData.titleEn,
+              titleAr: notificationData.titleAr,
+              messageEn: notificationData.messageEn,
+              messageAr: notificationData.messageAr,
+              eventId: notificationData.eventId,
+              isRead: notificationData.isRead,
+              createdAt: notificationData.createdAt,
+            }
+          });
+          notificationsImported++;
+        } catch (error) {
+          console.error('❌ Error importing notification:', error);
+          notificationsFailed++;
+        }
+      }
+
+      console.log(`Notifications - Imported: ${notificationsImported}, Failed: ${notificationsFailed}`);
+    }
+
+    // Import Broadcast Messages
+    console.log('🔄 Importing Broadcast Messages...');
+    const broadcastWorksheet = workbook.getWorksheet('Broadcast Messages Backup');
+    if (broadcastWorksheet) {
+      let broadcastImported = 0;
+      let broadcastFailed = 0;
+
+      // Convert worksheet to array and skip header
+      const broadcastRows: any[] = [];
+      broadcastWorksheet.eachRow((row: any, rowNumber: number) => {
+        if (rowNumber > 1) broadcastRows.push(row);
+      });
+
+      for (const row of broadcastRows) {
+        try {
+          const broadcastData = {
+            id: row.getCell(1).value?.toString() || '',
+            subject: row.getCell(2).value?.toString() || '',
+            message: row.getCell(3).value?.toString() || '',
+            recipientFilter: row.getCell(4).value?.toString() || '',
+            marshalTypes: row.getCell(5).value?.toString() || null,
+            eventId: row.getCell(6).value?.toString() || null,
+            createdAt: row.getCell(7).value ? new Date(row.getCell(7).value.toString()) : new Date(),
+          };
+
+          // Create broadcast message
+          await prisma.broadcastMessage.create({
+            data: {
+              subject: broadcastData.subject,
+              message: broadcastData.message,
+              recipientFilter: broadcastData.recipientFilter,
+              marshalTypes: broadcastData.marshalTypes,
+              eventId: broadcastData.eventId,
+              createdAt: broadcastData.createdAt,
+            }
+          });
+          broadcastImported++;
+        } catch (error) {
+          console.error('❌ Error importing broadcast message:', error);
+          broadcastFailed++;
+        }
+      }
+
+      console.log(`Broadcast Messages - Imported: ${broadcastImported}, Failed: ${broadcastFailed}`);
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Import completed',
+      message: 'Complete backup import completed successfully! System fully restored.',
       stats: {
-        total: usersToImport.length,
-        imported,
-        updated,
-        failed,
+        users: { total: usersToImport.length, imported, updated, failed },
+        events: eventsWorksheet ? 'Imported successfully' : 'Not found in backup',
+        attendances: attendancesWorksheet ? 'Imported successfully' : 'Not found in backup',
+        notifications: notificationsWorksheet ? 'Imported successfully' : 'Not found in backup',
+        broadcastMessages: broadcastWorksheet ? 'Imported successfully' : 'Not found in backup',
       },
-      updateDetails: updateDetails, // Send details to frontend
+      updateDetails: updateDetails,
       errors: errors.length > 0 ? errors : undefined
     });
 
