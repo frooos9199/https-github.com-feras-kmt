@@ -67,7 +67,14 @@ export default function EventsManagement() {
   const fetchEvents = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/events")
+      const res = await fetch("/api/admin/events", {
+        credentials: 'include'
+      })
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`)
+      }
+      
       const data = await res.json()
       if (Array.isArray(data)) {
         setEvents(data)
@@ -78,6 +85,7 @@ export default function EventsManagement() {
       }
     } catch (error) {
       console.error("Error fetching events:", error)
+      setEvents([])
     } finally {
       setLoading(false)
     }

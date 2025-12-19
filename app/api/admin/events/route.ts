@@ -137,54 +137,12 @@ function verifyJWT(request: NextRequest) {
 // GET - Fetch all events
 export async function GET(request: NextRequest) {
   try {
-    let userRole = null;
-    
-    // تحقق من session (next-auth) للأدمن
+    // تحقق من session (next-auth) للأدمن أو المارشال
     const session = await getServerSession(authOptions);
-    if (session?.user?.role === "admin") {
-      userRole = "admin";
-    }
-    
-    // إذا ما في session، جرب JWT Token
-    if (!userRole) {
-      const authHeader = request.headers.get("authorization");
-      if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.substring(7);
-        try {
-          // ✅ نفس الـ secret المستخدم في Login
-          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
-          const decoded = jwt.verify(token, jwtSecret) as any;
-          if (decoded.role === "admin" || decoded.role === "marshal") {
-            userRole = decoded.role;
-          }
-        } catch (error) {
-          console.error("[EVENTS API] JWT verification failed:", error);
-        }
-      }
-    }
-    
-    if (userRole === "admin" || userRole === "marshal") {
-      const events = await prisma.event.findMany({
-        include: {
-          _count: {
-            select: {
-              attendances: {
-                where: { status: 'approved' }
-              }
-            }
-          }
-        },
-        orderBy: { createdAt: "desc" }
-      });
-      return NextResponse.json(events);
-    }
-
-    // تحقق من JWT (للأدمن أو المارشال)
-    const user = verifyJWT(request);
-    console.log("[DEBUG] Decoded user from JWT:", user);
-    if (!user || !["admin", "marshal"].includes((user as any).role)) {
+    if (!session?.user?.id || !["admin", "marshal"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
     const events = await prisma.event.findMany({
       include: {
         _count: {

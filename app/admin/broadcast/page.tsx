@@ -39,7 +39,9 @@ export default function BroadcastPage() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch("/api/admin/events")
+      const res = await fetch("/api/admin/events", {
+        credentials: 'include'
+      })
       if (res.ok) {
         const data = await res.json()
         setEvents(data)

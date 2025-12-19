@@ -14,7 +14,7 @@ export async function GET(
     console.log('API EVENT GET', {
       url: req.url,
       headers: Object.fromEntries(req.headers.entries()),
-      params
+      params: await params
     });
 
     if (req.headers.get("accept")?.includes("text/html")) {
@@ -44,7 +44,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
+    if (!id) {
+      console.error('API event: missing id param', { id });
+      return NextResponse.json({ error: "Event id is required" }, { status: 400 });
+    }
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
@@ -116,7 +120,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-  const { id } = params
+    const { id } = await params
     const body = await req.json()
     const { 
       titleEn, 
