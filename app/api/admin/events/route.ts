@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Filter marshals who have matching types
-    const matchingMarshals = allMarshals.filter(marshal => {
+    const matchingMarshals = allMarshals.filter((marshal: any) => {
       if (!marshal.marshalTypes) return false
       const marshalTypes = marshal.marshalTypes.split(',').filter((t: string) => t)
       return eventTypes.some((eventType: string) => marshalTypes.includes(eventType.trim()))
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
 
     // Send emails only to matching marshals (in parallel, continue even if some fail)
     const emailPromises = matchingMarshals
-      .filter(marshal => marshal.email)
-      .map(marshal =>
+      .filter((marshal: any) => marshal.email)
+      .map((marshal: any) =>
         sendEmail({
           to: marshal.email!,
           subject: `🏁 New Event Available - ${event.titleEn}`,

@@ -7,7 +7,7 @@ import { getUserFromToken } from "@/lib/auth"
 // GET - Fetch single event with registered marshals
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Debug: log headers and params
@@ -96,7 +96,7 @@ export async function GET(
 // PATCH - Update event
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     let userId: string | null = null
@@ -166,7 +166,7 @@ export async function PATCH(
 // DELETE - Delete event
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     let userId: string | null = null
@@ -190,7 +190,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-  const { id } = params
+    const { id } = await params
 
     // Delete all attendances first
     await prisma.attendance.deleteMany({
