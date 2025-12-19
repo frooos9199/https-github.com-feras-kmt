@@ -36,19 +36,6 @@ export async function GET(req: NextRequest) {
         fcmToken: true,
         createdAt: true,
         updatedAt: true,
-        attendances: {
-          include: {
-            event: {
-              select: {
-                id: true,
-                titleEn: true,
-                titleAr: true,
-                date: true,
-                status: true,
-              }
-            }
-          }
-        }
       },
       orderBy: {
         role: 'desc', // Admin first, then marshals
@@ -83,7 +70,6 @@ export async function GET(req: NextRequest) {
       { header: 'Registration Date', key: 'registrationDate', width: 15 },
       { header: 'Created At', key: 'createdAt', width: 20 },
       { header: 'Updated At', key: 'updatedAt', width: 20 },
-      { header: 'Registered Events', key: 'registeredEvents', width: 50 },
     ];
 
     // Style the header row
@@ -120,14 +106,6 @@ export async function GET(req: NextRequest) {
         registrationDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : '', // DD/MM/YYYY format
         createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : '',
         updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString() : '',
-        registeredEvents: user.attendances && user.attendances.length > 0
-          ? user.attendances.map(att => {
-              const event = att.event;
-              const eventDate = event.date ? new Date(event.date).toLocaleDateString('en-GB') : '';
-              const title = event.titleEn || event.titleAr || 'Unknown Event';
-              return `${title} (${eventDate})`;
-            }).join('; ')
-          : 'No events registered',
       });
     });
 
@@ -143,6 +121,90 @@ export async function GET(req: NextRequest) {
           };
         }
       }
+    });
+
+    // Create Attendances worksheet for complete backup restoration
+    const attendancesWorksheet = workbook.addWorksheet('Attendances Backup');
+
+    // Fetch all attendances with user and event details
+    const attendances = await prisma.attendance.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            employeeId: true,
+            name: true,
+            email: true,
+          }
+        },
+        event: {
+          select: {
+            id: true,
+            titleEn: true,
+            titleAr: true,
+            date: true,
+            time: true,
+            location: true,
+            status: true,
+          }
+        }
+      },
+      orderBy: {
+        registeredAt: 'desc'
+      }
+    });
+
+    // Define attendances columns
+    attendancesWorksheet.columns = [
+      { header: 'Attendance ID', key: 'id', width: 15 },
+      { header: 'User ID', key: 'userId', width: 15 },
+      { header: 'Employee ID', key: 'employeeId', width: 15 },
+      { header: 'User Name', key: 'userName', width: 25 },
+      { header: 'User Email', key: 'userEmail', width: 30 },
+      { header: 'Event ID', key: 'eventId', width: 15 },
+      { header: 'Event Title (EN)', key: 'eventTitleEn', width: 30 },
+      { header: 'Event Title (AR)', key: 'eventTitleAr', width: 30 },
+      { header: 'Event Date', key: 'eventDate', width: 15 },
+      { header: 'Event Time', key: 'eventTime', width: 15 },
+      { header: 'Event Location', key: 'eventLocation', width: 25 },
+      { header: 'Event Status', key: 'eventStatus', width: 15 },
+      { header: 'Attendance Status', key: 'status', width: 15 },
+      { header: 'Registered At', key: 'registeredAt', width: 20 },
+      { header: 'Notes', key: 'notes', width: 30 },
+      { header: 'Cancelled At', key: 'cancelledAt', width: 20 },
+      { header: 'Cancellation Reason', key: 'cancellationReason', width: 30 },
+    ];
+
+    // Style attendances header
+    attendancesWorksheet.getRow(1).font = { bold: true, size: 12 };
+    attendancesWorksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE60000' }, // Red background
+    };
+    attendancesWorksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; // White text
+
+    // Add attendances data
+    attendances.forEach((attendance: any) => {
+      attendancesWorksheet.addRow({
+        id: attendance.id,
+        userId: attendance.userId,
+        employeeId: attendance.user.employeeId || '',
+        userName: attendance.user.name,
+        userEmail: attendance.user.email,
+        eventId: attendance.eventId,
+        eventTitleEn: attendance.event.titleEn,
+        eventTitleAr: attendance.event.titleAr,
+        eventDate: attendance.event.date ? new Date(attendance.event.date).toISOString().split('T')[0] : '',
+        eventTime: attendance.event.time || '',
+        eventLocation: attendance.event.location || '',
+        eventStatus: attendance.event.status || '',
+        status: attendance.status,
+        registeredAt: attendance.registeredAt ? new Date(attendance.registeredAt).toISOString() : '',
+        notes: attendance.notes || '',
+        cancelledAt: attendance.cancelledAt ? new Date(attendance.cancelledAt).toISOString() : '',
+        cancellationReason: attendance.cancellationReason || '',
+      });
     });
 
     // Generate the Excel file buffer
