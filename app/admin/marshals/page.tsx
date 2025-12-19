@@ -103,6 +103,7 @@ const NATIONALITIES = [
   { value: "KE", label: { ar: "كينيا", en: "Kenya" } },
   { value: "ET", label: { ar: "إثيوبيا", en: "Ethiopia" } },
   { value: "GH", label: { ar: "غانا", en: "Ghana" } },
+  { value: "AF", label: { ar: "أفغانستان", en: "Afghanistan" } },
 ]
 
 export default function MarshalsManagement() {
