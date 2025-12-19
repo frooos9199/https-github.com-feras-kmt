@@ -188,7 +188,7 @@ export default function EventDetails() {
       setError("حدث خطأ أثناء الاتصال بالخادم.")
       setEvent(null)
     }
-
+  }
 
   const fetchAvailableMarshals = async () => {
     if (!event) return
