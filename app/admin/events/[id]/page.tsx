@@ -100,7 +100,9 @@ export default function EventDetails() {
     if (!eventId) return
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/events/${eventId}`)
+      const res = await fetch(`/api/admin/events/${eventId}`, {
+        credentials: 'include'
+      })
       if (res.ok) {
         const data = await res.json()
         setEvent(data)
