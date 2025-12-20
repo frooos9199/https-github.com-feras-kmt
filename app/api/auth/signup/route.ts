@@ -9,6 +9,7 @@ export async function POST(req: Request) {
     const { name, email, password, phone, civilId, dateOfBirth } = body
 
     console.log(`[SIGNUP] Starting signup process for email: ${email}`)
+    console.log(`[SIGNUP] Received data:`, { name, email, phone, civilId, dateOfBirth })
 
     if (!name || !email || !password || !phone) {
       console.error("[SIGNUP] Missing required fields", { name, email, password, phone })
@@ -43,57 +44,40 @@ export async function POST(req: Request) {
     }
 
 
-    // Create user with employeeId generation in a single transaction (atomic, always unique and incremented, with retry)
+    // Create user with simplified employeeId generation
     let user
-    const maxRetries = 10
+    const maxRetries = 3
     let retryCount = 0
     while (retryCount < maxRetries) {
       try {
-        user = await prisma.$transaction(async (tx) => {
-          // Find the highest employeeId in the form KMT-<number>
-          const lastUser = await tx.user.findFirst({
-            where: {
-              employeeId: {
-                startsWith: "KMT-"
-              }
-            },
-            orderBy: {
-              employeeId: 'desc'
-            },
-          })
-          let nextNumber = 100
-          if (lastUser && lastUser.employeeId) {
-            const match = lastUser.employeeId.match(/^KMT-(\d+)/)
-            if (match) {
-              nextNumber = parseInt(match[1], 10) + 1
-            }
+        // Simple employeeId generation - just use current timestamp for uniqueness
+        const timestamp = Date.now()
+        const employeeId = `KMT-${timestamp}`
+
+        user = await prisma.user.create({
+          data: {
+            employeeId,
+            name,
+            email,
+            password: hashedPassword,
+            phone,
+            ...(civilId ? { civilId } : {}),
+            ...(parsedDate ? { dateOfBirth: parsedDate } : {}),
+            role: "marshal"
           }
-          const employeeId = `KMT-${nextNumber}`
-          return await tx.user.create({
-            data: {
-              employeeId,
-              name,
-              email,
-              password: hashedPassword,
-              phone,
-              ...(civilId ? { civilId } : {}),
-              ...(parsedDate ? { dateOfBirth: parsedDate } : {}),
-              role: "marshal"
-            }
-          })
         })
+        console.log(`[SIGNUP] User created successfully:`, { id: user.id, employeeId: user.employeeId, name: user.name })
         break // Success, exit loop
       } catch (err: any) {
-        if (err.code === 'P2002' && err.meta?.target?.includes('employeeId')) {
-          // Race condition, retry
-          retryCount++
-          await new Promise(res => setTimeout(res, 200))
-          continue
-        }
+        console.error(`[SIGNUP] Attempt ${retryCount + 1} failed:`, err.message, err.code)
         if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
           return NextResponse.json({ error: "Email already registered" }, { status: 400 })
         }
-        return NextResponse.json({ error: "Database error occurred. Please try again." }, { status: 500 })
+        retryCount++
+        if (retryCount >= maxRetries) {
+          return NextResponse.json({ error: "Database error occurred. Please try again." }, { status: 500 })
+        }
+        await new Promise(res => setTimeout(res, 500))
       }
     }
 
@@ -103,7 +87,8 @@ export async function POST(req: Request) {
       }, { status: 500 })
     }
 
-    // Create notification for admin
+    // Create notification for admin (disabled temporarily for debugging)
+    /*
     try {
       const admins = await prisma.user.findMany({ where: { role: 'admin' }, select: { id: true } })
       if (admins.length > 0) {
@@ -123,8 +108,10 @@ export async function POST(req: Request) {
       console.error("[SIGNUP] Notification create error", err)
       // لا توقف العملية إذا فشل الإشعار
     }
+    */
 
-    // Send welcome email
+    // Send welcome email (disabled temporarily for debugging)
+    /*
     if (user.email) {
       try {
         await sendEmail({
@@ -137,6 +124,7 @@ export async function POST(req: Request) {
         // لا توقف العملية إذا فشل الإيميل
       }
     }
+    */
 
     return NextResponse.json(
       { message: "User created successfully", userId: user.id, employeeId: user.employeeId },

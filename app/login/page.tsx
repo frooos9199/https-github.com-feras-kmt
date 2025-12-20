@@ -126,12 +126,19 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Sign Up Link */}
-          <div className="mt-6 text-center text-gray-400">
-            {language === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
-            <Link href="/signup" className="text-red-500 hover:text-red-400 font-semibold">
-              {t("signup")}
-            </Link>
+          {/* Forgot Password & Sign Up Links */}
+          <div className="mt-6 text-center space-y-2">
+            <div className="text-gray-400">
+              <Link href="/forgot-password" className="text-red-500 hover:text-red-400 font-semibold">
+                {language === "ar" ? "نسيت كلمة المرور؟" : "Forgot Password?"}
+              </Link>
+            </div>
+            <div className="text-gray-400">
+              {language === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
+              <Link href="/signup" className="text-red-500 hover:text-red-400 font-semibold">
+                {t("signup")}
+              </Link>
+            </div>
           </div>
         </div>
 

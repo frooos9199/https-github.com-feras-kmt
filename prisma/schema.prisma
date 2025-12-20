@@ -30,6 +30,8 @@ model User {
   marshalTypes       String   @default("") // Comma-separated: "drag-race,drift,circuit"
   role               String   @default("marshal") // "marshal" or "admin"
   fcmToken           String?  // Firebase Cloud Messaging token for push notifications
+  resetToken         String?  // Password reset token
+  resetTokenExpiry   DateTime? // Password reset token expiry
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

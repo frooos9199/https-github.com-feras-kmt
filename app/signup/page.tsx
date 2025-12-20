@@ -156,7 +156,6 @@ export default function SignupPage() {
                 value={formData.civilId}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors text-sm"
-                required
               />
             </div>
 
@@ -170,7 +169,6 @@ export default function SignupPage() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors text-sm"
-                required
               />
             </div>
 

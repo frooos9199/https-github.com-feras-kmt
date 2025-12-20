@@ -22,6 +22,8 @@ interface Event {
   _count: {
     attendances: number
   }
+  approvedCount: number
+  rejectedCount: number
 }
 
 export default function EventsPage() {
@@ -136,7 +138,7 @@ export default function EventsPage() {
             events.map((event, index) => {
               const isRegistered = event.attendances.length > 0
               const registrationStatus = isRegistered ? event.attendances[0].status : null
-              const isFull = event._count.attendances >= event.maxMarshals
+              const isFull = event.approvedCount >= event.maxMarshals
 
               return (
                 <motion.div
@@ -193,7 +195,12 @@ export default function EventsPage() {
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>👥</span>
                         <span>
-                          {event._count.attendances}/{event.maxMarshals} {language === "ar" ? "مارشال" : "Marshals"}
+                          {event.approvedCount}/{event.maxMarshals} {language === "ar" ? "مارشال" : "Marshals"}
+                          {event.rejectedCount > 0 && (
+                            <span className="text-red-400 ml-2">
+                              ({event.rejectedCount} {language === "ar" ? "مرفوض" : "rejected"})
+                            </span>
+                          )}
                         </span>
                       </div>
                     </div>

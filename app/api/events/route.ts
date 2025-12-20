@@ -63,7 +63,29 @@ export async function GET(req: NextRequest) {
         }
       }
     })
-    return NextResponse.json(allEvents)
+
+    // Add approved and rejected counts to each event
+    const eventsWithCounts = await Promise.all(allEvents.map(async (event) => {
+      const approvedCount = await prisma.attendance.count({
+        where: {
+          eventId: event.id,
+          status: "approved"
+        }
+      })
+      const rejectedCount = await prisma.attendance.count({
+        where: {
+          eventId: event.id,
+          status: "rejected"
+        }
+      })
+      return {
+        ...event,
+        approvedCount,
+        rejectedCount
+      }
+    }))
+
+    return NextResponse.json(eventsWithCounts)
   } catch (error) {
     console.error("Error fetching events:", error)
     return NextResponse.json(

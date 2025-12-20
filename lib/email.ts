@@ -4,9 +4,9 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 const LOGO_URL = 'https://https-github-com-feras-kmt.vercel.app/kmt-logo.png'
 
-// Production mode: always send to intended recipient
-// const TESTING_MODE = process.env.EMAIL_TESTING_MODE === 'true'
-// const TESTING_EMAIL = 'summit_kw@hotmail.com' // Your verified email in Resend
+// Testing mode: send all emails to a test recipient
+const TESTING_MODE = process.env.EMAIL_TESTING_MODE === 'true'
+const TESTING_EMAIL = process.env.EMAIL_TESTING_RECIPIENT || 'test@example.com'
 
 interface SendEmailParams {
   to: string
@@ -16,13 +16,24 @@ interface SendEmailParams {
 
 export async function sendEmail({ to, subject, html }: SendEmailParams) {
   try {
+    // In testing mode, send to test email and include original recipient in subject
+    const actualTo = TESTING_MODE ? TESTING_EMAIL : to
+    const actualSubject = TESTING_MODE ? `[TEST] ${subject} (Original: ${to})` : subject
+
     const data = await resend.emails.send({
       from: 'KMT System <noreply@kmtsys.com>',
-      to: [to],
-      subject,
+      to: [actualTo],
+      subject: actualSubject,
       html,
     })
-    console.log('Email sent successfully:', data)
+
+    console.log('Email sent successfully:', {
+      to: actualTo,
+      subject: actualSubject,
+      testing: TESTING_MODE,
+      originalRecipient: TESTING_MODE ? to : null
+    })
+
     return { success: true, data }
   } catch (error) {
     console.error('Error sending email:', error)
