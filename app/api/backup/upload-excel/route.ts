@@ -493,7 +493,8 @@ export async function POST(req: NextRequest) {
               recipientFilter: broadcastData.recipientFilter,
               marshalTypes: broadcastData.marshalTypes,
               eventId: broadcastData.eventId,
-              createdAt: broadcastData.createdAt,
+              sentAt: broadcastData.createdAt || new Date(),
+              sentBy: session.user.id,
             }
           });
           broadcastImported++;
