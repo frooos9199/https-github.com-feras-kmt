@@ -51,7 +51,11 @@ export async function GET(req: NextRequest) {
         date: "asc"
       },
       include: {
-        attendances: true,
+        attendances: {
+          where: {
+            userId: userId
+          }
+        },
         _count: {
           select: {
             attendances: true
