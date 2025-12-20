@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         
         try {
           // استخدام نفس السر المستخدم في Login API
-          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'your-secret-key'
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-key'
           const decoded = jwt.verify(token, jwtSecret) as { email: string }
           userEmail = decoded.email
           console.log('[FCM-TOKEN] ✅ JWT verified, user email:', userEmail)

@@ -137,9 +137,32 @@ function verifyJWT(request: NextRequest) {
 // GET - Fetch all events
 export async function GET(request: NextRequest) {
   try {
-    // تحقق من session (next-auth) للأدمن أو المارشال
+    let userId: string | null = null
+    let userRole: string | null = null
+
+    // Try NextAuth session first
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id || !["admin", "marshal"].includes(session.user.role)) {
+    if (session?.user?.id) {
+      userId = session.user.id
+      userRole = session.user.role
+    } else {
+      // Try JWT from mobile app
+      const authHeader = request.headers.get('authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7)
+        try {
+          // ✅ نفس الـ secret المستخدم في Login
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
+          const decoded = jwt.verify(token, jwtSecret) as { id: string, role: string }
+          userId = decoded.id
+          userRole = decoded.role
+        } catch (jwtError) {
+          console.error('JWT verification failed:', jwtError)
+        }
+      }
+    }
+
+    if (!userId || !["admin", "marshal"].includes(userRole || "")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     

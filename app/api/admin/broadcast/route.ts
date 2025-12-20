@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       if (authHeader?.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
         try {
-          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "kmt-marshal-system-secret-key-2025";
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
           const decoded = jwt.verify(token, jwtSecret) as { id?: string, role?: string };
           if (decoded.role === "admin" && decoded.id) {
             userId = decoded.id;

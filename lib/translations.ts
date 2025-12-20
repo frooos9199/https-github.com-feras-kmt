@@ -52,6 +52,19 @@ export const translations = {
     active: "Active",
     cancelled: "Cancelled",
     completed: "Completed",
+    
+    // Stats
+    num_events: "Events",
+    num_marshals: "Marshals", 
+    num_pending_requests: "Pending Requests",
+    upcoming_events: "Upcoming Events",
+    today_events: "Today's Events",
+    past_events: "Past Events",
+    no_permission_stats: "You don't have permission to view statistics",
+    marshals_by_specialty: "Marshals by Specialty",
+    loading_stats: "Loading statistics...",
+    error_loading_stats: "Error loading statistics",
+    stats: "Statistics",
   },
   ar: {
     // Common
@@ -106,6 +119,19 @@ export const translations = {
     active: "نشط",
     cancelled: "ملغي",
     completed: "منتهي",
+    
+    // Stats
+    num_events: "الفعاليات",
+    num_marshals: "المارشال",
+    num_pending_requests: "الطلبات المعلقة",
+    upcoming_events: "الفعاليات القادمة",
+    today_events: "فعاليات اليوم",
+    past_events: "الفعاليات السابقة",
+    no_permission_stats: "ليس لديك صلاحية لعرض الإحصائيات",
+    marshals_by_specialty: "المارشال حسب التخصص",
+    loading_stats: "جاري تحميل الإحصائيات...",
+    error_loading_stats: "خطأ في تحميل الإحصائيات",
+    stats: "الإحصائيات",
   }
 }
 

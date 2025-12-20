@@ -13,7 +13,7 @@ export async function GET(
   try {
     let userRole: string | null = null
 
-    // Try NextAuth session first (for web)
+    // Try to get user role from NextAuth session
     const session = await getServerSession(authOptions)
     if (session?.user?.role) {
       userRole = session.user.role
@@ -23,7 +23,7 @@ export async function GET(
       if (authHeader?.startsWith('Bearer ')) {
         const token = authHeader.substring(7)
         try {
-          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "kmt-marshal-system-secret-key-2025"
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key"
           const decoded = jwt.verify(token, jwtSecret) as { role: string }
           userRole = decoded.role
         } catch (jwtError) {
@@ -95,7 +95,7 @@ export async function PATCH(
       if (authHeader?.startsWith('Bearer ')) {
         const token = authHeader.substring(7)
         try {
-          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "kmt-marshal-system-secret-key-2025"
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key"
           const decoded = jwt.verify(token, jwtSecret) as { role: string }
           userRole = decoded.role
         } catch (jwtError) {
