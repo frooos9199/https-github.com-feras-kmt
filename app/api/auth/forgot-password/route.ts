@@ -17,10 +17,11 @@ export async function POST(req: Request) {
     })
 
     if (!user) {
-      // Don't reveal if email exists or not for security
+      // Return different message if email is not registered
       return NextResponse.json({
-        message: "If an account with this email exists, a password reset link has been sent."
-      })
+        error: "هذا البريد الإلكتروني غير مسجل لدى كي ام تي. يرجى التسجيل أولاً.",
+        code: "EMAIL_NOT_REGISTERED"
+      }, { status: 404 })
     }
 
     // Generate reset token
