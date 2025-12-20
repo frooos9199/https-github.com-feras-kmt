@@ -125,7 +125,7 @@ function verifyJWT(request: NextRequest) {
   const token = authHeader.split(" ")[1];
   if (!token) return null;
   try {
-    const jwtSecret = process.env.JWT_SECRET || "dev-secret-key";
+    const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
     const decoded = jwt.verify(token, jwtSecret);
     if (typeof decoded === "string") return null;
     return decoded;
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (!userId || !["admin", "marshal"].includes(userRole || "")) {
+    if (!userId || userRole !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
