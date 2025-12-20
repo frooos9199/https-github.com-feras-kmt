@@ -66,19 +66,21 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check if already registered
-    const existing = await prisma.attendance.findUnique({
+    // Check if already registered (allow re-register if last status is 'rejected' or 'cancelled')
+    const existing = await prisma.attendance.findFirst({
       where: {
-        userId_eventId: {
-          userId,
-          eventId: eventId
-        }
-      }
+        userId,
+        eventId: eventId
+      },
+      orderBy: { registeredAt: 'desc' }
     })
 
-    if (existing) {
+    if (existing && ["pending", "approved"].includes(existing.status)) {
       return NextResponse.json(
-        { error: "Already registered for this event" },
+        {
+          error: "Already registered for this event",
+          errorAr: "مسجل بالفعل في هذه الفعالية"
+        },
         { status: 400 }
       )
     }
