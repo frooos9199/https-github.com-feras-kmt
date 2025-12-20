@@ -8,6 +8,12 @@ const nextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  // Disable static optimization for better compatibility with different networks
+  trailingSlash: false,
+  // Enable compression
+  compress: true,
+  // Power by header for debugging
+  poweredByHeader: false,
   async headers() {
     return [
       {
@@ -43,7 +49,15 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
+            value: 'Content-Type, Authorization, X-Requested-With',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
           },
         ],
       },
