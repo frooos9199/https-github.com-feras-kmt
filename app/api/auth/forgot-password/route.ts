@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     if (!user) {
       // Return different message if email is not registered
       return NextResponse.json({
-        error: "هذا البريد الإلكتروني غير مسجل لدى كي ام تي. يرجى التسجيل أولاً.",
+        error: "You are not registered with KMT Marshal Club",
         code: "EMAIL_NOT_REGISTERED"
       }, { status: 404 })
     }
