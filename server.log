@@ -549,3 +549,92 @@ Decoded user: {
   updatedAt: 2025-12-20T22:20:21.002Z
 }
  GET /api/notifications 200 in 2.5s (compile: 4ms, render: 2.5s)
+ POST /api/auth/login 200 in 1012ms (compile: 73ms, render: 939ms)
+[FCM-TOKEN] 🔑 Authorization header: Present
+[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
+[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
+[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
+[FCM-TOKEN] ✅ FCM token updated successfully
+ POST /api/user/fcm-token 200 in 472ms (compile: 61ms, render: 412ms)
+⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)
+ GET /api/admin/events 200 in 422ms (compile: 36ms, render: 387ms)
+Decoded user: {
+  id: 'cmjcnxesq0005l504837u6wp3',
+  employeeId: 'KMT-511',
+  name: 'FERAS ALOTAIBI',
+  email: 'summit_kw@hotmail.com',
+  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
+  phone: '50540999',
+  civilId: '0000000000000',
+  dateOfBirth: 1980-04-02T00:00:00.000Z,
+  nationality: 'KW',
+  bloodType: 'O+',
+  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
+  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
+  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
+  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
+  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
+  isActive: true,
+  marshalTypes: 'circuit',
+  role: 'admin',
+  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
+  resetToken: null,
+  resetTokenExpiry: null,
+  createdAt: 2025-12-19T09:24:18.603Z,
+  updatedAt: 2025-12-20T22:33:16.606Z
+}
+ GET /api/admin/attendance 200 in 3.7s (compile: 22ms, render: 3.7s)
+ GET /api/admin/stats 200 in 3.3s (compile: 38ms, render: 3.3s)
+Decoded user: {
+  id: 'cmjcnxesq0005l504837u6wp3',
+  employeeId: 'KMT-511',
+  name: 'FERAS ALOTAIBI',
+  email: 'summit_kw@hotmail.com',
+  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
+  phone: '50540999',
+  civilId: '0000000000000',
+  dateOfBirth: 1980-04-02T00:00:00.000Z,
+  nationality: 'KW',
+  bloodType: 'O+',
+  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
+  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
+  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
+  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
+  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
+  isActive: true,
+  marshalTypes: 'circuit',
+  role: 'admin',
+  fcmToken: 'eFcy4YAOPU-8mumR9FyU4W:APA91bGzRIyrphfxcRgxcu97rhQZJKYXDZjTxC3r4zdHWMOtFnskyRmfNqN1SK4oV6W0feMq7dvBkvAbLsoxJYsawlsYxUe6AP9f9D4isf0JGddyt8Lw9PI',
+  resetToken: null,
+  resetTokenExpiry: null,
+  createdAt: 2025-12-19T09:24:18.603Z,
+  updatedAt: 2025-12-21T04:20:52.094Z
+}
+ GET /api/notifications 200 in 2.9s (compile: 40ms, render: 2.9s)
+Decoded user: {
+  id: 'cmjcnxesq0005l504837u6wp3',
+  employeeId: 'KMT-511',
+  name: 'FERAS ALOTAIBI',
+  email: 'summit_kw@hotmail.com',
+  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
+  phone: '50540999',
+  civilId: '0000000000000',
+  dateOfBirth: 1980-04-02T00:00:00.000Z,
+  nationality: 'KW',
+  bloodType: 'O+',
+  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
+  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
+  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
+  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
+  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
+  isActive: true,
+  marshalTypes: 'circuit',
+  role: 'admin',
+  fcmToken: 'eFcy4YAOPU-8mumR9FyU4W:APA91bGzRIyrphfxcRgxcu97rhQZJKYXDZjTxC3r4zdHWMOtFnskyRmfNqN1SK4oV6W0feMq7dvBkvAbLsoxJYsawlsYxUe6AP9f9D4isf0JGddyt8Lw9PI',
+  resetToken: null,
+  resetTokenExpiry: null,
+  createdAt: 2025-12-19T09:24:18.603Z,
+  updatedAt: 2025-12-21T04:20:52.094Z
+}
+ GET /api/admin/events 200 in 2.1s (compile: 11ms, render: 2.1s)
+ GET /api/admin/attendance 200 in 2.1s (compile: 5ms, render: 2.1s)
