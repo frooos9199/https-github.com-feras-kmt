@@ -29,7 +29,7 @@ interface Event {
 export default function EventsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [registering, setRegistering] = useState<string | null>(null)
@@ -69,7 +69,7 @@ export default function EventsPage() {
 
       if (res.ok) {
         fetchEvents() // Refresh events
-        alert(language === "ar" ? "تم التسجيل بنجاح!" : "Registration successful!")
+        alert(t("registrationSuccessful"))
       } else {
         const data = await res.json()
         alert(data.error || "Registration failed")
@@ -105,7 +105,7 @@ export default function EventsPage() {
               href="/dashboard"
               className="text-gray-400 hover:text-white transition-colors"
             >
-              ← {language === "ar" ? "العودة" : "Back"}
+              ← {t("back")}
             </Link>
           </div>
         </div>
@@ -119,10 +119,10 @@ export default function EventsPage() {
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-white mb-2">
-            🏁 {language === "ar" ? "الفعاليات القادمة" : "Upcoming Events"}
+            🏁 {t("upcomingEvents")}
           </h1>
-          <p className="text-gray-400">
-            {language === "ar" ? "سجل حضورك في الفعاليات" : "Register your attendance for events"}
+          <p className="text-gray-400 mb-8">
+            {t("registerYourAttendance")}
           </p>
         </motion.div>
 
@@ -131,7 +131,7 @@ export default function EventsPage() {
           {events.length === 0 ? (
             <div className="col-span-2 text-center py-12">
               <p className="text-gray-400 text-lg">
-                {language === "ar" ? "لا توجد فعاليات قادمة حالياً" : "No upcoming events at the moment"}
+                {t("noUpcomingEvents")}
               </p>
             </div>
           ) : (
@@ -195,10 +195,10 @@ export default function EventsPage() {
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>👥</span>
                         <span>
-                          {event.approvedCount}/{event.maxMarshals} {language === "ar" ? "مارشال" : "Marshals"}
+                          {event.approvedCount}/{event.maxMarshals} {t("marshals")}
                           {event.rejectedCount > 0 && (
                             <span className="text-red-400 ml-2">
-                              ({event.rejectedCount} {language === "ar" ? "مرفوض" : "rejected"})
+                              ({event.rejectedCount} {t("rejected")})
                             </span>
                           )}
                         </span>
@@ -214,9 +214,9 @@ export default function EventsPage() {
                           ? "bg-yellow-600/20 text-yellow-500 border border-yellow-600/30"
                           : "bg-red-600/20 text-red-500 border border-red-600/30"
                       }`}>
-                        {registrationStatus === "approved" && (language === "ar" ? "✅ مقبول" : "✅ Approved")}
-                        {registrationStatus === "pending" && (language === "ar" ? "⏳ معلق" : "⏳ Pending")}
-                        {registrationStatus === "rejected" && (language === "ar" ? "❌ مرفوض" : "❌ Rejected")}
+                        {registrationStatus === "approved" && `✅ ${t("approved")}`}
+                        {registrationStatus === "pending" && `⏳ ${t("pending")}`}
+                        {registrationStatus === "rejected" && `❌ ${t("rejected")}`}
                       </div>
                     ) : (
                       <button
@@ -231,12 +231,12 @@ export default function EventsPage() {
                         {registering === event.id ? (
                           <span className="flex items-center justify-center gap-2">
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            {language === "ar" ? "جاري التسجيل..." : "Registering..."}
+                            {t("registering")}
                           </span>
                         ) : isFull ? (
-                          language === "ar" ? "مكتمل" : "Full"
+                          t("full")
                         ) : (
-                          <>🏁 {language === "ar" ? "سجل حضورك" : "Register"}</>
+                          <>🏁 {t("register")}</>
                         )}
                       </button>
                     )}

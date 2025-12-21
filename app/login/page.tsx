@@ -28,13 +28,13 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError("Invalid email or password")
+        setError(t("invalidEmailOrPassword"))
       } else {
         router.push("/dashboard")
         router.refresh()
       }
     } catch (error) {
-      setError("Something went wrong")
+      setError(t("somethingWentWrong"))
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +116,7 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {language === "ar" ? "جاري التحميل..." : "Loading..."}
+                  {t("loading")}
                 </>
               ) : (
                 <>
@@ -130,11 +130,11 @@ export default function LoginPage() {
           <div className="mt-6 text-center space-y-2">
             <div className="text-gray-400">
               <Link href="/forgot-password" className="text-red-500 hover:text-red-400 font-semibold">
-                {language === "ar" ? "نسيت كلمة المرور؟" : "Forgot Password?"}
+                {t("forgotPassword")}
               </Link>
             </div>
             <div className="text-gray-400">
-              {language === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
+              {t("dontHaveAccount")}{" "}
               <Link href="/signup" className="text-red-500 hover:text-red-400 font-semibold">
                 {t("signup")}
               </Link>

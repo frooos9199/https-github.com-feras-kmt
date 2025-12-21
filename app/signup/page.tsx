@@ -42,46 +42,46 @@ export default function SignupPage() {
 
     // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = "Full name is required"
+      newErrors.name = t("fullNameRequired")
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters"
+      newErrors.name = t("nameMinLength")
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!formData.email) {
-      newErrors.email = "Email is required"
+      newErrors.email = t("emailRequired")
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address"
+      newErrors.email = t("invalidEmail")
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = "Password is required"
+      newErrors.password = t("passwordRequired")
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters"
+      newErrors.password = t("passwordMinLength8")
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      newErrors.password = t("passwordComplexity")
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password"
+      newErrors.confirmPassword = t("confirmPasswordRequired")
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
+      newErrors.confirmPassword = t("passwordsDoNotMatch")
     }
 
     // Phone validation (Kuwaiti format)
     const phoneRegex = /^(\+965|00965|965)?[569]\d{7}$/
     if (!formData.phone) {
-      newErrors.phone = "Phone number is required"
+      newErrors.phone = t("phoneRequired")
     } else if (!phoneRegex.test(formData.phone.replace(/\s+/g, ''))) {
-      newErrors.phone = "Please enter a valid Kuwaiti phone number"
+      newErrors.phone = t("invalidKuwaitiPhone")
     }
 
     // Civil ID validation (optional but if provided, must be valid)
     if (formData.civilId && !/^\d{12}$/.test(formData.civilId)) {
-      newErrors.civilId = "Civil ID must be 12 digits"
+      newErrors.civilId = t("civilId12Digits")
     }
 
     // Date of birth validation (optional but if provided, must be reasonable)
@@ -91,11 +91,11 @@ export default function SignupPage() {
       const age = today.getFullYear() - birthDate.getFullYear()
       
       if (isNaN(birthDate.getTime())) {
-        newErrors.dateOfBirth = "Please enter a valid date"
+        newErrors.dateOfBirth = t("invalidDate")
       } else if (age < 16) {
-        newErrors.dateOfBirth = "You must be at least 16 years old"
+        newErrors.dateOfBirth = t("ageRequirement")
       } else if (age > 100) {
-        newErrors.dateOfBirth = "Please enter a valid date of birth"
+        newErrors.dateOfBirth = t("invalidDateOfBirth")
       }
     }
 
@@ -399,7 +399,7 @@ export default function SignupPage() {
                     aria-hidden="true"
                   />
                   <span id="loading-status">
-                    {language === "ar" ? "جاري التسجيل..." : "Registering..."}
+                    {t("registering")}
                   </span>
                 </>
               ) : (
@@ -413,7 +413,7 @@ export default function SignupPage() {
 
           {/* Login Link */}
           <div className="mt-6 text-center text-gray-400 text-sm">
-            {language === "ar" ? "لديك حساب؟" : "Already have an account?"}{" "}
+            {t("alreadyHaveAccount")}{" "}
             <Link href="/login" className="text-red-500 hover:text-red-400 font-semibold">
               {t("login")}
             </Link>

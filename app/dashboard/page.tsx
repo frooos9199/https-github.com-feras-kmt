@@ -116,12 +116,11 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {/* Logout Button */}
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
               >
-                {language === "ar" ? "تسجيل خروج" : "Logout"}
+                {t("logout")}
               </button>
             </div>
           </div>
@@ -137,10 +136,10 @@ export default function DashboardPage() {
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-white mb-2">
-            {language === "ar" ? `مرحباً، ${session.user?.name}` : `Welcome, ${session.user?.name}`}
+            {t("welcome")}, {session.user?.name}
           </h1>
           <p className="text-gray-400">
-            {language === "ar" ? "لوحة تحكم المارشال" : "Marshal Dashboard"}
+            {t("marshalDashboard")}
           </p>
         </motion.div>
 
@@ -159,7 +158,7 @@ export default function DashboardPage() {
               <span className="text-3xl font-bold text-white">{stats.upcomingEvents}</span>
             </div>
             <h3 className="text-gray-300 font-medium">
-              {language === "ar" ? "الفعاليات القادمة" : "Upcoming Events"}
+              {t("upcomingEvents")}
             </h3>
           </motion.div>
 
@@ -176,7 +175,7 @@ export default function DashboardPage() {
               <span className="text-3xl font-bold text-white">{stats.myAttendance}</span>
             </div>
             <h3 className="text-gray-300 font-medium">
-              {language === "ar" ? "حضوري" : "My Attendance"}
+              {t("myAttendance")}
             </h3>
           </motion.div>
 
@@ -193,7 +192,7 @@ export default function DashboardPage() {
               <span className="text-3xl font-bold text-white">{stats.pendingRequests}</span>
             </div>
             <h3 className="text-gray-300 font-medium">
-              {language === "ar" ? "طلبات معلقة" : "Pending Requests"}
+              {t("pendingRequests")}
             </h3>
           </motion.div>
         </div>
@@ -207,20 +206,20 @@ export default function DashboardPage() {
             className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6"
           >
             <h2 className="text-xl font-bold text-white mb-4">
-              ⚡ {language === "ar" ? "الإجراءات السريعة" : "Quick Actions"}
+              ⚡ {t("quickActions")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Link href="/dashboard/events" className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center">
-                🏁 {language === "ar" ? "عرض الفعاليات" : "View Events"}
+                🏁 {t("viewEvents")}
               </Link>
               <Link href="/dashboard/attendance" className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center">
-                📋 {language === "ar" ? "حضوري" : "My Attendance"}
+                📋 {t("myAttendance")}
               </Link>
               <Link href="/dashboard/profile" className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center">
-                👤 {language === "ar" ? "الملف الشخصي" : "Profile"}
+                👤 {t("profile")}
               </Link>
               <button className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                🔔 {language === "ar" ? "الإشعارات" : "Notifications"}
+                🔔 {t("notifications")}
               </button>
             </div>
           </motion.div>

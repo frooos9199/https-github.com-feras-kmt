@@ -31,7 +31,7 @@ interface AdminStats {
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
   const [stats, setStats] = useState<AdminStats>({
     totalMarshals: 0,
     totalEvents: 0,
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
                 onClick={handleLogout}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
               >
-                {language === "ar" ? "تسجيل خروج" : "Logout"}
+                {t("logout")}
               </button>
             </div>
           </div>
@@ -120,13 +120,10 @@ export default function AdminDashboard() {
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-white mb-2">
-            👑 {language === "ar" ? "لوحة تحكم المدير" : "Admin Dashboard"}
+            👑 {t("adminDashboard")}
           </h1>
           <p className="text-gray-400">
-            {language === "ar" 
-              ? `مرحباً ${session.user.name}، إدارة النظام`
-              : `Welcome ${session.user.name}, System Management`
-            }
+            {t("welcome")} {session.user.name}، {t("systemManagement")}
           </p>
         </motion.div>
 
@@ -142,7 +139,7 @@ export default function AdminDashboard() {
               <span className="text-4xl">👥</span>
               <div className="text-right">
                 <p className="text-gray-400 text-sm">
-                  {language === "ar" ? "إجمالي المارشالات" : "Total Marshals"}
+                  {t("totalMarshals")}
                 </p>
                 <p className="text-3xl font-bold text-white">{stats.totalMarshals}</p>
               </div>
@@ -159,7 +156,7 @@ export default function AdminDashboard() {
               <span className="text-4xl">🏁</span>
               <div className="text-right">
                 <p className="text-gray-400 text-sm">
-                  {language === "ar" ? "إجمالي الفعاليات" : "Total Events"}
+                  {t("totalEvents")}
                 </p>
                 <p className="text-3xl font-bold text-white">{stats.totalEvents}</p>
               </div>
@@ -176,7 +173,7 @@ export default function AdminDashboard() {
               <span className="text-4xl">⏳</span>
               <div className="text-right">
                 <p className="text-gray-400 text-sm">
-                  {language === "ar" ? "طلبات معلقة" : "Pending Requests"}
+                  {t("pendingRequests")}
                 </p>
                 <p className="text-3xl font-bold text-white">{stats.pendingAttendance}</p>
               </div>
@@ -193,7 +190,7 @@ export default function AdminDashboard() {
               <span className="text-4xl">📅</span>
               <div className="text-right">
                 <p className="text-gray-400 text-sm">
-                  {language === "ar" ? "فعاليات قادمة" : "Upcoming Events"}
+                  {t("upcomingEvents")}
                 </p>
                 <p className="text-3xl font-bold text-white">{stats.upcomingEvents}</p>
               </div>
@@ -209,56 +206,56 @@ export default function AdminDashboard() {
           className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 mb-8"
         >
           <h2 className="text-xl font-bold text-white mb-4">
-            ⚡ {language === "ar" ? "الإجراءات السريعة" : "Quick Actions"}
+            ⚡ {t("quickActions")}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <Link
               href="/admin/events"
               className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              🏁 {language === "ar" ? "إدارة الفعاليات" : "Manage Events"}
+              🏁 {t("manageEvents")}
             </Link>
             <Link
               href="/admin/attendance"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              📋 {language === "ar" ? "طلبات الحضور" : "Attendance Requests"}
+              📋 {t("attendanceRequests")}
             </Link>
             <Link
               href="/admin/marshals"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              👥 {language === "ar" ? "إدارة المارشال" : "Manage Marshals"}
+              👥 {t("manageMarshals")}
             </Link>
             <Link
               href="/admin/broadcast"
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              📢 {language === "ar" ? "رسائل جماعية" : "Broadcast Message"}
+              📢 {t("broadcastMessage")}
             </Link>
             <Link
               href="/admin/backup"
               className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              🗄️ {language === "ar" ? "النسخ الاحتياطي" : "Database Backup"}
+              🗄️ {t("databaseBackup")}
             </Link>
             <Link
               href="/admin/reports"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              📊 {language === "ar" ? "التقارير" : "Reports"}
+              📊 {t("reports")}
             </Link>
             <Link
               href="/dashboard/profile"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              👤 {language === "ar" ? "الملف الشخصي" : "Profile"}
+              👤 {t("profile")}
             </Link>
             <Link
               href="/"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              🏠 {language === "ar" ? "الرئيسية" : "Home"}
+              🏠 {t("home")}
             </Link>
           </div>
         </motion.div>
@@ -271,11 +268,11 @@ export default function AdminDashboard() {
           className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6"
         >
           <h2 className="text-xl font-bold text-white mb-4">
-            📈 {language === "ar" ? "النشاط الأخير" : "Recent Activity"}
+            📈 {t("recentActivity")}
           </h2>
           {stats.recentActivity.length === 0 ? (
             <div className="text-center py-8 text-gray-400">
-              {language === "ar" ? "لا يوجد نشاط حتى الآن" : "No activity yet"}
+              {t("noActivity")}
             </div>
           ) : (
             <div className="space-y-3">

@@ -20,7 +20,9 @@ export async function GET(req: NextRequest) {
       if (authHeader?.startsWith('Bearer ')) {
         const token = authHeader.substring(7)
         try {
-          const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key') as { id: string }
+          // ✅ نفس الـ secret المستخدم في Login
+          const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
+          const decoded = jwt.verify(token, jwtSecret) as { id: string }
           userId = decoded.id
         } catch (jwtError) {
           console.error('JWT verification failed:', jwtError)

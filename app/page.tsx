@@ -56,7 +56,7 @@ export default function Home() {
               KUWAIT MOTOR TOWN
             </p>
             <p className="text-lg md:text-xl text-gray-400 mb-8">
-              {language === "ar" ? "نظام إدارة المارشال" : "Marshal Management System"}
+              {t("marshalManagementSystem")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -66,7 +66,7 @@ export default function Home() {
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-lg transition-colors shadow-lg shadow-red-600/50"
                 >
-                  {language === "ar" ? "تسجيل جديد" : "Sign Up"}
+                  {t("signUp")}
                 </motion.button>
               </Link>
               <Link href="/login">
@@ -75,7 +75,7 @@ export default function Home() {
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg text-lg transition-colors backdrop-blur-sm border border-white/20"
                 >
-                  {language === "ar" ? "تسجيل دخول" : "Login"}
+                  {t("login")}
                 </motion.button>
               </Link>
             </div>
@@ -91,7 +91,7 @@ export default function Home() {
         >
           <div className="flex flex-col items-center">
             <p className="text-gray-400 text-sm mb-2">
-              {language === "ar" ? "اسحب للأسفل" : "Scroll Down"}
+              {t("scrollDown")}
             </p>
             <motion.div
               animate={{ y: [0, 10, 0] }}
@@ -114,7 +114,7 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold text-white mb-4">
-              {language === "ar" ? "عن النظام" : "About the System"}
+              {t("aboutTheSystem")}
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
               {language === "ar"
@@ -177,7 +177,7 @@ export default function Home() {
           className="max-w-4xl mx-auto text-center"
         >
           <h2 className="text-4xl font-bold text-white mb-6">
-            {language === "ar" ? "جاهز للبدء؟" : "Ready to Get Started?"}
+            {t("readyToGetStarted")}
           </h2>
           <p className="text-gray-400 text-lg mb-8">
             {language === "ar"
@@ -190,7 +190,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
               className="px-10 py-5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xl transition-colors shadow-lg shadow-red-600/50"
             >
-              🏁 {language === "ar" ? "سجل الآن" : "Register Now"}
+              🏁 {t("registerNow")}
             </motion.button>
           </Link>
         </motion.div>
@@ -200,10 +200,10 @@ export default function Home() {
       <footer className="py-6 px-4 bg-black border-t border-gray-800">
         <div className="max-w-7xl mx-auto text-center text-gray-500 text-sm">
           <p className="mb-1">
-            {language === "ar" ? "© 2025 جميع الحقوق محفوظة" : "© 2025 All Rights Reserved"}
+            {t("allRightsReserved")}
           </p>
           <p>
-            {language === "ar" ? "تصميم وتطوير: " : "Designed & Developed by: "}
+            {t("designedAndDevelopedBy")}
             <a 
               href="https://nexdev-portfolio-one.vercel.app/" 
               target="_blank" 
