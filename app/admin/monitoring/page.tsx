@@ -364,7 +364,7 @@ export default function MonitoringDashboard() {
                   {operations.map((operation) => (
                     <tr key={operation.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                        {getOperationTranslation(operation.operation, language === 'ar' ? 'ar' : 'en')}
+                        {getOperationTranslation(operation.operation, language as 'en' | 'ar')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(operation.status)}`}>
