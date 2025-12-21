@@ -18,6 +18,7 @@ interface AttendanceRequest {
     email: string
     phone: string
     civilId: string
+    employeeId: string
   }
   event: {
     id: string
@@ -210,6 +211,11 @@ export default function AttendanceManagement() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-lg font-bold text-white mb-1">
+                            {attendance.user.employeeId && (
+                              <span className="text-blue-400 font-bold mr-2">
+                                {attendance.user.employeeId}
+                              </span>
+                            )}
                             {attendance.user.name}
                           </h3>
                           <p className="text-gray-400 text-sm mb-2">
