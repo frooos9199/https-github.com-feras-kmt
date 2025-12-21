@@ -139,18 +139,18 @@ export async function PATCH(
     } = body
 
     const updateData: any = {}
-    if (titleEn !== undefined) updateData.titleEn = titleEn
-    if (titleAr !== undefined) updateData.titleAr = titleAr
-    if (descriptionEn !== undefined) updateData.descriptionEn = descriptionEn
-    if (descriptionAr !== undefined) updateData.descriptionAr = descriptionAr
-    if (date !== undefined) updateData.date = new Date(date)
+    if (titleEn !== undefined && titleEn !== null) updateData.titleEn = titleEn
+    if (titleAr !== undefined && titleAr !== null) updateData.titleAr = titleAr
+    if (descriptionEn !== undefined && descriptionEn !== null) updateData.descriptionEn = descriptionEn
+    if (descriptionAr !== undefined && descriptionAr !== null) updateData.descriptionAr = descriptionAr
+    if (date !== undefined && date !== null) updateData.date = new Date(date)
     if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null
-    if (time !== undefined) updateData.time = time
+    if (time !== undefined && time !== null) updateData.time = time
     if (endTime !== undefined) updateData.endTime = endTime || null
-    if (location !== undefined) updateData.location = location
+    if (location !== undefined && location !== null) updateData.location = location
     if (marshalTypes !== undefined) updateData.marshalTypes = marshalTypes
-    if (maxMarshals !== undefined) updateData.maxMarshals = parseInt(maxMarshals)
-    if (status !== undefined) updateData.status = status
+    if (maxMarshals !== undefined && maxMarshals !== null) updateData.maxMarshals = parseInt(maxMarshals)
+    if (status !== undefined && status !== null) updateData.status = status
 
     console.log('Update data:', updateData)
 
