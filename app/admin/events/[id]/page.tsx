@@ -108,6 +108,27 @@ export default function EventDetails() {
     }
   }, [showAddMarshalModal, event])
 
+  useEffect(() => {
+    if (showEditModal && event) {
+      console.log('Initializing edit form with event data:', event)
+      setEditForm({
+        titleEn: event.titleEn,
+        titleAr: event.titleAr,
+        descriptionEn: event.descriptionEn,
+        descriptionAr: event.descriptionAr,
+        date: event.date.split('T')[0],
+        endDate: event.endDate ? event.endDate.split('T')[0] : "",
+        time: event.time,
+        endTime: event.endTime || "",
+        location: event.location,
+        marshalTypes: event.marshalTypes ? event.marshalTypes.split(',').filter((t: string) => t.trim()) : [],
+        maxMarshals: event.maxMarshals,
+        status: event.status
+      })
+      console.log('Edit form marshalTypes initialized:', event.marshalTypes ? event.marshalTypes.split(',').filter((t: string) => t.trim()) : [])
+    }
+  }, [showEditModal, event])
+
   const fetchEvent = async () => {
     if (!eventId) return
     setLoading(true)
@@ -131,7 +152,7 @@ export default function EventDetails() {
           time: data.time,
           endTime: data.endTime || "",
           location: data.location,
-          marshalTypes: data.marshalTypes ? data.marshalTypes.split(',').filter((t: string) => t) : [],
+          marshalTypes: data.marshalTypes ? data.marshalTypes.split(',').filter((t: string) => t.trim()) : [],
           maxMarshals: data.maxMarshals,
           status: data.status
         })
@@ -401,7 +422,7 @@ export default function EventDetails() {
                   <div>
                     <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "أنواع المارشال المطلوبة" : "Required Marshal Types"}</p>
                     <div className="flex flex-wrap gap-2">
-                      {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
+                      {event.marshalTypes && event.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
                         const typeLabels: Record<string, {en: string, ar: string, icon: string, color: string}> = {
                           'karting': {en: 'Karting', ar: 'كارتنج', icon: '🏎️', color: 'bg-yellow-600'},
                           'motocross': {en: 'Motocross', ar: 'موتوكروس', icon: '🏍️', color: 'bg-orange-600'},
@@ -439,7 +460,7 @@ export default function EventDetails() {
                 <div className="absolute left-1/2 -translate-x-1/2 top-7 w-[340px] max-w-[90%] h-12 rounded-lg bg-gradient-to-r from-red-900/70 via-red-700/60 to-red-600/60 opacity-70 z-0" />
                 {/* أيقونات المارشال */}
                 <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
-                  {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
+                  {event.marshalTypes && event.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
                     const typeIcons: Record<string, string> = {
                       'karting': '🏎️',
                       'motocross': '🏍️',
@@ -854,7 +875,7 @@ export default function EventDetails() {
                       <div className="flex items-center gap-2">
                         {marshal.marshalTypes && (
                           <div className="flex flex-wrap gap-1">
-                            {marshal.marshalTypes.split(',').filter((t: string) => t).slice(0, 2).map((type: string) => {
+                            {marshal.marshalTypes.split(',').filter((t: string) => t.trim()).slice(0, 2).map((type: string) => {
                               const typeIcons: Record<string, string> = {
                                 'karting': '🏎️',
                                 'motocross': '🏍️',
