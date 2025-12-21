@@ -502,8 +502,15 @@ export default function EventDetails() {
                           </div>
                         )}
                         <div>
-                          <p className="text-white font-medium">{attendance.user.name}</p>
-                          <p className="text-sm text-gray-400">{attendance.user.employeeId}</p>
+                          <p className="text-white font-medium">
+                            {attendance.user.employeeId && (
+                              <span className="text-blue-400 font-bold mr-2">
+                                {attendance.user.employeeId}
+                              </span>
+                            )}
+                            {attendance.user.name}
+                          </p>
+                          <p className="text-sm text-gray-400">{attendance.user.email}</p>
                           {attendance.status === 'cancelled' && attendance.cancellationReason && (
                             <p className="text-xs text-red-400 mt-1">
                               {language === "ar" ? "سبب الإلغاء:" : "Cancelled:"} {attendance.cancellationReason}
