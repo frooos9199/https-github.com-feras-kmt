@@ -209,7 +209,9 @@ export async function PUT(request: NextRequest) {
     if (time) updateData.time = time
     if (endTime !== undefined) updateData.endTime = endTime || null
     if (location) updateData.location = location
-    if (marshalTypes !== undefined) updateData.marshalTypes = Array.isArray(marshalTypes) ? marshalTypes.join(",") : marshalTypes
+    if (marshalTypes !== undefined) {
+      updateData.marshalTypes = Array.isArray(marshalTypes) ? marshalTypes.filter(t => t).join(",") : marshalTypes
+    }
     if (maxMarshals) updateData.maxMarshals = parseInt(maxMarshals)
     if (status) updateData.status = status
 
