@@ -76,6 +76,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.role = token.role as string
         session.user.id = token.id as string
+        (session as any).token = token // Add the token to session
       }
       return session
     }

@@ -150,16 +150,28 @@ export default function EventDetails() {
   const handleEdit = async () => {
     if (!event) return
     try {
+      // Get the session to access the token
+      const session = await fetch('/api/auth/session').then(res => res.json())
+      const token = session?.token
+      
       const requestData = {
         ...editForm,
         marshalTypes: editForm.marshalTypes.join(',')
       }
       console.log('Sending update data:', requestData)
       
+      const headers: any = { "Content-Type": "application/json" }
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`
+        console.log('Using JWT token for authentication')
+      } else {
+        console.log('No token found, using credentials')
+      }
+      
       const res = await fetch(`/api/admin/events/${event.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include',
+        headers,
+        credentials: token ? undefined : 'include', // Use credentials if no token
         body: JSON.stringify(requestData)
       })
       
