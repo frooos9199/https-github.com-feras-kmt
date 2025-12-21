@@ -1,5 +1,111 @@
 import { prisma } from '@/lib/prisma';
 
+// قاموس ترجمة العمليات
+const operationTranslations = {
+  'notification_send': {
+    en: 'Send Notification',
+    ar: 'إرسال إشعار'
+  },
+  'user_login': {
+    en: 'User Login',
+    ar: 'تسجيل دخول مستخدم'
+  },
+  'user_logout': {
+    en: 'User Logout',
+    ar: 'تسجيل خروج مستخدم'
+  },
+  'user_signup': {
+    en: 'User Registration',
+    ar: 'تسجيل مستخدم جديد'
+  },
+  'event_create': {
+    en: 'Create Event',
+    ar: 'إنشاء حدث'
+  },
+  'event_update': {
+    en: 'Update Event',
+    ar: 'تحديث حدث'
+  },
+  'event_delete': {
+    en: 'Delete Event',
+    ar: 'حذف حدث'
+  },
+  'event_cancel': {
+    en: 'Cancel Event',
+    ar: 'إلغاء حدث'
+  },
+  'attendance_register': {
+    en: 'Register Attendance',
+    ar: 'تسجيل حضور'
+  },
+  'attendance_cancel': {
+    en: 'Cancel Attendance',
+    ar: 'إلغاء حضور'
+  },
+  'attendance_approve': {
+    en: 'Approve Attendance',
+    ar: 'اعتماد حضور'
+  },
+  'attendance_reject': {
+    en: 'Reject Attendance',
+    ar: 'رفض حضور'
+  },
+  'admin_action': {
+    en: 'Admin Action',
+    ar: 'إجراء إداري'
+  },
+  'backup_create': {
+    en: 'Create Backup',
+    ar: 'إنشاء نسخة احتياطية'
+  },
+  'backup_restore': {
+    en: 'Restore Backup',
+    ar: 'استعادة نسخة احتياطية'
+  },
+  'report_generate': {
+    en: 'Generate Report',
+    ar: 'إنشاء تقرير'
+  },
+  'broadcast_send': {
+    en: 'Send Broadcast',
+    ar: 'إرسال إذاعة'
+  },
+  'email_send': {
+    en: 'Send Email',
+    ar: 'إرسال بريد إلكتروني'
+  },
+  'push_send': {
+    en: 'Send Push Notification',
+    ar: 'إرسال إشعار فوري'
+  },
+  'user_update': {
+    en: 'Update User Profile',
+    ar: 'تحديث ملف المستخدم'
+  },
+  'password_reset': {
+    en: 'Password Reset',
+    ar: 'إعادة تعيين كلمة المرور'
+  },
+  'file_upload': {
+    en: 'File Upload',
+    ar: 'رفع ملف'
+  },
+  'api_call': {
+    en: 'API Call',
+    ar: 'استدعاء API'
+  }
+};
+
+// دالة للحصول على ترجمة العملية حسب اللغة
+export function getOperationTranslation(operation: string, language: 'en' | 'ar' = 'ar'): string {
+  const translation = operationTranslations[operation as keyof typeof operationTranslations];
+  if (translation) {
+    return translation[language];
+  }
+  // إذا لم توجد ترجمة، أعد العملية كما هي
+  return operation;
+}
+
 // تسجيل العمليات
 export async function logOperation(
   operation: string,
