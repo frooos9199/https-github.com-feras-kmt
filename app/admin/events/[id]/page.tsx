@@ -153,6 +153,7 @@ export default function EventDetails() {
       const res = await fetch(`/api/admin/events/${event.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({
           ...editForm,
           marshalTypes: editForm.marshalTypes.join(',')
