@@ -136,3 +136,4 @@ Temporary Items
 .next/
 .vercel
 .env.vercel
+.env*.local

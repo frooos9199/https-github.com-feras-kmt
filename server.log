@@ -1,3 +1,7 @@
+
+> kmt-marshal-system@1.0.0 dev
+> next dev
+
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of /Users/mac/Documents/package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -14,12 +18,118 @@
   · serverActions
 
 ✓ Starting...
-✓ Ready in 455ms
- POST /api/auth/login 200 in 4.0s (compile: 727ms, render: 3.2s)
- GET / 200 in 923ms (compile: 795ms, render: 128ms)
- POST /api/auth/login 200 in 413ms (compile: 1572µs, render: 412ms)
-⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)
- GET /api/admin/events 401 in 364ms (compile: 331ms, render: 33ms)
+✓ Ready in 551ms
+ POST /api/auth/login 401 in 2.7s (compile: 186ms, render: 2.5s)
+ POST /api/auth/login 401 in 780ms (compile: 2ms, render: 778ms)
+ GET /api/profile 404 in 556ms (compile: 153ms, render: 403ms)
+ GET /api/admin/stats 200 in 3.7s (compile: 17ms, render: 3.7s)
+  Reload env: .env.local
+ POST /api/auth/login 200 in 2.3s (compile: 131ms, render: 2.1s)
+[FCM-TOKEN] 🔑 Authorization header: Present
+[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
+[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
+[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
+[FCM-TOKEN] ✅ FCM token updated successfully
+ POST /api/user/fcm-token 200 in 472ms (compile: 64ms, render: 408ms)
+✅ Firebase Admin initialized successfully
+Decoded user: {
+  id: 'cmjcnxesq0005l504837u6wp3',
+  employeeId: 'KMT-511',
+  name: 'FERAS ALOTAIBI',
+  email: 'summit_kw@hotmail.com',
+  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
+  phone: '50540999',
+  civilId: '0000000000000',
+  dateOfBirth: 1980-04-02T00:00:00.000Z,
+  nationality: 'KW',
+  bloodType: 'O+',
+  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
+  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
+  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
+  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
+  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
+  isActive: true,
+  marshalTypes: 'circuit',
+  role: 'admin',
+  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
+  resetToken: null,
+  resetTokenExpiry: null,
+  createdAt: 2025-12-19T09:24:18.603Z,
+  updatedAt: 2025-12-21T05:40:58.613Z
+}
+ GET /api/notifications 200 in 1190ms (compile: 44ms, render: 1146ms)
+Decoded user: {
+  id: 'cmjcnxesq0005l504837u6wp3',
+  employeeId: 'KMT-511',
+  name: 'FERAS ALOTAIBI',
+  email: 'summit_kw@hotmail.com',
+  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
+  phone: '50540999',
+  civilId: '0000000000000',
+  dateOfBirth: 1980-04-02T00:00:00.000Z,
+  nationality: 'KW',
+  bloodType: 'O+',
+  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
+  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
+  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
+  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
+  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
+  isActive: true,
+  marshalTypes: 'circuit',
+  role: 'admin',
+  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
+  resetToken: null,
+  resetTokenExpiry: null,
+  createdAt: 2025-12-19T09:24:18.603Z,
+  updatedAt: 2025-12-21T05:40:58.613Z
+}
+ GET /api/admin/events 200 in 2.0s (compile: 167ms, render: 1860ms)
+Decoded user: {
+  id: 'cmjcnxesq0005l504837u6wp3',
+  employeeId: 'KMT-511',
+  name: 'FERAS ALOTAIBI',
+  email: 'summit_kw@hotmail.com',
+  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
+  phone: '50540999',
+  civilId: '0000000000000',
+  dateOfBirth: 1980-04-02T00:00:00.000Z,
+  nationality: 'KW',
+  bloodType: 'O+',
+  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
+  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
+  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
+  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
+  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
+  isActive: true,
+  marshalTypes: 'circuit',
+  role: 'admin',
+  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
+  resetToken: null,
+  resetTokenExpiry: null,
+  createdAt: 2025-12-19T09:24:18.603Z,
+  updatedAt: 2025-12-21T05:40:58.613Z
+}
+ GET /api/notifications 200 in 2.6s (compile: 193ms, render: 2.4s)
+ GET /api/admin/attendance 200 in 3.4s (compile: 186ms, render: 3.2s)
+ GET /api/admin/stats 200 in 3.3s (compile: 27ms, render: 3.3s)
+API EVENT GET {
+  url: 'http://localhost:3000/api/admin/events/cmjemmea70000lb0464ejqzj6',
+  headers: {
+    accept: 'application/json',
+    'accept-encoding': 'gzip, deflate',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWpjbnhlc3EwMDA1bDUwNDgzN3U2d3AzIiwiaWQiOiJjbWpjbnhlc3EwMDA1bDUwNDgzN3U2d3AzIiwiZW1haWwiOiJzdW1taXRfa3dAaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjYyOTU2NTgsImV4cCI6MTc2NjkwMDQ1OH0.8kPeM0zDI5mJihdnnQleaTODUAmVbbC8s50kJbeZtwg',
+    connection: 'keep-alive',
+    'content-type': 'application/json',
+    host: '192.168.8.68:3000',
+    'user-agent': 'kmtsysApp/1 CFNetwork/3860.200.71 Darwin/25.1.0',
+    'x-forwarded-for': '::ffff:192.168.8.68',
+    'x-forwarded-host': '192.168.8.68:3000',
+    'x-forwarded-port': '3000',
+    'x-forwarded-proto': 'http'
+  },
+  params: { id: 'cmjemmea70000lb0464ejqzj6' }
+}
 Decoded user: {
   id: 'cmjcnxesq0005l504837u6wp3',
   employeeId: 'KMT-511',
@@ -43,17 +153,28 @@ Decoded user: {
   resetToken: null,
   resetTokenExpiry: null,
   createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T21:38:02.035Z
+  updatedAt: 2025-12-21T05:41:49.882Z
 }
- GET /api/admin/attendance 200 in 2.5s (compile: 354ms, render: 2.1s)
- GET /api/auth/login 405 in 4ms (compile: 1946µs, render: 1752µs)
- POST /api/auth/login 401 in 804ms (compile: 2ms, render: 801ms)
- POST /api/auth/login 200 in 796ms (compile: 6ms, render: 790ms)
- GET /api/admin/events 401 in 9ms (compile: 2ms, render: 7ms)
- POST /api/auth/login 200 in 704ms (compile: 10ms, render: 694ms)
- GET /api/admin/events 401 in 14ms (compile: 4ms, render: 10ms)
- POST /api/auth/login 200 in 2.5s (compile: 9ms, render: 2.5s)
- GET /api/admin/events 401 in 9ms (compile: 1955µs, render: 7ms)
+ GET /api/admin/events/cmjemmea70000lb0464ejqzj6 200 in 2.9s (compile: 774ms, render: 2.1s)
+ GET /api/admin/events 200 in 2.6s (compile: 112ms, render: 2.5s)
+API EVENT GET {
+  url: 'http://localhost:3000/api/admin/events/cmjemmea70000lb0464ejqzj6',
+  headers: {
+    accept: 'application/json',
+    'accept-encoding': 'gzip, deflate',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWpjbnhlc3EwMDA1bDUwNDgzN3U2d3AzIiwiaWQiOiJjbWpjbnhlc3EwMDA1bDUwNDgzN3U2d3AzIiwiZW1haWwiOiJzdW1taXRfa3dAaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjYyOTU2NTgsImV4cCI6MTc2NjkwMDQ1OH0.8kPeM0zDI5mJihdnnQleaTODUAmVbbC8s50kJbeZtwg',
+    connection: 'keep-alive',
+    'content-type': 'application/json',
+    host: '192.168.8.68:3000',
+    'user-agent': 'kmtsysApp/1 CFNetwork/3860.200.71 Darwin/25.1.0',
+    'x-forwarded-for': '::ffff:192.168.8.68',
+    'x-forwarded-host': '192.168.8.68:3000',
+    'x-forwarded-port': '3000',
+    'x-forwarded-proto': 'http'
+  },
+  params: { id: 'cmjemmea70000lb0464ejqzj6' }
+}
 Decoded user: {
   id: 'cmjcnxesq0005l504837u6wp3',
   employeeId: 'KMT-511',
@@ -77,66 +198,16 @@ Decoded user: {
   resetToken: null,
   resetTokenExpiry: null,
   createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T21:43:52.979Z
+  updatedAt: 2025-12-21T05:41:49.882Z
 }
- GET /api/admin/attendance 200 in 1948ms (compile: 5ms, render: 1943ms)
-⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)
-JWT verification failed: Error [JsonWebTokenError]: invalid signature
-    at GET (app/api/admin/events/route.ts:156:31)
-  154 |           // ✅ نفس الـ secret المستخدم في Login
-  155 |           const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
-> 156 |           const decoded = jwt.verify(token, jwtSecret) as { id: string, role: string }
-      |                               ^
-  157 |           userId = decoded.id
-  158 |           userRole = decoded.role
-  159 |         } catch (jwtError) { {
-  constructor: [Function: JsonWebTokenError]
-}
- GET /api/admin/events 401 in 239ms (compile: 147ms, render: 92ms)
- POST /api/auth/login 200 in 785ms (compile: 7ms, render: 778ms)
- GET /api/admin/events 200 in 489ms (compile: 3ms, render: 485ms)
- POST /api/auth/login 200 in 2.6s (compile: 9ms, render: 2.6s)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'eFcy4YAOPU-8mumR9FyU4W:APA91bGzRIyrphfxcRgxcu97rhQZJKYXDZjTxC3r4zdHWMOtFnskyRmfNqN1SK4oV6W0feMq7dvBkvAbLsoxJYsawlsYxUe6AP9f9D4isf0JGddyt8Lw9PI',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T21:50:42.633Z
-}
- GET /api/admin/attendance 200 in 2.1s (compile: 4ms, render: 2.1s)
- POST /api/auth/login 200 in 689ms (compile: 4ms, render: 685ms)
- POST /api/auth/login 200 in 868ms (compile: 3ms, render: 865ms)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): test
-[FCM-TOKEN] ❌ JWT verification failed: jwt malformed
-[FCM-TOKEN] ❌ No user email found - Unauthorized
- POST /api/user/fcm-token 401 in 192ms (compile: 184ms, render: 8ms)
- POST /api/auth/login 200 in 726ms (compile: 5ms, render: 721ms)
+ GET /api/admin/events/cmjemmea70000lb0464ejqzj6 200 in 2.2s (compile: 7ms, render: 2.2s)
+ POST /api/auth/login 200 in 950ms (compile: 4ms, render: 946ms)
 [FCM-TOKEN] 🔑 Authorization header: Present
 [FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
 [FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
 [FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
 [FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 573ms (compile: 60ms, render: 513ms)
- GET /api/admin/events 200 in 461ms (compile: 3ms, render: 458ms)
+ POST /api/user/fcm-token 200 in 472ms (compile: 3ms, render: 468ms)
 Decoded user: {
   id: 'cmjcnxesq0005l504837u6wp3',
   employeeId: 'KMT-511',
@@ -160,9 +231,9 @@ Decoded user: {
   resetToken: null,
   resetTokenExpiry: null,
   createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T21:56:37.637Z
+  updatedAt: 2025-12-21T06:08:39.941Z
 }
- GET /api/notifications 200 in 1656ms (compile: 82ms, render: 1575ms)
+ GET /api/notifications 200 in 1088ms (compile: 3ms, render: 1085ms)
 Decoded user: {
   id: 'cmjcnxesq0005l504837u6wp3',
   employeeId: 'KMT-511',
@@ -186,314 +257,7 @@ Decoded user: {
   resetToken: null,
   resetTokenExpiry: null,
   createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T21:56:37.637Z
-}
- GET /api/notifications 200 in 3.5s (compile: 93ms, render: 3.4s)
- POST /api/auth/login 200 in 1900ms (compile: 9ms, render: 1891ms)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 681ms (compile: 4ms, render: 677ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T21:59:58.053Z
-}
- GET /api/admin/attendance 200 in 1887ms (compile: 3ms, render: 1884ms)
- POST /api/auth/login 200 in 680ms (compile: 3ms, render: 677ms)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 245ms (compile: 1421µs, render: 243ms)
- GET /api/admin/events 200 in 1082ms (compile: 2ms, render: 1079ms)
- POST /api/auth/login 200 in 2.3s (compile: 4ms, render: 2.3s)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 389ms (compile: 2ms, render: 387ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:04:14.489Z
-}
- GET /api/notifications 200 in 1010ms (compile: 1736µs, render: 1008ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:04:14.489Z
-}
- GET /api/notifications 200 in 3.1s (compile: 1039µs, render: 3.1s)
- POST /api/auth/login 200 in 1029ms (compile: 5ms, render: 1024ms)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 608ms (compile: 4ms, render: 604ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:08:24.074Z
-}
- GET /api/admin/events 200 in 587ms (compile: 1475µs, render: 586ms)
- GET /api/admin/attendance 200 in 2.3s (compile: 1686µs, render: 2.3s)
- POST /api/auth/login 200 in 2.2s (compile: 13ms, render: 2.2s)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 420ms (compile: 4ms, render: 416ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:13:06.710Z
-}
- GET /api/notifications 200 in 991ms (compile: 3ms, render: 988ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:13:06.710Z
-}
- GET /api/notifications 200 in 2.6s (compile: 1770µs, render: 2.6s)
- POST /api/auth/login 200 in 870ms (compile: 5ms, render: 865ms)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 688ms (compile: 1815µs, render: 686ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:13:40.916Z
-}
- GET /api/admin/events 200 in 647ms (compile: 3ms, render: 644ms)
- GET /api/admin/attendance 200 in 1876ms (compile: 2ms, render: 1874ms)
- GET /api/admin/stats 200 in 3.7s (compile: 232ms, render: 3.5s)
-⚠ Found a change in next.config.js. Restarting the server to apply the changes...
-⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
- We detected multiple lockfiles and selected the directory of /Users/mac/Documents/package-lock.json as the root directory.
- To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
-   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
- Detected additional lockfiles: 
-   * /Users/mac/Documents/GitHub/kmtmaster/https-github.com-feras-kmt/package-lock.json
-   * /Users/mac/Documents/GitHub/kmtmaster/yarn.lock
-
-▲ Next.js 16.1.0 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://192.168.8.68:3000
-- Environments: .env.local, .env
-- Experiments (use with caution):
-  · serverActions
-
-✓ Starting...
-✓ Ready in 488ms
-⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)
- GET /api/admin/events 200 in 3.3s (compile: 336ms, render: 3.0s)
- POST /api/auth/login 200 in 945ms (compile: 51ms, render: 895ms)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 417ms (compile: 37ms, render: 381ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:20:21.002Z
-}
- GET /api/notifications 200 in 1029ms (compile: 28ms, render: 1001ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:20:21.002Z
+  updatedAt: 2025-12-21T06:08:39.941Z
 }
 Decoded user: {
   id: 'cmjcnxesq0005l504837u6wp3',
@@ -518,123 +282,7 @@ Decoded user: {
   resetToken: null,
   resetTokenExpiry: null,
   createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:20:21.002Z
+  updatedAt: 2025-12-21T06:08:39.941Z
 }
- GET /api/notifications 200 in 2.4s (compile: 38ms, render: 2.4s)
- GET /api/admin/attendance 200 in 3.1s (compile: 55ms, render: 3.1s)
- GET /api/admin/stats 200 in 2.7s (compile: 47ms, render: 2.7s)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:20:21.002Z
-}
- GET /api/notifications 200 in 2.5s (compile: 4ms, render: 2.5s)
- POST /api/auth/login 200 in 1012ms (compile: 73ms, render: 939ms)
-[FCM-TOKEN] 🔑 Authorization header: Present
-[FCM-TOKEN] 📝 JWT Token (first 30 chars): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
-[FCM-TOKEN] ✅ JWT verified, user email: summit_kw@hotmail.com
-[FCM-TOKEN] 💾 Updating FCM token for user: summit_kw@hotmail.com
-[FCM-TOKEN] ✅ FCM token updated successfully
- POST /api/user/fcm-token 200 in 472ms (compile: 61ms, render: 412ms)
-⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)
- GET /api/admin/events 200 in 422ms (compile: 36ms, render: 387ms)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'fXxsi56iuE-ZhKD0p9au3Z:APA91bGS3Rm3p-H3oUUEeTgDTtYJeqkCLJZsejt3WZLUcGK8Zrnha2Mom5_i3rraEdDypt1U38LR4x2WZaylydgJ7TeHvGFE3R5Bfv5DKDDs-4XvywBIrqE',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-20T22:33:16.606Z
-}
- GET /api/admin/attendance 200 in 3.7s (compile: 22ms, render: 3.7s)
- GET /api/admin/stats 200 in 3.3s (compile: 38ms, render: 3.3s)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'eFcy4YAOPU-8mumR9FyU4W:APA91bGzRIyrphfxcRgxcu97rhQZJKYXDZjTxC3r4zdHWMOtFnskyRmfNqN1SK4oV6W0feMq7dvBkvAbLsoxJYsawlsYxUe6AP9f9D4isf0JGddyt8Lw9PI',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-21T04:20:52.094Z
-}
- GET /api/notifications 200 in 2.9s (compile: 40ms, render: 2.9s)
-Decoded user: {
-  id: 'cmjcnxesq0005l504837u6wp3',
-  employeeId: 'KMT-511',
-  name: 'FERAS ALOTAIBI',
-  email: 'summit_kw@hotmail.com',
-  password: '$2a$12$BY3ifF0jDNHfLNRWbu6M5.9CTbVKRaI5YSs6JQbxzNChV2b2KyW3.',
-  phone: '50540999',
-  civilId: '0000000000000',
-  dateOfBirth: 1980-04-02T00:00:00.000Z,
-  nationality: 'KW',
-  bloodType: 'O+',
-  image: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610519/kmt/profile_1765610519394_2ehsi3.jpg',
-  civilIdImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610566/kmt/civilId_1765610566280_um6qa9.jpg',
-  civilIdBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610638/kmt/civilIdBack_1765610638466_3ieyrh.jpg',
-  licenseFrontImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610589/kmt/licenseFront_1765610589195_h7tz66.jpg',
-  licenseBackImage: 'https://res.cloudinary.com/dghmld0c3/image/upload/v1765610608/kmt/licenseBack_1765610607908_9qwrkw.jpg',
-  isActive: true,
-  marshalTypes: 'circuit',
-  role: 'admin',
-  fcmToken: 'eFcy4YAOPU-8mumR9FyU4W:APA91bGzRIyrphfxcRgxcu97rhQZJKYXDZjTxC3r4zdHWMOtFnskyRmfNqN1SK4oV6W0feMq7dvBkvAbLsoxJYsawlsYxUe6AP9f9D4isf0JGddyt8Lw9PI',
-  resetToken: null,
-  resetTokenExpiry: null,
-  createdAt: 2025-12-19T09:24:18.603Z,
-  updatedAt: 2025-12-21T04:20:52.094Z
-}
- GET /api/admin/events 200 in 2.1s (compile: 11ms, render: 2.1s)
- GET /api/admin/attendance 200 in 2.1s (compile: 5ms, render: 2.1s)
+ GET /api/notifications 200 in 3.2s (compile: 6ms, render: 3.1s)
+ GET /api/admin/attendance 200 in 4.2s (compile: 4ms, render: 4.2s)
