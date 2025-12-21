@@ -510,7 +510,12 @@ export default function EventDetails() {
                             )}
                             {attendance.user.name}
                           </p>
-                          <p className="text-sm text-gray-400">{attendance.user.email}</p>
+                          <p className="text-sm text-gray-400">
+                            {attendance.user.email}
+                            {attendance.user.phone && (
+                              <span className="ml-2 text-gray-500">• {attendance.user.phone}</span>
+                            )}
+                          </p>
                           {attendance.status === 'cancelled' && attendance.cancellationReason && (
                             <p className="text-xs text-red-400 mt-1">
                               {language === "ar" ? "سبب الإلغاء:" : "Cancelled:"} {attendance.cancellationReason}
