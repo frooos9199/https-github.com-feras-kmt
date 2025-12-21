@@ -96,11 +96,22 @@ const operationTranslations = {
   }
 };
 
-// دالة للحصول على ترجمة العملية حسب اللغة
-export function getOperationTranslation(operation: string, language: 'en' | 'ar' = 'ar'): string {
+// دالة للحصول على اللغة الحالية من localStorage
+function getCurrentLanguage(): 'en' | 'ar' {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem("language") as 'en' | 'ar';
+    return saved || 'ar'; // العربية كافتراضي
+  }
+  return 'ar'; // العربية كافتراضي للخادم
+}
+
+// دالة للحصول على ترجمة العملية حسب اللغة المختارة في الموقع
+export function getOperationTranslation(operation: string, language?: 'en' | 'ar'): string {
+  // إذا لم يتم تمرير اللغة، استخدم اللغة المحفوظة في الموقع
+  const lang = language || getCurrentLanguage();
   const translation = operationTranslations[operation as keyof typeof operationTranslations];
   if (translation) {
-    return translation[language];
+    return translation[lang];
   }
   // إذا لم توجد ترجمة، أعد العملية كما هي
   return operation;
@@ -117,7 +128,7 @@ export async function logOperation(
     const startTime = Date.now();
 
     // تسجيل بداية العملية
-    const logEntry = await prisma.operationLog.create({
+    const logEntry = await (prisma as any).operationLog.create({
       data: {
         operation,
         userId,
@@ -132,7 +143,7 @@ export async function logOperation(
       startTime,
       complete: async (status: 'success' | 'error', errorMessage?: string, additionalMetadata?: any) => {
         const duration = Date.now() - startTime;
-        await prisma.operationLog.update({
+        await (prisma as any).operationLog.update({
           where: { id: logEntry.id },
           data: {
             status,
@@ -166,7 +177,7 @@ export async function logError(
   metadata?: any
 ) {
   try {
-    await prisma.errorLog.create({
+    await (prisma as any).errorLog.create({
       data: {
         type,
         operation,
@@ -189,7 +200,7 @@ export async function updateLastLogin(userId: string) {
   try {
     await prisma.user.update({
       where: { id: userId },
-      data: { lastLogin: new Date() }
+      data: { lastLogin: new Date() } as any
     });
   } catch (error) {
     console.error('Failed to update last login:', error);
@@ -203,7 +214,7 @@ export async function updateDailyStats() {
     today.setHours(0, 0, 0, 0);
 
     // التحقق من وجود إحصائيات لهذا اليوم
-    const existingStats = await prisma.systemStats.findUnique({
+    const existingStats = await (prisma as any).systemStats.findUnique({
       where: { date: today }
     });
 
@@ -212,9 +223,7 @@ export async function updateDailyStats() {
       const totalUsers = await prisma.user.count();
       const activeUsers = await prisma.user.count({
         where: {
-          lastLogin: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // آخر أسبوع
-          }
+          isActive: true
         }
       });
       const totalEvents = await prisma.event.count();
@@ -224,28 +233,28 @@ export async function updateDailyStats() {
       });
 
       // إحصائيات العمليات لليوم
-      const todayOperations = await prisma.operationLog.findMany({
+      const todayOperations = await (prisma as any).operationLog.findMany({
         where: {
           createdAt: { gte: today }
         }
       });
 
-      const successfulOperations = todayOperations.filter(op => op.status === 'success').length;
-      const failedOperations = todayOperations.filter(op => op.status === 'error').length;
+      const successfulOperations = todayOperations.filter((op: any) => op.status === 'success').length;
+      const failedOperations = todayOperations.filter((op: any) => op.status === 'error').length;
 
-      const completedOperations = todayOperations.filter(op => op.duration && op.status === 'success');
+      const completedOperations = todayOperations.filter((op: any) => op.duration && op.status === 'success');
       const averageResponseTime = completedOperations.length > 0
-        ? completedOperations.reduce((sum, op) => sum + (op.duration || 0), 0) / completedOperations.length
+        ? completedOperations.reduce((sum: number, op: any) => sum + (op.duration || 0), 0) / completedOperations.length
         : 0;
 
       // إحصائيات الإيميلات والإشعارات
-      const emailOperations = todayOperations.filter(op => op.operation === 'email_send');
-      const notificationOperations = todayOperations.filter(op => op.operation === 'notification_send');
+      const emailOperations = todayOperations.filter((op: any) => op.operation === 'email_send');
+      const notificationOperations = todayOperations.filter((op: any) => op.operation === 'notification_send');
 
-      const emailsSent = emailOperations.filter(op => op.status === 'success').length;
-      const notificationsSent = notificationOperations.filter(op => op.status === 'success').length;
+      const emailsSent = emailOperations.filter((op: any) => op.status === 'success').length;
+      const notificationsSent = notificationOperations.filter((op: any) => op.status === 'success').length;
 
-      await prisma.systemStats.update({
+      await (prisma as any).systemStats.update({
         where: { date: today },
         data: {
           totalUsers,
@@ -266,9 +275,7 @@ export async function updateDailyStats() {
       const totalUsers = await prisma.user.count();
       const activeUsers = await prisma.user.count({
         where: {
-          lastLogin: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          }
+          isActive: true
         }
       });
       const totalEvents = await prisma.event.count();
@@ -277,7 +284,7 @@ export async function updateDailyStats() {
         where: { status: 'pending' }
       });
 
-      await prisma.systemStats.create({
+      await (prisma as any).systemStats.create({
         data: {
           date: today,
           totalUsers,

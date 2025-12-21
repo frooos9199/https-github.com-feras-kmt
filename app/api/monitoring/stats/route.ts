@@ -59,9 +59,7 @@ export async function GET(request: NextRequest) {
     const totalUsers = await prisma.user.count();
     const activeUsers = await prisma.user.count({
       where: {
-        lastLogin: {
-          gte: startDate
-        }
+        isActive: true
       }
     });
 
@@ -84,7 +82,7 @@ export async function GET(request: NextRequest) {
     });
 
     // إحصائيات العمليات
-    const operations = await prisma.operationLog.findMany({
+    const operations = await (prisma as any).operationLog.findMany({
       where: {
         createdAt: {
           gte: startDate
@@ -115,7 +113,7 @@ export async function GET(request: NextRequest) {
     const notificationsSent = notificationOperations.filter((op: any) => op.status === 'success').length;
 
     // إحصائيات الأخطاء
-    const errors = await prisma.errorLog.findMany({
+    const errors = await (prisma as any).errorLog.findMany({
       where: {
         createdAt: {
           gte: startDate

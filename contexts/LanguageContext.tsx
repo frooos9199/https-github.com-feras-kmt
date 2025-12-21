@@ -36,8 +36,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }
 
   const t = useCallback((key: TranslationKey): string => {
-    const langTranslations = translations[language as keyof typeof translations]
-    return langTranslations?.[key] || translations.en[key] || key
+    const langTranslations = translations[language as keyof typeof translations] as any
+    return langTranslations?.[key] || (translations.en as any)[key] || key
   }, [language])
 
   return (

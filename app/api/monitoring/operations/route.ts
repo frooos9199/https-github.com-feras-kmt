@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       where.operation = operation;
     }
 
-    const operations = await prisma.operationLog.findMany({
+    const operations = await (prisma as any).operationLog.findMany({
       where,
       orderBy: {
         createdAt: 'desc'
