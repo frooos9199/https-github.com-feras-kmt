@@ -68,6 +68,15 @@ export default function AttendanceManagement() {
 
   const handleStatusUpdate = async (attendanceId: string, newStatus: "approved" | "rejected") => {
     setProcessing(attendanceId)
+    
+    // Optimistic update - update UI immediately
+    const previousAttendances = [...attendances]
+    setAttendances(prev => prev.map(att => 
+      att.id === attendanceId 
+        ? { ...att, status: newStatus }
+        : att
+    ))
+    
     try {
       const res = await fetch("/api/admin/attendance", {
         method: "PUT",
@@ -79,12 +88,19 @@ export default function AttendanceManagement() {
       })
 
       if (res.ok) {
-        fetchAttendances()
+        // Success - keep the optimistic update and refresh in background
+        setTimeout(() => {
+          fetchAttendances()
+        }, 2000) // Refresh after 2 seconds to sync with server
+        
         alert(language === "ar" 
           ? `تم ${newStatus === "approved" ? "قبول" : "رفض"} الطلب بنجاح!`
           : `Request ${newStatus} successfully!`
         )
       } else {
+        // Error - revert the optimistic update
+        setAttendances(previousAttendances)
+        
         const errorData = await res.json()
         
         // Show detailed error message if event is full
@@ -99,8 +115,10 @@ export default function AttendanceManagement() {
         }
       }
     } catch (error) {
+      // Network error - revert the optimistic update
+      setAttendances(previousAttendances)
       console.error("Error updating attendance:", error)
-      alert(language === "ar" ? "حدث خطأ" : "An error occurred")
+      alert(language === "ar" ? "حدث خطأ في الاتصال" : "Connection error occurred")
     } finally {
       setProcessing(null)
     }
