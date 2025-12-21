@@ -21,7 +21,7 @@ export default function Home() {
           className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg transition-all backdrop-blur-sm border border-white/20 shadow-lg"
         >
           <span className="text-lg">🌐</span>
-          <span>{language === "ar" ? "English" : "العربية"}</span>
+          <span>{language === "ar" ? t('english') : t('arabic')}</span>
         </button>
       </motion.div>
 
@@ -117,9 +117,7 @@ export default function Home() {
               {t("aboutTheSystem")}
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              {language === "ar"
-                ? "نظام متقدم لإدارة المارشال في الفعاليات والسباقات بمدينة الكويت لرياضة المحركات"
-                : "Advanced marshal management system for events and races at Kuwait Motor Town"}
+              {t('systemDescription')}
             </p>
           </motion.div>
 

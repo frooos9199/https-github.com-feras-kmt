@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function NotificationBell() {
   const { data: session } = useSession()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function NotificationBell() {
     <Link
       href="/notifications"
       className="relative p-2 hover:bg-zinc-800 rounded-lg transition-colors"
-      title={language === "ar" ? "الإشعارات" : "Notifications"}
+      title={t('notifications')}
     >
       <span className="text-2xl">🔔</span>
       {unreadCount > 0 && (

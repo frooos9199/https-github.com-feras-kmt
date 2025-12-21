@@ -22,7 +22,7 @@ interface Notification {
 export default function NotificationsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<"all" | "unread">("all")
@@ -249,7 +249,7 @@ export default function NotificationsPage() {
                   : "bg-zinc-800 text-gray-400 hover:bg-zinc-700"
               }`}
             >
-              {language === "ar" ? "الكل" : "All"}
+              {t('all')}
             </button>
             <button
               onClick={() => setFilter("unread")}
@@ -259,7 +259,7 @@ export default function NotificationsPage() {
                   : "bg-zinc-800 text-gray-400 hover:bg-zinc-700"
               }`}
             >
-              {language === "ar" ? "غير مقروء" : "Unread"}
+              {t('unread')}
             </button>
             {unreadCount > 0 && (
               <button
@@ -267,7 +267,7 @@ export default function NotificationsPage() {
                 disabled={actionLoading === "all"}
                 className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {actionLoading === "all" ? "⏳" : "✓"} {language === "ar" ? "تحديد الكل كمقروء" : "Mark all as read"}
+                {actionLoading === "all" ? "⏳" : "✓"} {t('markAllAsRead')}
               </button>
             )}
           </div>
@@ -339,7 +339,7 @@ export default function NotificationsPage() {
                         onClick={() => markAsRead(notification.id)}
                         disabled={actionLoading === notification.id}
                         className="px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-lg text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={language === "ar" ? "تحديد كمقروء" : "Mark as read"}
+                        title={t('markAsRead')}
                       >
                         {actionLoading === notification.id ? "⏳" : "✓"}
                       </button>
@@ -348,7 +348,7 @@ export default function NotificationsPage() {
                       onClick={() => deleteNotification(notification.id)}
                       disabled={actionLoading === notification.id}
                       className="px-3 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={language === "ar" ? "حذف" : "Delete"}
+                      title={t('delete')}
                     >
                       {actionLoading === notification.id ? "⏳" : "🗑️"}
                     </button>

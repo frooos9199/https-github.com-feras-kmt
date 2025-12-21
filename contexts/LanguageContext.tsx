@@ -16,11 +16,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("language") as Language
+    console.log('LanguageContext useEffect - saved language from localStorage:', saved)
     if (saved) {
+      console.log('Setting language to saved value:', saved)
       setLanguage(saved)
       document.documentElement.lang = saved
       document.documentElement.dir = saved === "ar" ? "rtl" : "ltr"
     } else {
+      console.log('No saved language, setting default to Arabic')
       // Set default to Arabic
       setLanguage("ar")
       document.documentElement.lang = "ar"
@@ -36,8 +39,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }
 
   const t = useCallback((key: TranslationKey): string => {
+    console.log('LanguageContext t() called with language:', language, 'key:', key)
     const langTranslations = translations[language as keyof typeof translations] as any
-    return langTranslations?.[key] || (translations.en as any)[key] || key
+    const result = langTranslations?.[key] || (translations.en as any)[key] || key
+    console.log('Translation result:', result)
+    return result
   }, [language])
 
   return (

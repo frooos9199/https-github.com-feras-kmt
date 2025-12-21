@@ -485,10 +485,10 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                    {language === "ar" ? "المعلومات الشخصية" : "Personal Information"}
+                    {t('personalInformation')}
                   </h3>
                   <p className="text-sm text-gray-400 mt-1">
-                    {language === "ar" ? "قم بتحديث معلوماتك الشخصية الأساسية" : "Update your basic personal information"}
+                    {t('updateBasicInfo')}
                   </p>
                 </div>
               </div>
@@ -499,7 +499,7 @@ export default function ProfilePage() {
                   <div className="group">
                     <label className="block text-gray-300 mb-3 text-sm font-medium flex items-center gap-2">
                       <span className="text-blue-400">📝</span>
-                      {language === "ar" ? "الاسم الكامل" : "Full Name"} *
+                      {t('fullName')} *
                     </label>
                     <div className="relative">
                       <input
@@ -508,7 +508,7 @@ export default function ProfilePage() {
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
                         className="w-full px-5 py-4 bg-slate-800/50 border border-slate-600/50 rounded-2xl text-white placeholder-gray-500 focus:border-blue-500/70 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 hover:border-slate-500/70"
-                        placeholder={language === "ar" ? "أدخل اسمك الكامل" : "Enter your full name"}
+                        placeholder={t('enterFullName')}
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     </div>
@@ -518,7 +518,7 @@ export default function ProfilePage() {
                   <div className="group">
                     <label className="block text-gray-300 mb-3 text-sm font-medium flex items-center gap-2">
                       <span className="text-green-400">📱</span>
-                      {language === "ar" ? "رقم الهاتف" : "Phone Number"}
+                      {t('phoneNumber')}
                     </label>
                     <div className="relative">
                       <input
@@ -526,7 +526,7 @@ export default function ProfilePage() {
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="w-full px-5 py-4 bg-slate-800/50 border border-slate-600/50 rounded-2xl text-white placeholder-gray-500 focus:border-green-500/70 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all duration-300 hover:border-slate-500/70"
-                        placeholder={language === "ar" ? "أدخل رقم هاتفك" : "Enter your phone number"}
+                        placeholder={t('enterPhoneNumber')}
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-green-600/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     </div>
@@ -536,7 +536,7 @@ export default function ProfilePage() {
                   <div className="group">
                     <label className="block text-gray-300 mb-3 text-sm font-medium flex items-center gap-2">
                       <span className="text-purple-400">🆔</span>
-                      {language === "ar" ? "رقم البطاقة المدنية" : "Civil ID"}
+                      {t('civilId')}
                     </label>
                     <div className="relative">
                       <input
@@ -544,7 +544,7 @@ export default function ProfilePage() {
                         value={formData.civilId}
                         onChange={(e) => setFormData({ ...formData, civilId: e.target.value })}
                         className="w-full px-5 py-4 bg-slate-800/50 border border-slate-600/50 rounded-2xl text-white placeholder-gray-500 focus:border-purple-500/70 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 hover:border-slate-500/70"
-                        placeholder={language === "ar" ? "أدخل رقم البطاقة المدنية" : "Enter your civil ID"}
+                        placeholder={t('enterCivilId')}
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     </div>
@@ -554,7 +554,7 @@ export default function ProfilePage() {
                   <div className="group">
                     <label className="block text-gray-300 mb-3 text-sm font-medium flex items-center gap-2">
                       <span className="text-pink-400">🎂</span>
-                      {language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}
+                      {t('dateOfBirth')}
                     </label>
                     <div className="relative">
                       <input
@@ -571,7 +571,7 @@ export default function ProfilePage() {
                   <div className="group">
                     <label className="block text-gray-300 mb-3 text-sm font-medium flex items-center gap-2">
                       <span className="text-yellow-400">🌍</span>
-                      {language === "ar" ? "الجنسية" : "Nationality"}
+                      {t('nationality')}
                     </label>
                     <div className="relative">
                       <select
@@ -580,7 +580,7 @@ export default function ProfilePage() {
                         className="w-full px-5 py-4 bg-slate-800/50 border border-slate-600/50 rounded-2xl text-white focus:border-yellow-500/70 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 transition-all duration-300 hover:border-slate-500/70 appearance-none"
                       >
                         <option value="" className="bg-slate-800">
-                          {language === "ar" ? "اختر الجنسية" : "Select nationality"}
+                          {t('selectNationality')}
                         </option>
                         {NATIONALITIES.map((nat) => (
                           <option key={nat.value} value={nat.value} className="bg-slate-800">
@@ -601,7 +601,7 @@ export default function ProfilePage() {
                   <div className="group">
                     <label className="block text-gray-300 mb-3 text-sm font-medium flex items-center gap-2">
                       <span className="text-red-400">🩸</span>
-                      {language === "ar" ? "فصيلة الدم" : "Blood Type"}
+                      {t('bloodType')}
                     </label>
                     <div className="relative">
                       <select
@@ -610,7 +610,7 @@ export default function ProfilePage() {
                         className="w-full px-5 py-4 bg-slate-800/50 border border-slate-600/50 rounded-2xl text-white focus:border-red-500/70 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all duration-300 hover:border-slate-500/70 appearance-none"
                       >
                         <option value="" className="bg-slate-800">
-                          {language === "ar" ? "اختر فصيلة الدم" : "Select blood type"}
+                          {t('selectBloodType')}
                         </option>
                         {BLOOD_TYPES.map((type) => (
                           <option key={type.value} value={type.value} className="bg-slate-800">
@@ -640,12 +640,12 @@ export default function ProfilePage() {
                       {saving ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>{language === "ar" ? "جاري الحفظ..." : "Saving..."}</span>
+                          <span>{t('saving')}</span>
                         </>
                       ) : (
                         <>
                           <span className="text-lg">💾</span>
-                          <span>{language === "ar" ? "حفظ التغييرات" : "Save Changes"}</span>
+                          <span>{t('saveChanges')}</span>
                         </>
                       )}
                     </div>

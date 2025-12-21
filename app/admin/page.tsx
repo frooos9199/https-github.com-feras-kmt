@@ -243,7 +243,7 @@ export default function AdminDashboard() {
               href="/admin/monitoring"
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >
-              📊 تتبع العمليات
+              📊 {t("operationTracking")}
             </Link>
             <Link
               href="/admin/reports"

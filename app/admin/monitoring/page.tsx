@@ -56,8 +56,13 @@ interface Operation {
 export default function MonitoringDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { language, t } = useLanguage()
+  const { language, t, setLanguage } = useLanguage()
   const translateOperation = useOperationTranslation()
+
+  // Debug logging
+  console.log('Current language:', language)
+  console.log('t("overview"):', t('overview'))
+  console.log('t("operations"):', t('operations'))
   const [stats, setStats] = useState<SystemStats | null>(null)
   const [operations, setOperations] = useState<Operation[]>([])
   const [loading, setLoading] = useState(true)
@@ -139,19 +144,19 @@ export default function MonitoringDashboard() {
                 href="/admin"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                ← رجوع للوحة الإدمن
+                ← {t('backToAdminDashboard')}
               </Link>
               <div className="h-6 w-px bg-zinc-700" />
               <h1 className="text-xl font-bold text-white">
-                📊 تتبع العمليات
+                📊 {t('operationTracking')}
               </h1>
             </div>
             {/* Period Selector */}
             <div className="flex gap-2">
               {[
-                { value: '24h', label: '24 ساعة' },
-                { value: '7d', label: '7 أيام' },
-                { value: '30d', label: '30 يوم' }
+                { value: '24h', label: t('24_hours') },
+                { value: '7d', label: t('7_days') },
+                { value: '30d', label: t('30_days') }
               ].map((period) => (
                 <button
                   key={period.value}
@@ -172,14 +177,15 @@ export default function MonitoringDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-zinc-800">
+
+      {/* Tabs */}
+      <div className="mb-6">
+        <div className="border-b border-zinc-800">
             <nav className="-mb-px flex space-x-8">
               {[
-                { id: 'overview', label: 'نظرة عامة' },
-                { id: 'operations', label: 'العمليات' },
-                { id: 'errors', label: 'الأخطاء' }
+                { id: 'overview', label: t('overview') },
+                { id: 'operations', label: t('operations') },
+                { id: 'errors', label: t('errors') }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -207,13 +213,13 @@ export default function MonitoringDashboard() {
             {/* System Health Cards */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-6">
-                🟢 حالة النظام
+                🟢 {t('systemStatus')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <span className="text-white font-medium">حالة النظام</span>
+                    <span className="text-white font-medium">{t('systemStatus')}</span>
                   </div>
                   <p className="text-2xl font-bold text-green-400">{stats.systemHealth.serverUptime}%</p>
                   <p className="text-gray-400 text-sm">Uptime</p>
@@ -222,28 +228,28 @@ export default function MonitoringDashboard() {
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-3 h-3 rounded-full bg-blue-500" />
-                    <span className="text-white font-medium">المستخدمون</span>
+                    <span className="text-white font-medium">{t('users')}</span>
                   </div>
                   <p className="text-2xl font-bold text-blue-400">{stats.systemHealth.totalUsers}</p>
-                  <p className="text-gray-400 text-sm">{stats.systemHealth.activeUsers} نشط</p>
+                  <p className="text-gray-400 text-sm">{stats.systemHealth.activeUsers} {t('active')}</p>
                 </div>
 
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-3 h-3 rounded-full bg-purple-500" />
-                    <span className="text-white font-medium">الأحداث</span>
+                    <span className="text-white font-medium">{t('events')}</span>
                   </div>
                   <p className="text-2xl font-bold text-purple-400">{stats.systemHealth.totalEvents}</p>
-                  <p className="text-gray-400 text-sm">{stats.systemHealth.recentEvents} حديث</p>
+                  <p className="text-gray-400 text-sm">{stats.systemHealth.recentEvents} {t('recent')}</p>
                 </div>
 
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <span className="text-white font-medium">متوسط الاستجابة</span>
+                    <span className="text-white font-medium">{t('averageResponse')}</span>
                   </div>
                   <p className="text-2xl font-bold text-yellow-400">{stats.systemHealth.averageResponseTime}ms</p>
-                  <p className="text-gray-400 text-sm">للعمليات</p>
+                  <p className="text-gray-400 text-sm">{t('forOperations')}</p>
                 </div>
               </div>
             </div>
@@ -251,25 +257,25 @@ export default function MonitoringDashboard() {
             {/* Operations Stats */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-6">
-                📈 إحصائيات العمليات
+                📈 {t('operationStatistics')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-gradient-to-br from-green-600/20 to-green-900/20 border border-green-600/30 rounded-2xl p-6">
                   <div className="text-3xl mb-2">✅</div>
                   <div className="text-2xl font-bold text-white">{stats.systemHealth.successfulOperations}</div>
-                  <div className="text-gray-400 text-sm">عمليات ناجحة</div>
+                  <div className="text-gray-400 text-sm">{t('successfulOperations')}</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-red-600/20 to-red-900/20 border border-red-600/30 rounded-2xl p-6">
                   <div className="text-3xl mb-2">❌</div>
                   <div className="text-2xl font-bold text-white">{stats.systemHealth.failedOperations}</div>
-                  <div className="text-gray-400 text-sm">عمليات فاشلة</div>
+                  <div className="text-gray-400 text-sm">{t('failedOperations')}</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-blue-600/20 to-blue-900/20 border border-blue-600/30 rounded-2xl p-6">
                   <div className="text-3xl mb-2">🔄</div>
                   <div className="text-2xl font-bold text-white">{stats.systemHealth.totalOperations}</div>
-                  <div className="text-gray-400 text-sm">إجمالي العمليات</div>
+                  <div className="text-gray-400 text-sm">{t('totalOperations')}</div>
                 </div>
               </div>
             </div>
@@ -277,13 +283,13 @@ export default function MonitoringDashboard() {
             {/* Communications */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-6">
-                📧 التواصل
+                📧 {t('communication')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="text-2xl">📧</span>
-                    <span className="text-white font-medium">الإيميلات المرسلة</span>
+                    <span className="text-white font-medium">{t('emailsSent')}</span>
                   </div>
                   <p className="text-2xl font-bold text-blue-400">{stats.systemHealth.emailsSent}</p>
                 </div>
@@ -291,7 +297,7 @@ export default function MonitoringDashboard() {
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="text-2xl">🔔</span>
-                    <span className="text-white font-medium">الإشعارات المرسلة</span>
+                    <span className="text-white font-medium">{t('notificationsSent')}</span>
                   </div>
                   <p className="text-2xl font-bold text-green-400">{stats.systemHealth.notificationsSent}</p>
                 </div>
@@ -301,29 +307,29 @@ export default function MonitoringDashboard() {
             {/* Error Stats */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-6">
-                ⚠️ إحصائيات الأخطاء
+                ⚠️ {t('errorStatistics')}
               </h2>
               <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                 <div className="grid grid-cols-5 gap-4">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-red-400">{stats.errors.critical}</p>
-                    <p className="text-gray-400 text-sm">حرجة</p>
+                    <p className="text-gray-400 text-sm">{t('critical')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-orange-400">{stats.errors.high}</p>
-                    <p className="text-gray-400 text-sm">عالية</p>
+                    <p className="text-gray-400 text-sm">{t('high')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-yellow-400">{stats.errors.medium}</p>
-                    <p className="text-gray-400 text-sm">متوسطة</p>
+                    <p className="text-gray-400 text-sm">{t('medium')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-blue-400">{stats.errors.low}</p>
-                    <p className="text-gray-400 text-sm">منخفضة</p>
+                    <p className="text-gray-400 text-sm">{t('low')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-400">{stats.errors.total}</p>
-                    <p className="text-gray-400 text-sm">إجمالي</p>
+                    <p className="text-gray-400 text-sm">{t('total')}</p>
                   </div>
                 </div>
               </div>
@@ -339,26 +345,26 @@ export default function MonitoringDashboard() {
             className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden"
           >
             <div className="px-6 py-4 border-b border-zinc-800">
-              <h3 className="text-lg font-medium text-white">العمليات الحديثة</h3>
+              <h3 className="text-lg font-medium text-white">{t('recentOperations')}</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-zinc-800">
                 <thead className="bg-zinc-900/50">
                   <tr>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      العملية
+                      {t('operation')}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      الحالة
+                      {t('status')}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      المدة
+                      {t('duration')}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      المستخدم
+                      {t('user')}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      التاريخ
+                      {t('date')}
                     </th>
                   </tr>
                 </thead>
@@ -377,7 +383,7 @@ export default function MonitoringDashboard() {
                         {operation.duration ? `${operation.duration}ms` : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                        {operation.user?.name || 'النظام'}
+                        {operation.user?.name || t('system')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         {new Date(operation.createdAt).toLocaleString('ar-SA')}
@@ -397,15 +403,15 @@ export default function MonitoringDashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6"
           >
-            <h3 className="text-lg font-medium text-white mb-4">إدارة الأخطاء</h3>
-            <p className="text-gray-400">قريباً - عرض تفصيلي للأخطاء وحلولها</p>
+            <h3 className="text-lg font-medium text-white mb-4">{t('errorManagement')}</h3>
+            <p className="text-gray-400">{t('comingSoon')}</p>
           </motion.div>
         )}
 
         {/* Last Updated */}
         {stats && (
           <div className="mt-6 text-center text-sm text-gray-500">
-            آخر تحديث: {new Date(stats.lastUpdated).toLocaleString('ar-SA')}
+            {t('lastUpdate')}: {new Date(stats.lastUpdated).toLocaleString('ar-SA')}
           </div>
         )}
       </main>
