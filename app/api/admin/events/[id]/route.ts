@@ -104,19 +104,26 @@ export async function PATCH(
 
     // Try NextAuth session
     const session = await getServerSession(authOptions)
+    console.log('PATCH - Session:', session)
     if (session?.user?.id) {
       userId = session.user.id
       userRole = session.user.role
+      console.log('PATCH - Using NextAuth session:', { userId, userRole })
     } else {
       // Try JWT token
       const user = await getUserFromToken(req)
+      console.log('PATCH - JWT user:', user)
       if (user) {
         userId = user.id
         userRole = user.role
+        console.log('PATCH - Using JWT token:', { userId, userRole })
+      } else {
+        console.log('PATCH - No authentication found')
       }
     }
     
     if (!userId || userRole !== "admin") {
+      console.log('PATCH - Unauthorized access attempt')
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
