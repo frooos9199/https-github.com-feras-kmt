@@ -150,21 +150,34 @@ export default function EventDetails() {
   const handleEdit = async () => {
     if (!event) return
     try {
+      const requestData = {
+        ...editForm,
+        marshalTypes: editForm.marshalTypes.join(',')
+      }
+      console.log('Sending update data:', requestData)
+      
       const res = await fetch(`/api/admin/events/${event.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',
-        body: JSON.stringify({
-          ...editForm,
-          marshalTypes: editForm.marshalTypes.join(',')
-        })
+        body: JSON.stringify(requestData)
       })
+      
+      console.log('Response status:', res.status)
+      
       if (res.ok) {
+        const responseData = await res.json()
+        console.log('Update successful:', responseData)
         setShowEditModal(false)
         fetchEvent()
+      } else {
+        const errorData = await res.json()
+        console.error("Error updating event:", errorData)
+        alert(`خطأ في تحديث الحدث: ${errorData.error || 'خطأ غير معروف'}`)
       }
     } catch (error) {
       console.error("Error updating event:", error)
+      alert('خطأ في الاتصال بالخادم')
     }
   }
 

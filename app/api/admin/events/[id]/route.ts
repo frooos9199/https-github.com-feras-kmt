@@ -122,6 +122,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await req.json()
+    console.log('PATCH request body:', body)
     const { 
       titleEn, 
       titleAr, 
@@ -138,18 +139,20 @@ export async function PATCH(
     } = body
 
     const updateData: any = {}
-    if (titleEn) updateData.titleEn = titleEn
-    if (titleAr) updateData.titleAr = titleAr
-    if (descriptionEn) updateData.descriptionEn = descriptionEn
-    if (descriptionAr) updateData.descriptionAr = descriptionAr
-    if (date) updateData.date = new Date(date)
+    if (titleEn !== undefined) updateData.titleEn = titleEn
+    if (titleAr !== undefined) updateData.titleAr = titleAr
+    if (descriptionEn !== undefined) updateData.descriptionEn = descriptionEn
+    if (descriptionAr !== undefined) updateData.descriptionAr = descriptionAr
+    if (date !== undefined) updateData.date = new Date(date)
     if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null
-    if (time) updateData.time = time
+    if (time !== undefined) updateData.time = time
     if (endTime !== undefined) updateData.endTime = endTime || null
-    if (location) updateData.location = location
+    if (location !== undefined) updateData.location = location
     if (marshalTypes !== undefined) updateData.marshalTypes = marshalTypes
-    if (maxMarshals) updateData.maxMarshals = parseInt(maxMarshals)
-    if (status) updateData.status = status
+    if (maxMarshals !== undefined) updateData.maxMarshals = parseInt(maxMarshals)
+    if (status !== undefined) updateData.status = status
+
+    console.log('Update data:', updateData)
 
     const event = await prisma.event.update({
       where: { id },
