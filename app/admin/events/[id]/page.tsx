@@ -150,9 +150,9 @@ export default function EventDetails() {
   const handleEdit = async () => {
     if (!event) return
     try {
-      // Get the session to access the token
-      const session = await fetch('/api/auth/session').then(res => res.json())
-      const token = session?.token
+      // Use the session from useSession hook
+      const token = (session as any)?.token
+      console.log('Using token from session hook:', !!token)
       
       const requestData = {
         ...editForm,
@@ -165,13 +165,13 @@ export default function EventDetails() {
         headers["Authorization"] = `Bearer ${token}`
         console.log('Using JWT token for authentication')
       } else {
-        console.log('No token found, using credentials')
+        console.log('No token available, using credentials')
       }
       
       const res = await fetch(`/api/admin/events/${event.id}`, {
         method: "PATCH",
         headers,
-        credentials: token ? undefined : 'include', // Use credentials if no token
+        credentials: 'include', // Always include credentials as fallback
         body: JSON.stringify(requestData)
       })
       
@@ -183,13 +183,18 @@ export default function EventDetails() {
         setShowEditModal(false)
         fetchEvent()
       } else {
-        const errorData = await res.json()
-        console.error("Error updating event:", errorData)
-        alert(`خطأ في تحديث الحدث: ${errorData.error || 'خطأ غير معروف'}`)
+        const errorText = await res.text()
+        console.error("Error updating event:", res.status, errorText)
+        try {
+          const errorData = JSON.parse(errorText)
+          alert(`خطأ في تحديث الحدث: ${errorData.error || 'خطأ غير معروف'}`)
+        } catch {
+          alert(`خطأ في تحديث الحدث: ${res.status}`)
+        }
       }
     } catch (error) {
-      console.error("Error updating event:", error)
-      alert('خطأ في الاتصال بالخادم')
+      console.error("Error in handleEdit:", error)
+      alert("حدث خطأ أثناء تحديث الحدث")
     }
   }
 
