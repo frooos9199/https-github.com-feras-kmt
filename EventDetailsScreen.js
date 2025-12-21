@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, SafeAreaView, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import I18n from './i18n';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { UserContext } from './UserContext';
 import { createAuthHeaders } from './apiConfig';
 
@@ -16,11 +16,7 @@ const EventDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchEvent();
-  }, [eventId]);
-
-  const fetchEvent = async () => {
+  const fetchEvent = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -48,7 +44,13 @@ const EventDetailsScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.token, eventId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvent();
+    }, [fetchEvent])
+  );
 
   const handleEdit = () => {
     navigation.navigate('EditEvent', { eventId });
