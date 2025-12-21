@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { Language, translations, TranslationKey } from "@/lib/translations"
 
 interface LanguageContextType {
@@ -35,9 +35,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr"
   }
 
-  const t = (key: TranslationKey): string => {
-    return translations[language][key]
-  }
+  const t = useCallback((key: TranslationKey): string => {
+    const langTranslations = translations[language as keyof typeof translations]
+    return langTranslations?.[key] || translations.en[key] || key
+  }, [language])
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
