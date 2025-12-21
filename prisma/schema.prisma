@@ -32,6 +32,7 @@ model User {
   fcmToken           String?  // Firebase Cloud Messaging token for push notifications
   resetToken         String?  // Password reset token
   resetTokenExpiry   DateTime? // Password reset token expiry
+  lastLogin          DateTime? // آخر وقت تسجيل دخول
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -108,4 +109,64 @@ model BroadcastMessage {
   recipientCount   Int      @default(0)
   
   @@index([sentAt])
+}
+
+// جدول تتبع العمليات - لمراقبة جميع العمليات في النظام
+model OperationLog {
+  id            String   @id @default(cuid())
+  operation     String   // "event_create", "user_register", "attendance_request", "email_send", "notification_send", "admin_approve"
+  userId        String?  // المستخدم اللي عمل العملية
+  targetId      String?  // ID الهدف (event, user, attendance, etc.)
+  status        String   // "success", "error", "pending"
+  duration      Int?     // مدة العملية بالميلي ثانية
+  errorMessage  String?  // رسالة الخطأ لو فشلت
+  metadata      Json?    // بيانات إضافية (IP, UserAgent, etc.)
+  createdAt     DateTime @default(now())
+
+  @@index([operation, status])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+// جدول الأخطاء - لتتبع وتحليل الأخطاء
+model ErrorLog {
+  id          String   @id @default(cuid())
+  type        String   // "api_error", "db_error", "email_error", "notification_error", "auth_error"
+  operation   String?  // العملية اللي سبب الخطأ
+  message     String   // رسالة الخطأ
+  stack       String?  // Stack trace
+  userId      String?  // المستخدم المتأثر
+  url         String?  // الصفحة أو API endpoint
+  userAgent   String?  // معلومات المتصفح/التطبيق
+  ip          String?  // عنوان IP
+  severity    String   @default("medium") // "low", "medium", "high", "critical"
+  resolved    Boolean  @default(false)   // هل تم حل المشكلة
+  resolvedAt  DateTime? // وقت الحل
+  createdAt   DateTime @default(now())
+
+  @@index([type, severity])
+  @@index([createdAt])
+  @@index([resolved])
+}
+
+// جدول إحصائيات النظام - للتقارير اليومية
+model SystemStats {
+  id                    String   @id @default(cuid())
+  date                  DateTime @db.Date // التاريخ
+  totalUsers            Int      @default(0)
+  activeUsers           Int      @default(0)
+  totalEvents           Int      @default(0)
+  totalAttendances      Int      @default(0)
+  pendingRequests       Int      @default(0)
+  totalOperations       Int      @default(0)
+  successfulOperations  Int      @default(0)
+  failedOperations      Int      @default(0)
+  averageResponseTime   Float    @default(0) // بالميلي ثانية
+  emailsSent            Int      @default(0)
+  notificationsSent     Int      @default(0)
+  serverUptime          Float    @default(0) // نسبة الـ uptime
+  createdAt             DateTime @default(now())
+
+  @@unique([date])
+  @@index([date])
 }

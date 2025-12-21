@@ -240,6 +240,12 @@ export default function AdminDashboard() {
               🗄️ {t("databaseBackup")}
             </Link>
             <Link
+              href="/admin/monitoring"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
+            >
+              📊 تتبع العمليات
+            </Link>
+            <Link
               href="/admin/reports"
               className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-center"
             >

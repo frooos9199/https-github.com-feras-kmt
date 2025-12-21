@@ -1,5 +1,6 @@
 import { prisma } from "./prisma"
 import { sendPushNotification as sendPushViaAdmin } from "./firebase-admin"
+import { logOperation, logError, updateLastLogin } from "./monitoring"
 
 type NotificationType =
   | "NEW_EVENT"
@@ -23,11 +24,16 @@ interface CreateNotificationParams {
 }
 
 export async function createNotification(params: CreateNotificationParams) {
+  const operation = await logOperation('notification_send', undefined, params.userId, {
+    type: params.type,
+    eventId: params.eventId
+  });
+
   try {
     console.log(`[NOTIFICATION] 📝 Creating notification for user: ${params.userId}`);
     console.log(`[NOTIFICATION] 📨 Type: ${params.type}`);
     console.log(`[NOTIFICATION] 📨 Title: ${params.titleEn}`);
-    
+
     // Create in-app notification
     await prisma.notification.create({
       data: {
@@ -51,7 +57,7 @@ export async function createNotification(params: CreateNotificationParams) {
 
     if (user?.fcmToken) {
       console.log(`[NOTIFICATION] 📱 Sending push to: ${user.email}`);
-      
+
       // استخدام Firebase Admin SDK الصحيح
       const result = await sendPushViaAdmin(
         [user.fcmToken],
@@ -59,13 +65,21 @@ export async function createNotification(params: CreateNotificationParams) {
         params.messageEn,
         params.eventId ? { eventId: params.eventId } : undefined
       )
-      
+
       console.log(`[NOTIFICATION] 📨 Push result: ${result.success} success, ${result.failure} failed`);
     } else {
       console.log(`[NOTIFICATION] ⚠️ No FCM token for user`);
     }
+
+    // إكمال العملية بنجاح
+    await operation.complete('success');
+
   } catch (error) {
     console.error("[NOTIFICATION] ❌ Error creating notification:", error)
+
+    // تسجيل الخطأ وإكمال العملية بفشل
+    await logError('notification_error', error instanceof Error ? error.message : 'Unknown error', 'notification_send', params.userId);
+    await operation.complete('error', error instanceof Error ? error.message : 'Unknown error');
   }
 }
 
