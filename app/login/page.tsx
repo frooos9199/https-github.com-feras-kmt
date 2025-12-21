@@ -24,18 +24,17 @@ export default function LoginPage() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: "/dashboard"
       })
 
       if (result?.error) {
         setError(t("invalidEmailOrPassword"))
-      } else {
-        router.push("/dashboard")
-        router.refresh()
+        setIsLoading(false)
       }
+      // If successful, NextAuth will handle the redirect
     } catch (error) {
       setError(t("somethingWentWrong"))
-    } finally {
       setIsLoading(false)
     }
   }

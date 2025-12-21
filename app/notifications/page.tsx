@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -26,6 +26,9 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<"all" | "unread">("all")
+  const [isFetching, setIsFetching] = useState(false)
+  const [debouncedFilter, setDebouncedFilter] = useState<"all" | "unread">("all")
+  const [actionLoading, setActionLoading] = useState<string | null>(null) // للأزرار الفردية
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -33,22 +36,43 @@ export default function NotificationsPage() {
     } else if (session) {
       fetchNotifications()
       
-      // Auto-refresh every 5 seconds for real-time updates
+      // Auto-refresh every 60 seconds for real-time updates
       const interval = setInterval(() => {
         fetchNotifications()
-      }, 5000)
+      }, 60000)
       
       return () => clearInterval(interval)
     }
-  }, [status, session, filter])
+  }, [status, session])
 
-  const fetchNotifications = async () => {
+  // Debouncing للفلاتر - انتظار 300ms بعد آخر تغيير
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilter(filter)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [filter])
+
+  // Separate effect for filter changes
+  useEffect(() => {
+    if (session) {
+      fetchNotifications()
+    }
+  }, [debouncedFilter])
+
+  const fetchNotifications = useCallback(async () => {
+    if (isFetching) return // منع الطلبات المتعددة
+
+    setIsFetching(true)
     setLoading(true)
     try {
-      const url = filter === "unread" 
+      const url = debouncedFilter === "unread" 
         ? "/api/notifications?unreadOnly=true"
         : "/api/notifications"
-      const res = await fetch(url)
+      const res = await fetch(url, {
+        cache: 'no-store' // لا نحتاج cache في الواجهة لأن الخادم يتعامل مع ذلك
+      })
       if (res.ok) {
         const data = await res.json()
         setNotifications(data)
@@ -57,51 +81,90 @@ export default function NotificationsPage() {
       console.error("Error fetching notifications:", error)
     } finally {
       setLoading(false)
+      setIsFetching(false)
     }
-  }
+  }, [debouncedFilter, isFetching])
 
   const markAsRead = async (notificationId: string) => {
+    setActionLoading(notificationId)
+    
+    // Optimistic update - أحدث الواجهة فوراً
+    const previousNotifications = [...notifications]
+    setNotifications(notifications.map(n =>
+      n.id === notificationId ? { ...n, isRead: true } : n
+    ))
+
     try {
       const res = await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notificationId })
       })
-      if (res.ok) {
-        setNotifications(notifications.map(n => 
-          n.id === notificationId ? { ...n, isRead: true } : n
-        ))
+
+      if (!res.ok) {
+        // لو فشل الخادم - أرجع الحالة السابقة
+        console.error("Failed to mark as read")
+        setNotifications(previousNotifications)
       }
     } catch (error) {
       console.error("Error marking notification as read:", error)
+      setNotifications(previousNotifications)
+    } finally {
+      setActionLoading(null)
     }
   }
 
   const markAllAsRead = async () => {
+    setActionLoading("all")
+    
+    // Optimistic update - أحدث الواجهة فوراً
+    const previousNotifications = [...notifications]
+    setNotifications(notifications.map(n => ({ ...n, isRead: true })))
+
     try {
       const res = await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ markAllAsRead: true })
       })
-      if (res.ok) {
-        setNotifications(notifications.map(n => ({ ...n, isRead: true })))
+
+      if (!res.ok) {
+        // لو فشل الخادم - أرجع الحالة السابقة
+        console.error("Failed to mark all as read")
+        setNotifications(previousNotifications)
       }
     } catch (error) {
-      console.error("Error marking all as read:", error)
+      console.error("Error marking all notifications as read:", error)
+      setNotifications(previousNotifications)
+    } finally {
+      setActionLoading(null)
     }
   }
 
   const deleteNotification = async (notificationId: string) => {
+    setActionLoading(notificationId)
+    
+    // Optimistic update - أمسح من الواجهة فوراً
+    const previousNotifications = [...notifications]
+    setNotifications(notifications.filter(n => n.id !== notificationId))
+
     try {
       const res = await fetch(`/api/notifications?id=${notificationId}`, {
         method: "DELETE"
       })
-      if (res.ok) {
-        setNotifications(notifications.filter(n => n.id !== notificationId))
+
+      if (!res.ok) {
+        // لو فشل الخادم - أرجع الإشعار
+        console.error("Failed to delete notification")
+        setNotifications(previousNotifications)
+        // يمكن إضافة toast notification هنا
       }
     } catch (error) {
       console.error("Error deleting notification:", error)
+      // أرجع الإشعار لو فشل الطلب
+      setNotifications(previousNotifications)
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -201,9 +264,10 @@ export default function NotificationsPage() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-xl transition-colors ml-auto"
+                disabled={actionLoading === "all"}
+                className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                ✓ {language === "ar" ? "تحديد الكل كمقروء" : "Mark all as read"}
+                {actionLoading === "all" ? "⏳" : "✓"} {language === "ar" ? "تحديد الكل كمقروء" : "Mark all as read"}
               </button>
             )}
           </div>
@@ -273,18 +337,20 @@ export default function NotificationsPage() {
                     {!notification.isRead && (
                       <button
                         onClick={() => markAsRead(notification.id)}
-                        className="px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-lg text-xs transition-colors"
+                        disabled={actionLoading === notification.id}
+                        className="px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-lg text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title={language === "ar" ? "تحديد كمقروء" : "Mark as read"}
                       >
-                        ✓
+                        {actionLoading === notification.id ? "⏳" : "✓"}
                       </button>
                     )}
                     <button
                       onClick={() => deleteNotification(notification.id)}
-                      className="px-3 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg text-xs transition-colors"
+                      disabled={actionLoading === notification.id}
+                      className="px-3 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title={language === "ar" ? "حذف" : "Delete"}
                     >
-                      🗑️
+                      {actionLoading === notification.id ? "⏳" : "🗑️"}
                     </button>
                   </div>
                 </div>
