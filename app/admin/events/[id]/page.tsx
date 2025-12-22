@@ -60,6 +60,7 @@ export default function EventDetails() {
   const [showAddMarshalModal, setShowAddMarshalModal] = useState(false)
   const [availableMarshals, setAvailableMarshals] = useState<any[]>([])
   const [selectedMarshalToAdd, setSelectedMarshalToAdd] = useState<string | null>(null)
+  const [marshalSearchQuery, setMarshalSearchQuery] = useState<string>("")
   const [eventId, setEventId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     titleEn: "",
@@ -284,6 +285,7 @@ export default function EventDetails() {
       if (res.ok) {
         setShowAddMarshalModal(false)
         setSelectedMarshalToAdd(null)
+        setMarshalSearchQuery("")
         fetchEvent()
       }
     } catch (error) {
@@ -473,6 +475,14 @@ export default function EventDetails() {
                     return <span key={type} className="text-3xl relative">{typeIcons[type] || '�'}</span>
                   })}
                 </div>
+              </div>
+              <div className="flex justify-center mb-6">
+                <button
+                  onClick={() => setShowAddMarshalModal(true)}
+                  className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                >
+                  ➕ {language === "ar" ? "إضافة مارشال" : "Add Marshal"}
+                </button>
               </div>
               {event.attendances.length === 0 ? (
                 <p className="text-gray-400 text-center py-8">
@@ -842,6 +852,20 @@ export default function EventDetails() {
               ➕ {language === "ar" ? "إضافة مارشال للفعالية" : "Add Marshal to Event"}
             </h3>
             
+            {/* Search Filter */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                🔍 {language === "ar" ? "البحث عن مارشال" : "Search Marshal"}
+              </label>
+              <input
+                type="text"
+                value={marshalSearchQuery}
+                onChange={(e) => setMarshalSearchQuery(e.target.value)}
+                placeholder={language === "ar" ? "ابحث بالاسم أو رقم الموظف أو الإيميل..." : "Search by name, employee ID, or email..."}
+                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+              />
+            </div>
+            
             <div className="mb-6">
               <p className="text-gray-300 mb-4">
                 {language === "ar" 
@@ -856,7 +880,17 @@ export default function EventDetails() {
                 </p>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {availableMarshals.map((marshal) => (
+                  {availableMarshals
+                    .filter((marshal) => {
+                      if (!marshalSearchQuery.trim()) return true
+                      const query = marshalSearchQuery.toLowerCase()
+                      return (
+                        marshal.name.toLowerCase().includes(query) ||
+                        marshal.email.toLowerCase().includes(query) ||
+                        (marshal.employeeId && marshal.employeeId.toLowerCase().includes(query))
+                      )
+                    })
+                    .map((marshal) => (
                     <div
                       key={marshal.id}
                       className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 cursor-pointer transition-all ${
@@ -931,6 +965,7 @@ export default function EventDetails() {
                   setShowAddMarshalModal(false)
                   setSelectedMarshalToAdd(null)
                   setAvailableMarshals([])
+                  setMarshalSearchQuery("")
                 }}
                 className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold transition-all"
               >
