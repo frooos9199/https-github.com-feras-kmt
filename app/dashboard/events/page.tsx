@@ -229,8 +229,10 @@ function CalendarView({ events, onRegister, registering }: {
                         isFinished 
                           ? 'bg-gray-600/50 text-gray-400'
                           : isRegistered && registrationStatus === 'approved'
-                          ? 'bg-green-600/30 text-green-400'
-                          : 'bg-red-600/30 text-red-400'
+                          ? 'bg-green-600/80 text-white border border-green-500'
+                          : isRegistered && registrationStatus === 'pending'
+                          ? 'bg-yellow-600/50 text-yellow-400'
+                          : 'bg-gray-600/30 text-gray-400'
                       }`}
                     >
                       <div className="font-medium truncate text-xs">
