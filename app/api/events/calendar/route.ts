@@ -37,7 +37,6 @@ export async function GET(req: NextRequest) {
     if (userRole === "admin") {
       // Admin can see all events (archived and non-archived)
       events = await prisma.event.findMany({
-        orderBy: { date: "asc" },
         select: {
           id: true,
           titleEn: true,
@@ -71,7 +70,6 @@ export async function GET(req: NextRequest) {
             }
           }))
         },
-        orderBy: { date: "asc" },
         select: {
           id: true,
           titleEn: true,
@@ -86,7 +84,26 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    return NextResponse.json(events)
+    // ترتيب الأحداث: الحالية أولاً، القادمة بعد ذلك، المنتهية في النهاية
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // بداية اليوم
+
+    const sortedEvents = events.sort((a, b) => {
+      const dateA = new Date(a.date)
+      const dateB = new Date(b.date)
+
+      // إذا كان الحدث A منتهي والحدث B غير منتهي، B أولاً
+      const isAFinished = dateA < today
+      const isBFinished = dateB < today
+
+      if (!isAFinished && isBFinished) return -1
+      if (isAFinished && !isBFinished) return 1
+
+      // إذا كان كلا الحدثين منتهيين أو غير منتهيين، رتب حسب التاريخ
+      return dateA.getTime() - dateB.getTime()
+    })
+
+    return NextResponse.json(sortedEvents)
   } catch (error) {
     console.error("Error fetching calendar events:", error)
     return NextResponse.json(

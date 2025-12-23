@@ -178,10 +178,29 @@ export async function GET(request: NextRequest) {
             }
           }
         }
-      },
-      orderBy: { createdAt: "desc" }
+      }
     });
-    return NextResponse.json(events);
+
+    // ترتيب الأحداث: الحالية أولاً، القادمة بعد ذلك، المنتهية في النهاية
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // بداية اليوم
+
+    const sortedEvents = events.sort((a, b) => {
+      const dateA = new Date(a.date)
+      const dateB = new Date(b.date)
+
+      // إذا كان الحدث A منتهي والحدث B غير منتهي، B أولاً
+      const isAFinished = dateA < today
+      const isBFinished = dateB < today
+
+      if (!isAFinished && isBFinished) return -1
+      if (isAFinished && !isBFinished) return 1
+
+      // إذا كان كلا الحدثين منتهيين أو غير منتهيين، رتب حسب التاريخ
+      return dateA.getTime() - dateB.getTime()
+    })
+
+    return NextResponse.json(sortedEvents);
   } catch (error) {
     console.error("Error fetching events:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
