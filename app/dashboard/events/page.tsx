@@ -348,7 +348,7 @@ export default function EventsPage() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch("/api/events")
+      const res = await fetch("/api/events/my-attendance")
       const data = await res.json()
       setEvents(data)
     } catch (error) {
@@ -420,7 +420,7 @@ export default function EventsPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-3xl font-bold text-white">
-              🏁 {t("upcomingEvents")}
+              📅 {t("myAttendance")}
             </h1>
             
             {/* View Toggle Buttons */}
