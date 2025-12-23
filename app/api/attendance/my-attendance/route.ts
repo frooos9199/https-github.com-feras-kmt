@@ -37,6 +37,8 @@ export async function GET(req: NextRequest) {
             descriptionAr: true,
             date: true,
             time: true,
+            endDate: true,
+            endTime: true,
             location: true,
             marshalTypes: true,
           }

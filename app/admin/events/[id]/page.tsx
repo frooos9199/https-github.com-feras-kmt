@@ -397,32 +397,96 @@ export default function EventDetails() {
                   <p className="text-white">{language === "ar" ? event.descriptionAr : event.descriptionEn}</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ البداية" : "Start Date"}</p>
-                    <p className="text-white font-medium text-lg">
-                      {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
-                    </p>
+                  {/* تاريخ ووقت البداية */}
+                  <div className="bg-green-600/10 border border-green-600/30 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-green-500">📅</span>
+                      <div>
+                        <div className="text-green-500 font-bold text-sm">
+                          {language === "ar" ? "البداية" : "Start"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-white font-semibold text-lg mb-1">
+                      {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </div>
+                    <div className="text-green-500 text-lg font-bold">
+                      {event.time}
+                    </div>
                   </div>
+
+                  {/* تاريخ ووقت النهاية */}
                   {event.endDate && (
-                    <div>
-                      <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ النهاية" : "End Date"}</p>
-                      <p className="text-white font-medium text-lg">
-                        {new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
-                      </p>
+                    <div className="bg-red-600/10 border border-red-600/30 rounded-lg p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-red-500">🏁</span>
+                        <div>
+                          <div className="text-red-500 font-bold text-sm">
+                            {language === "ar" ? "النهاية" : "End"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-white font-semibold text-lg mb-1">
+                        {new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </div>
+                      <div className="text-red-500 text-lg font-bold">
+                        {event.endTime || event.time}
+                      </div>
                     </div>
                   )}
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "الوقت" : "Time"}</p>
-                    <p className="text-white font-medium text-lg">
-                      {event.time} {event.endTime && `- ${event.endTime}`}
-                    </p>
+
+                  {/* الموقع */}
+                  <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-blue-500">📍</span>
+                      <div>
+                        <div className="text-blue-500 font-bold text-sm">
+                          {language === "ar" ? "الموقع" : "Location"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-white font-semibold text-lg">
+                      {event.location}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "الموقع" : "Location"}</p>
-                    <p className="text-white font-medium text-lg">{event.location}</p>
+
+                  {/* الحالة */}
+                  <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-yellow-500">📊</span>
+                      <div>
+                        <div className="text-yellow-500 font-bold text-sm">
+                          {language === "ar" ? "الحالة" : "Status"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-white font-semibold text-lg">
+                      {event.status === "active" 
+                        ? (language === "ar" ? "نشط" : "Active") 
+                        : (language === "ar" ? "غير نشط" : "Inactive")}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "أنواع المارشال المطلوبة" : "Required Marshal Types"}</p>
+
+                  {/* أنواع المارشال المطلوبة */}
+                  <div className="md:col-span-2 bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-purple-500">👥</span>
+                      <div>
+                        <div className="text-purple-500 font-bold text-sm">
+                          {language === "ar" ? "أنواع المارشال المطلوبة" : "Required Marshal Types"}
+                        </div>
+                      </div>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {event.marshalTypes && event.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
                         const typeLabels: Record<string, {en: string, ar: string, icon: string, color: string}> = {

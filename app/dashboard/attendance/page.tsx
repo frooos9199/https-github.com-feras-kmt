@@ -7,6 +7,44 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
 
+// دالة لحساب العداد التنازلي
+const getCountdown = (startDate: string, startTime: string, endDate?: string, endTime?: string, status?: string, language: string = "en") => {
+  const now = new Date()
+  const start = new Date(`${startDate}T${startTime}`)
+  const end = endDate && endTime ? new Date(`${endDate}T${endTime}`) : new Date(`${startDate}T23:59`)
+  
+  let target, label, color
+  
+  if (now < start) {
+    // قبل الحدث
+    target = start
+    label = language === "ar" ? "يبدأ بعد: " : "Starts in: "
+    color = "#43A047"
+  } else if (now >= start && now <= end) {
+    // أثناء الحدث
+    target = end
+    label = language === "ar" ? "ينتهي بعد: " : "Ends in: "
+    color = "#FFA726"
+  } else {
+    // بعد الحدث
+    return { text: language === "ar" ? "انتهى الحدث" : "Event finished", color: "#e53935" }
+  }
+  
+  const diff = Math.max(0, target - now)
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
+  const mins = Math.floor((diff / (1000 * 60)) % 60)
+  const secs = Math.floor((diff / 1000) % 60)
+  
+  const timeStr = 
+    (days > 0 ? days + (language === "ar" ? " يوم " : "d ") : "") +
+    (hours > 0 ? hours + (language === "ar" ? " ساعة " : "h ") : "") +
+    (mins > 0 ? mins + (language === "ar" ? " دقيقة " : "m ") : "") +
+    secs + (language === "ar" ? " ثانية" : "s")
+  
+  return { text: label + timeStr, color }
+}
+
 interface AttendanceRecord {
   id: string
   status: string
@@ -20,9 +58,41 @@ interface AttendanceRecord {
     descriptionAr: string
     date: string
     time: string
+    endTime?: string
+    endDate?: string
     location: string
     type: string
   }
+}
+
+// مكون العداد التنازلي
+function CountdownTimer({ event, status }: { event: AttendanceRecord['event'], status: string }) {
+  const { language } = useLanguage()
+  const [countdown, setCountdown] = useState({ text: '', color: '#43A047' })
+  
+  useEffect(() => {
+    if (!event.date) return
+    
+    const updateCountdown = () => {
+      const cd = getCountdown(event.date, event.time, event.endDate, event.endTime, status, language)
+      setCountdown(cd)
+    }
+    
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 1000)
+    return () => clearInterval(interval)
+  }, [event.date, event.time, event.endDate, event.endTime, status, language])
+  
+  return (
+    <div className="text-center mb-4">
+      <div 
+        className="text-lg font-bold px-4 py-2 rounded-lg inline-block"
+        style={{ color: countdown.color }}
+      >
+        {countdown.text}
+      </div>
+    </div>
+  )
 }
 
 export default function MyAttendancePage() {
@@ -294,26 +364,76 @@ export default function MyAttendancePage() {
                       {language === "ar" ? attendance.event.descriptionAr : attendance.event.descriptionEn}
                     </p>
 
+                    {/* العداد التنازلي */}
+                    <CountdownTimer event={attendance.event} status={attendance.status} />
+
+                    {/* وقت وتاريخ البداية والنهاية */}
+                    <div className="mb-4">
+                      {/* تاريخ ووقت البداية */}
+                      <div className="flex items-center mb-3 bg-green-600/10 border border-green-600/30 rounded-lg p-4">
+                        <div className="flex items-center gap-3 flex-1">
+                          <span className="text-green-500">📅</span>
+                          <div>
+                            <div className="text-green-500 font-bold text-sm mb-1">
+                              {language === "ar" ? "البداية" : "Start"}
+                            </div>
+                            <div className="text-white font-semibold text-base">
+                              {new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                                weekday: 'short',
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-green-500 text-lg font-bold">{attendance.event.time}</span>
+                        </div>
+                      </div>
+                      
+                      {/* تاريخ ووقت النهاية */}
+                      {(attendance.event.endDate || attendance.event.endTime) && (
+                        <div className="flex items-center bg-red-600/10 border border-red-600/30 rounded-lg p-4">
+                          <div className="flex items-center gap-3 flex-1">
+                            <span className="text-red-500">🏁</span>
+                            <div>
+                              <div className="text-red-500 font-bold text-sm mb-1">
+                                {language === "ar" ? "النهاية" : "End"}
+                              </div>
+                              <div className="text-white font-semibold text-base">
+                                {attendance.event.endDate ? new Date(attendance.event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                                  weekday: 'short',
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                }) : new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                                  weekday: 'short',
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-red-500 text-lg font-bold">
+                              {attendance.event.endTime || (attendance.event.time ? attendance.event.time : '23:59')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* الموقع وتاريخ التسجيل */}
                     <div className="space-y-2 mb-4 text-sm">
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>📅</span>
-                        <span>{new Date(attendance.event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <span>🕐</span>
-                        <span>{attendance.event.time}</span>
-                      </div>
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📍</span>
                         <span>{attendance.event.location}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-300">
                         <span>📝</span>
-                        <span>{new Date(attendance.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
+                        <span>{language === "ar" ? "سُجل في: " : "Registered: "} {new Date(attendance.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
                       </div>
                     </div>
 

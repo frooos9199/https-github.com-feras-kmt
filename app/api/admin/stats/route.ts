@@ -43,6 +43,33 @@ export async function GET(req: NextRequest) {
     // Get total events
     const totalEvents = await prisma.event.count()
 
+    // Get today's events
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const todayEvents = await prisma.event.count({
+      where: {
+        date: {
+          gte: today,
+          lt: tomorrow
+        },
+        status: "active"
+      }
+    })
+
+    // Get past events
+    const pastEvents = await prisma.event.count({
+      where: {
+        date: { lt: today },
+        status: "active"
+      }
+    })
+
+    // Get marshals by specialty (marshalTypes)
+    // For now, return empty object as this requires parsing comma-separated values
+    const marshalsBySpecialty: { [key: string]: number } = {}
+
     // Get pending attendance requests
     const pendingAttendance = await prisma.attendance.count({
       where: { status: "pending" }
@@ -79,8 +106,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       totalMarshals,
       totalEvents,
-      pendingAttendance,
+      marshalsBySpecialty,
       upcomingEvents,
+      todayEvents,
+      pastEvents,
+      pendingAttendance,
       recentActivity,
     })
   } catch (error) {
