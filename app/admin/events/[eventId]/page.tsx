@@ -42,6 +42,21 @@ interface Event {
       image: string | null
     }
   }>
+  eventMarshals?: Array<{
+    id: string
+    status: string
+    invitedAt: string
+    respondedAt: string | null
+    marshal: {
+      id: string
+      employeeId: string
+      name: string
+      email: string
+      phone: string
+      image: string | null
+      marshalTypes: string
+    }
+  }>
 }
 
 export default function EventDetails() {
@@ -88,11 +103,11 @@ export default function EventDetails() {
 
   useEffect(() => {
     console.log('params:', params);
-    if (params.id) {
-      setEventId(params.id as string)
-      console.log('eventId set:', params.id)
+    if (params.eventId) {
+      setEventId(params.eventId as string)
+      console.log('eventId set:', params.eventId)
     } else {
-      console.warn('No id in params!', params)
+      console.warn('No eventId in params!', params)
     }
   }, [params])
 
@@ -264,10 +279,10 @@ export default function EventDetails() {
   const fetchAvailableMarshals = async () => {
     if (!event) return
     try {
-      const res = await fetch(`/api/admin/events/${event.id}/available-marshals`)
+      const res = await fetch(`/api/admin/events/${event.id}/invitations`)
       if (res.ok) {
         const data = await res.json()
-        setAvailableMarshals(data)
+        setAvailableMarshals(data.availableMarshals || [])
       }
     } catch (error) {
       console.error("Error fetching available marshals:", error)
@@ -277,10 +292,10 @@ export default function EventDetails() {
   const handleAddMarshal = async () => {
     if (!event || !selectedMarshalToAdd) return
     try {
-      const res = await fetch(`/api/admin/events/${event.id}/marshals`, {
+      const res = await fetch(`/api/admin/events/${event.id}/invitations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: selectedMarshalToAdd })
+        body: JSON.stringify({ marshalId: selectedMarshalToAdd })
       })
       if (res.ok) {
         setShowAddMarshalModal(false)
@@ -292,6 +307,44 @@ export default function EventDetails() {
       console.error("Error adding marshal:", error)
     }
   }
+
+  const handleApproveAttendance = async (attendanceId: string) => {
+    if (!event) return
+    try {
+      const res = await fetch(`/api/admin/events/${event.id}/attendance/${attendanceId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+      if (res.ok) {
+        fetchEvent()
+      } else {
+        const errData = await res.json()
+        alert(errData.error || "حدث خطأ أثناء قبول الطلب")
+      }
+    } catch (error) {
+      console.error("Error approving attendance:", error)
+      alert("حدث خطأ أثناء الاتصال بالخادم")
+    }
+  }
+
+  const handleRejectAttendance = async (attendanceId: string) => {
+    if (!event) return
+    try {
+      const res = await fetch(`/api/admin/events/${event.id}/attendance/${attendanceId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+      if (res.ok) {
+        fetchEvent()
+      } else {
+        const errData = await res.json()
+        alert(errData.error || "حدث خطأ أثناء رفض الطلب")
+      }
+    } catch (error) {
+        console.error("Error rejecting attendance:", error)
+        alert("حدث خطأ أثناء الاتصال بالخادم")
+      }
+    }
 
   if (status === "loading" || loading) {
     return (
@@ -310,7 +363,28 @@ export default function EventDetails() {
     )
   }
 
-  if (!session || session.user.role !== "admin" || !event) return null
+  if (!session || session.user.role !== "admin") {
+    console.log('Auth check failed:', { session: !!session, role: session?.user?.role })
+    return null
+  }
+
+  if (!event) {
+    console.log('No event data, showing loading or error')
+    if (loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-black">
+          <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )
+    } else {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-black text-red-600">
+          <p className="mb-4 text-lg">لم يتم العثور على بيانات الحدث</p>
+          <Link href="/admin/events" className="px-4 py-2 bg-red-600 text-white rounded-lg">رجوع لقائمة الأحداث</Link>
+        </div>
+      )
+    }
+  }
 
   const statusColor = event.status === "active" ? "green" : event.status === "cancelled" ? "red" : "blue"
 
@@ -516,10 +590,10 @@ export default function EventDetails() {
               </div>
             </div>
 
-            {/* Registered Marshals */}
+            {/* Accepted Marshals */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">
-                👥 {language === "ar" ? "المارشالات المسجلين" : "Registered Marshals"} ({event.attendances.length}/{event.maxMarshals})
+                ✅ {language === "ar" ? "المارشالات المقبولين" : "Accepted Marshals"} ({event.attendances.filter(a => a.status === 'approved').length}/{event.maxMarshals})
               </h2>
               <div className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6 bg-zinc-900/50 border border-zinc-800">
                 {/* مستطيل أحمر خلف الشعارات */}
@@ -548,13 +622,13 @@ export default function EventDetails() {
                   ➕ {language === "ar" ? "إضافة مارشال" : "Add Marshal"}
                 </button>
               </div>
-              {event.attendances.length === 0 ? (
+              {event.attendances.filter(a => a.status === 'approved').length === 0 ? (
                 <p className="text-gray-400 text-center py-8">
-                  {language === "ar" ? "لا يوجد مارشالات مسجلين" : "No marshals registered yet"}
+                  {language === "ar" ? "لا يوجد مارشالات مقبولين" : "No accepted marshals yet"}
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {event.attendances.map((attendance) => (
+                  {event.attendances.filter(a => a.status === 'approved').map((attendance) => (
                     <div
                       key={attendance.id}
                       className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 ${
@@ -633,6 +707,203 @@ export default function EventDetails() {
                 </div>
               )}
             </div>
+
+            {/* Invited Marshals */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-white mb-4">
+                📨 {language === "ar" ? "المارشالات المدعوين" : "Invited Marshals"} ({event.eventMarshals?.length || 0})
+              </h2>
+              <div className="flex justify-center mb-6">
+                <button
+                  onClick={() => setShowAddMarshalModal(true)}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                >
+                  ➕ {language === "ar" ? "دعوة مارشال" : "Invite Marshal"}
+                </button>
+              </div>
+              {!event.eventMarshals || event.eventMarshals.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">
+                  {language === "ar" ? "لا يوجد مارشالات مدعوين" : "No invited marshals yet"}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {event.eventMarshals.map((invitation) => (
+                    <div
+                      key={invitation.id}
+                      className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 ${
+                        invitation.status === 'accepted' 
+                          ? 'border-green-600/50 bg-green-900/20' 
+                          : invitation.status === 'declined'
+                          ? 'border-red-600/50 bg-red-900/20'
+                          : 'border-yellow-600/50 bg-yellow-900/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {invitation.marshal.image ? (
+                          <img
+                            src={invitation.marshal.image}
+                            alt={invitation.marshal.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-blue-600"
+                          />
+                        ) : (
+                          <div className="w-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold">
+                            {invitation.marshal.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-white font-medium">
+                            {invitation.marshal.employeeId && (
+                              <span className="text-blue-400 font-bold mr-2">
+                                {invitation.marshal.employeeId}
+                              </span>
+                            )}
+                            {invitation.marshal.name}
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            {invitation.marshal.email}
+                            {invitation.marshal.phone && (
+                              <span className="ml-2 text-gray-500">• {invitation.marshal.phone}</span>
+                            )}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {language === "ar" ? "مدعو في:" : "Invited:"} {new Date(invitation.invitedAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                            {invitation.respondedAt && (
+                              <span className="ml-2">
+                                {language === "ar" ? "رد في:" : "Responded:"} {new Date(invitation.respondedAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                              </span>
+                            )}
+                          </p>
+                          {/* عرض تخصصات المارشال */}
+                          {invitation.marshal.marshalTypes && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {invitation.marshal.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
+                                const typeLabels: Record<string, {en: string, ar: string, icon: string, color: string}> = {
+                                  'karting': {en: 'Karting', ar: 'كارتنج', icon: '🏎️', color: 'bg-yellow-600'},
+                                  'motocross': {en: 'Motocross', ar: 'موتوكروس', icon: '🏍️', color: 'bg-orange-600'},
+                                  'rescue': {en: 'Rescue', ar: 'إنقاذ', icon: '🚑', color: 'bg-red-600'},
+                                  'circuit': {en: 'Circuit', ar: 'سيركت', icon: '🏁', color: 'bg-blue-600'},
+                                  'drift': {en: 'Drift', ar: 'دريفت', icon: '💨', color: 'bg-purple-600'},
+                                  'drag-race': {en: 'Drag Race', ar: 'دراق ريس', icon: '🚦', color: 'bg-pink-600'},
+                                  'pit': {en: 'Pit', ar: 'بت', icon: '🔧', color: 'bg-teal-600'}
+                                }
+                                const label = typeLabels[type]
+                                if (!label) return null
+                                return (
+                                  <span 
+                                    key={type}
+                                    className={`${label.color} text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1`}
+                                  >
+                                    <span>{label.icon}</span>
+                                    <span>{language === "ar" ? label.ar : label.en}</span>
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          invitation.status === 'accepted' 
+                            ? 'bg-green-600/20 text-green-500' 
+                            : invitation.status === 'declined'
+                            ? 'bg-red-600/20 text-red-500'
+                            : 'bg-yellow-600/20 text-yellow-500'
+                        }`}>
+                          {invitation.status === 'accepted' 
+                            ? (language === "ar" ? "مقبول" : "Accepted")
+                            : invitation.status === 'declined'
+                            ? (language === "ar" ? "مرفوض" : "Declined")
+                            : (language === "ar" ? "معلق" : "Pending")
+                          }
+                        </span>
+                        {invitation.status === 'invited' && (
+                          <button
+                            onClick={() => {
+                              // يمكن إضافة إعادة إرسال الدعوة هنا
+                            }}
+                            className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-lg transition-all text-sm font-bold"
+                          >
+                            {language === "ar" ? "إعادة إرسال" : "Resend"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Pending Attendance Requests */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-white mb-4">
+                ⏳ {language === "ar" ? "طلبات الحضور المعلقة" : "Pending Attendance Requests"} ({event.attendances.filter(a => a.status === 'pending').length})
+              </h2>
+              {!event.attendances.filter(a => a.status === 'pending').length ? (
+                <p className="text-gray-400 text-center py-8">
+                  {language === "ar" ? "لا توجد طلبات حضور معلقة" : "No pending attendance requests"}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {event.attendances.filter(a => a.status === 'pending').map((attendance) => (
+                    <div
+                      key={attendance.id}
+                      className="flex items-center justify-between bg-zinc-800/50 border border-yellow-600/50 rounded-xl p-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        {attendance.user.image ? (
+                          <img
+                            src={attendance.user.image}
+                            alt={attendance.user.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-yellow-600"
+                          />
+                        ) : (
+                          <div className="w-12 rounded-full bg-gradient-to-br from-yellow-600 to-yellow-800 flex items-center justify-center text-white font-bold">
+                            {attendance.user.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-white font-medium">
+                            {attendance.user.employeeId && (
+                              <span className="text-blue-400 font-bold mr-2">
+                                {attendance.user.employeeId}
+                              </span>
+                            )}
+                            {attendance.user.name}
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            {attendance.user.email}
+                            {attendance.user.phone && (
+                              <span className="ml-2 text-gray-500">• {attendance.user.phone}</span>
+                            )}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {language === "ar" ? "تاريخ الطلب:" : "Requested:"} {new Date(attendance.registeredAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 rounded-full text-xs font-bold bg-yellow-600/20 text-yellow-500">
+                          {language === "ar" ? "معلق" : "Pending"}
+                        </span>
+                        <button
+                          onClick={() => handleApproveAttendance(attendance.id)}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all text-sm font-bold"
+                        >
+                          {language === "ar" ? "قبول" : "Approve"}
+                        </button>
+                        <button
+                          onClick={() => handleRejectAttendance(attendance.id)}
+                          className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
+                        >
+                          {language === "ar" ? "رفض" : "Reject"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </motion.div>
 
           {/* Stats */}
@@ -647,16 +918,16 @@ export default function EventDetails() {
               </h2>
               <div className="space-y-4">
                 <div className="bg-green-600/10 border border-green-600/30 rounded-xl p-4">
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المسجلين" : "Registered"}</p>
-                  <p className="text-green-500 font-bold text-3xl">{event._count.attendances}</p>
+                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المقبولين" : "Accepted"}</p>
+                  <p className="text-green-500 font-bold text-3xl">{event.attendances.filter(a => a.status === 'approved').length}</p>
                 </div>
                 <div className="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4">
-                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "الحد الأقصى" : "Max Capacity"}</p>
-                  <p className="text-blue-500 font-bold text-3xl">{event.maxMarshals}</p>
+                  <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المدعوين" : "Invited"}</p>
+                  <p className="text-blue-500 font-bold text-3xl">{event.eventMarshals?.length || 0}</p>
                 </div>
                 <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المتبقي" : "Available"}</p>
-                  <p className="text-yellow-500 font-bold text-3xl">{event.maxMarshals - event._count.attendances}</p>
+                  <p className="text-yellow-500 font-bold text-3xl">{event.maxMarshals - event.attendances.filter(a => a.status === 'approved').length}</p>
                 </div>
                 <div className="bg-purple-600/10 border border-purple-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ الإنشاء" : "Created"}</p>

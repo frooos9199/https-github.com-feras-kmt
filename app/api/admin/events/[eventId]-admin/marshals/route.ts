@@ -7,7 +7,7 @@ import { sendEmail, addedToEventEmailTemplate } from "@/lib/email"
 // POST - Add marshal to event
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     console.log('[API] Add Marshal to Event', { params: await params, body: await req.clone().json() });
@@ -17,7 +17,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = await params
+    const { eventId } = await params
     const body = await req.json()
     const { userId } = body
 
@@ -29,19 +29,19 @@ export async function POST(
     // Check if user is already registered for this event
     const existingAttendance = await prisma.attendance.findFirst({
       where: {
-        eventId: id,
+        eventId: eventId,
         userId: userId
       }
     })
 
     if (existingAttendance) {
-  console.error('[API] Marshal already registered', { id, userId });
+  console.error('[API] Marshal already registered', { eventId, userId });
       return NextResponse.json({ error: "Marshal is already registered for this event" }, { status: 400 })
     }
 
     // Get event and user details for email
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: { id: eventId },
       select: {
         titleEn: true,
         titleAr: true,
@@ -65,11 +65,11 @@ export async function POST(
     }
 
     // Create attendance record
-    console.log('[API] Creating attendance', { userId, eventId: id });
+    console.log('[API] Creating attendance', { userId, eventId: eventId });
     await prisma.attendance.create({
       data: {
         userId: userId,
-        eventId: id,
+        eventId: eventId,
         status: "approved" // Auto-approve when added by admin
       }
     })

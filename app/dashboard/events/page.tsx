@@ -10,39 +10,73 @@ import Link from "next/link"
 // دالة لحساب العداد التنازلي
 const getCountdown = (startDate: string, startTime: string, endDate?: string, endTime?: string, status?: string, language: string = "en") => {
   const now = new Date()
-  const start = new Date(`${startDate}T${startTime}`)
-  const end = endDate && endTime ? new Date(`${endDate}T${endTime}`) : new Date(`${startDate}T23:59`)
-  
-  let target, label, color
-  
-  if (now < start) {
-    // قبل الحدث
-    target = start
-    label = language === "ar" ? "يبدأ بعد: " : "Starts in: "
-    color = "#43A047"
-  } else if (now >= start && now <= end) {
-    // أثناء الحدث
-    target = end
-    label = language === "ar" ? "ينتهي بعد: " : "Ends in: "
-    color = "#FFA726"
-  } else {
-    // بعد الحدث
-    return { text: language === "ar" ? "انتهى الحدث" : "Event finished", color: "#e53935" }
+
+  // استخراج التاريخ فقط من ISO string إذا لزم الأمر
+  const extractDateOnly = (dateStr: string) => {
+    if (dateStr.includes('T')) {
+      return dateStr.split('T')[0]
+    }
+    return dateStr
   }
-  
+
+  const startDateOnly = extractDateOnly(startDate)
+  const endDateOnly = endDate ? extractDateOnly(endDate) : startDateOnly
+
+  const start = new Date(`${startDateOnly}T${startTime}`)
+  const end = endDate && endTime ? new Date(`${endDateOnly}T${endTime}`) : new Date(`${startDateOnly}T23:59`)
+
+  let target, label, color, icon, bgColor
+
+  if (now < start) {
+    // قبل الحدث - عداد تنازلي أخضر
+    target = start
+    label = language === "ar" ? "يبدأ بعد" : "Starts in"
+    color = "#22c55e" // أخضر فاتح
+    bgColor = "#dcfce7" // خلفية خضراء فاتحة
+    icon = "⏰"
+  } else if (now >= start && now <= end) {
+    // أثناء الحدث - عداد تنازلي برتقالي
+    target = end
+    label = language === "ar" ? "ينتهي بعد" : "Ends in"
+    color = "#f97316" // برتقالي
+    bgColor = "#fed7aa" // خلفية برتقالية فاتحة
+    icon = "🏁"
+  } else {
+    // بعد الحدث - انتهى
+    return {
+      text: language === "ar" ? "انتهى الحدث" : "Event finished",
+      color: "#ef4444", // أحمر
+      bgColor: "#fecaca", // خلفية حمراء فاتحة
+      icon: "✅",
+      finished: true
+    }
+  }
+
   const diff = Math.max(0, target.getTime() - now.getTime())
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
   const mins = Math.floor((diff / (1000 * 60)) % 60)
   const secs = Math.floor((diff / 1000) % 60)
-  
-  const timeStr = 
-    (days > 0 ? days + (language === "ar" ? " يوم " : "d ") : "") +
-    (hours > 0 ? hours + (language === "ar" ? " ساعة " : "h ") : "") +
-    (mins > 0 ? mins + (language === "ar" ? " دقيقة " : "m ") : "") +
-    secs + (language === "ar" ? " ثانية" : "s")
-  
-  return { text: label + timeStr, color }
+
+  let timeStr = ""
+  if (days > 0) {
+    timeStr += days + (language === "ar" ? " يوم " : "d ")
+  }
+  if (hours > 0 || days > 0) {
+    timeStr += hours + (language === "ar" ? " ساعة " : "h ")
+  }
+  if (mins > 0 || hours > 0 || days > 0) {
+    timeStr += mins + (language === "ar" ? " دقيقة " : "m ")
+  }
+  timeStr += secs + (language === "ar" ? " ثانية" : "s")
+
+  return {
+    text: `${icon} ${label}: ${timeStr}`,
+    color,
+    bgColor,
+    icon,
+    finished: false
+  }
 }
 
 interface Event {
@@ -69,28 +103,45 @@ interface Event {
 // مكون العداد التنازلي
 function CountdownTimer({ event }: { event: Event }) {
   const { language } = useLanguage()
-  const [countdown, setCountdown] = useState({ text: '', color: '#43A047' })
-  
+  const [countdown, setCountdown] = useState({
+    text: '',
+    color: '#22c55e',
+    bgColor: '#dcfce7',
+    icon: '⏰',
+    finished: false
+  })
+
   useEffect(() => {
     if (!event.date) return
-    
+
     const updateCountdown = () => {
       const cd = getCountdown(event.date, event.time, event.endDate, event.endTime, undefined, language)
       setCountdown(cd)
     }
-    
+
     updateCountdown()
     const interval = setInterval(updateCountdown, 1000)
     return () => clearInterval(interval)
   }, [event.date, event.time, event.endDate, event.endTime, language])
-  
+
   return (
     <div className="text-center mb-4">
-      <div 
-        className="text-lg font-bold px-4 py-2 rounded-lg inline-block"
-        style={{ color: countdown.color }}
+      <div
+        className={`text-lg font-bold px-6 py-3 rounded-xl inline-block border-2 transition-all duration-300 ${
+          countdown.finished
+            ? 'border-red-300 shadow-lg'
+            : 'border-current shadow-md hover:shadow-lg'
+        }`}
+        style={{
+          color: countdown.color,
+          backgroundColor: countdown.bgColor,
+          borderColor: countdown.color
+        }}
       >
-        {countdown.text}
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">{countdown.icon}</span>
+          <span className="font-bold">{countdown.text}</span>
+        </div>
       </div>
     </div>
   )

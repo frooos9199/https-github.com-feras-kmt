@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma"
 // GET - Fetch available marshals for an event (not already registered)
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,11 +14,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = await params
+    const { eventId } = await params
 
     // Get event details to check marshal types
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: { id: eventId },
       select: {
         marshalTypes: true,
         attendances: {

@@ -7,7 +7,7 @@ import { sendEmail, removalEmailTemplate } from "@/lib/email"
 // DELETE - Remove marshal from event
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string; userId: string }> }
+  { params }: { params: Promise<{ eventId: string; userId: string }> }
 ) {
   try {
     console.log('[API] Remove Marshal from Event', { params: await params, body: await req.clone().json() });
@@ -17,14 +17,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id, userId } = await params
+    const { eventId, userId } = await params
     const body = await req.json()
     const { reason } = body
 
     // Get attendance details before update for email
     const attendance = await prisma.attendance.findFirst({
       where: {
-        eventId: id,
+        eventId: eventId,
         userId: userId
       },
       include: {
@@ -45,7 +45,7 @@ export async function DELETE(
     })
 
     if (!attendance) {
-  console.error('[API] Attendance record not found', { id, userId });
+  console.error('[API] Attendance record not found', { eventId, userId });
       return NextResponse.json({ error: "Attendance record not found" }, { status: 404 })
     }
 
@@ -65,10 +65,10 @@ export async function DELETE(
     }
 
     // Update the attendance record to cancelled status with reason
-    console.log('[API] Cancelling attendance', { eventId: id, userId });
+    console.log('[API] Cancelling attendance', { eventId: eventId, userId });
     await prisma.attendance.updateMany({
       where: {
-        eventId: id,
+        eventId: eventId,
         userId: userId
       },
       data: {

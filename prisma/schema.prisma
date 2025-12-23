@@ -37,6 +37,7 @@ model User {
   updatedAt          DateTime @updatedAt
 
   attendances   Attendance[]
+  eventMarshals EventMarshal[] @relation("EventMarshalToUser")
   notifications Notification[]
 }
 
@@ -58,7 +59,23 @@ model Event {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  attendances Attendance[]
+  attendances   Attendance[]
+  eventMarshals EventMarshal[]
+}
+
+model EventMarshal {
+  id          String   @id @default(cuid())
+  eventId     String
+  marshalId   String   // User ID of the marshal
+  status      String   @default("invited") // "invited", "accepted", "declined", "approved", "rejected"
+  invitedAt   DateTime @default(now())
+  respondedAt DateTime? // When marshal responded to invitation
+  notes       String?
+
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  marshal User  @relation("EventMarshalToUser", fields: [marshalId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, marshalId])
 }
 
 model Attendance {

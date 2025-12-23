@@ -7,7 +7,7 @@ import { getUserFromToken } from "@/lib/auth"
 // GET - Fetch single event with registered marshals
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     // Debug: log headers and params
@@ -44,13 +44,13 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
-    if (!id) {
-      console.error('API event: missing id param', { id });
-      return NextResponse.json({ error: "Event id is required" }, { status: 400 });
+    const { eventId } = await params;
+    if (!eventId) {
+      console.error('API event: missing eventId param', { eventId });
+      return NextResponse.json({ error: "Event eventId is required" }, { status: 400 });
     }
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: { id: eventId },
       include: {
         attendances: {
           select: {
@@ -75,6 +75,28 @@ export async function GET(
             registeredAt: 'desc'
           }
         },
+        eventMarshals: {
+          select: {
+            id: true,
+            status: true,
+            invitedAt: true,
+            respondedAt: true,
+            marshal: {
+              select: {
+                id: true,
+                employeeId: true,
+                name: true,
+                email: true,
+                phone: true,
+                image: true,
+                marshalTypes: true
+              }
+            }
+          },
+          orderBy: {
+            invitedAt: 'desc'
+          }
+        },
         _count: {
           select: { attendances: true }
         }
@@ -82,7 +104,7 @@ export async function GET(
     });
 
     if (!event) {
-      console.error('API event not found', { id });
+      console.error('API event not found', { eventId });
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
@@ -96,7 +118,7 @@ export async function GET(
 // PATCH - Update event
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     let userId: string | null = null
@@ -127,7 +149,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = await params
+    const { eventId } = await params
     const body = await req.json()
     console.log('PATCH request body:', body)
     const { 
@@ -162,7 +184,7 @@ export async function PATCH(
     console.log('Update data:', updateData)
 
     const event = await prisma.event.update({
-      where: { id },
+      where: { id: eventId },
       data: updateData
     })
 
@@ -176,7 +198,7 @@ export async function PATCH(
 // DELETE - Delete event
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     let userId: string | null = null
@@ -200,16 +222,16 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = await params
+    const { eventId } = await params
 
     // Delete all attendances first
     await prisma.attendance.deleteMany({
-      where: { eventId: id }
+      where: { eventId: eventId }
     })
 
     // Delete the event
     await prisma.event.delete({
-      where: { id }
+      where: { id: eventId }
     })
 
     return NextResponse.json({ success: true })
