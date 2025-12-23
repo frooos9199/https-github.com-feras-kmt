@@ -24,15 +24,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get events where the user has registered or been approved
+    // Get events where the user has been approved for attendance
     const events = await prisma.event.findMany({
       where: {
         attendances: {
           some: {
             userId: userId,
-            status: {
-              in: ["registered", "approved"]
-            }
+            status: "approved"
           }
         }
       },
