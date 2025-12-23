@@ -47,13 +47,14 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Send notifications to matching marshals
-    await notifyMatchingMarshalsAboutNewEvent(
-      event.id,
-      event.titleEn,
-      event.titleAr,
-      event.marshalTypes
-    );
+    // لا نرسل إشعارات تلقائية - المارشال يرى الأحداث في الكلندر
+    // والإشعارات تُرسل فقط عندما يقرر الأدمن إرسالها خصيصاً
+    // await notifyMatchingMarshalsAboutNewEvent(
+    //   event.id,
+    //   event.titleEn,
+    //   event.titleAr,
+    //   event.marshalTypes
+    // );
 
     // Send email only to matching marshals
     const eventTypes = event.marshalTypes.split(',').filter((t: string) => t)
@@ -115,7 +116,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
-import { notifyMatchingMarshalsAboutNewEvent } from "@/lib/notifications"
 import { sendEmail, newEventEmailTemplate } from "@/lib/email"
 import jwt from "jsonwebtoken"
 // استخراج التوكن والتحقق منه
