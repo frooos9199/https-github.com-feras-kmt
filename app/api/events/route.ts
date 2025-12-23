@@ -47,9 +47,6 @@ export async function GET(req: NextRequest) {
           }
         }))
       },
-      orderBy: {
-        date: "asc"
-      },
       include: {
         attendances: {
           where: {
@@ -64,8 +61,27 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // ترتيب الأحداث: اليوم أولاً، القادمة بعد ذلك، المنتهية في النهاية
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // بداية اليوم
+
+    const sortedEvents = allEvents.sort((a, b) => {
+      const dateA = new Date(a.date)
+      const dateB = new Date(b.date)
+
+      // إذا كان الحدث A منتهي والحدث B غير منتهي، B أولاً
+      const isAFinished = dateA < today
+      const isBFinished = dateB < today
+
+      if (!isAFinished && isBFinished) return -1
+      if (isAFinished && !isBFinished) return 1
+
+      // إذا كان كلا الحدثين منتهيين أو غير منتهيين، رتب حسب التاريخ
+      return dateA.getTime() - dateB.getTime()
+    })
+
     // Add approved and rejected counts to each event
-    const eventsWithCounts = await Promise.all(allEvents.map(async (event) => {
+    const eventsWithCounts = await Promise.all(sortedEvents.map(async (event) => {
       const approvedCount = await prisma.attendance.count({
         where: {
           eventId: event.id,
