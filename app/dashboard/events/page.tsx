@@ -215,8 +215,8 @@ function CalendarView({ events, onRegister, registering }: {
                 {day.getDate()}
               </div>
               
-              <div className="space-y-1 max-h-24 overflow-hidden">
-                {dayEvents.slice(0, 3).map(event => {
+              <div className="space-y-1 max-h-40 overflow-y-auto">
+                {dayEvents.map(event => {
                   const isRegistered = event.attendances.length > 0
                   const registrationStatus = isRegistered ? event.attendances[0].status : null
                   const countdownInfo = getCountdown(event.date, event.time, event.endDate, event.endTime, undefined, language)
@@ -243,12 +243,6 @@ function CalendarView({ events, onRegister, registering }: {
                     </div>
                   )
                 })}
-                
-                {dayEvents.length > 3 && (
-                  <div className="text-xs text-gray-500 text-center py-1">
-                    +{dayEvents.length - 3}
-                  </div>
-                )}
               </div>
             </div>
           )
