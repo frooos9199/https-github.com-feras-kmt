@@ -138,8 +138,7 @@ function CountdownTimer({ event }: { event: Event }) {
           borderColor: countdown.color
         }}
       >
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">{countdown.icon}</span>
+        <div className="text-center">
           <span className="font-bold">{countdown.text}</span>
         </div>
       </div>
