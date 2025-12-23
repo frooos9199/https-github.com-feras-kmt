@@ -280,6 +280,10 @@ export default function EventsPage() {
               const isRegistered = event.attendances.length > 0
               const registrationStatus = isRegistered ? event.attendances[0].status : null
               const isFull = event.approvedCount >= event.maxMarshals
+              
+              // التحقق من انتهاء الحدث
+              const countdownInfo = getCountdown(event.date, event.time, event.endDate, event.endTime, undefined, language)
+              const isFinished = countdownInfo.finished
 
               return (
                 <motion.div
@@ -397,7 +401,11 @@ export default function EventsPage() {
                     </div>
 
                     {/* Registration Status */}
-                    {isRegistered ? (
+                    {isFinished ? (
+                      <div className="px-4 py-2 rounded-lg text-center font-medium bg-gray-600/20 text-gray-400 border border-gray-600/30">
+                        {language === "ar" ? "انتهى الحدث - لا يمكن التسجيل" : "Event finished - Registration not available"}
+                      </div>
+                    ) : isRegistered ? (
                       <div className={`px-4 py-2 rounded-lg text-center font-medium ${
                         registrationStatus === "approved" 
                           ? "bg-green-600/20 text-green-500 border border-green-600/30"
