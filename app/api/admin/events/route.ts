@@ -167,6 +167,9 @@ export async function GET(request: NextRequest) {
     }
     
     const events = await prisma.event.findMany({
+      where: {
+        isArchived: false
+      },
       include: {
         _count: {
           select: {

@@ -21,6 +21,7 @@ interface Event {
   marshalTypes: string
   maxMarshals: number
   status: string
+  isArchived: boolean
   createdAt: string
   _count: {
     attendances: number
@@ -250,6 +251,27 @@ export default function EventDetails() {
     }
   }
 
+  const handleArchiveEvent = async () => {
+    if (!event) return
+    try {
+      setError(null)
+      const res = await fetch(`/api/admin/events/${event.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isArchived: !event.isArchived })
+      })
+      if (res.ok) {
+        fetchEvent() // Refresh event data
+      } else {
+        const errData = await res.json()
+        setError(errData.error || "حدث خطأ أثناء تحديث حالة الأرشفة.")
+      }
+    } catch (error) {
+      console.error("Error archiving event:", error)
+      setError("حدث خطأ أثناء الاتصال بالخادم.")
+    }
+  }
+
   const handleRemoveMarshal = async () => {
     if (!event || !selectedMarshalId) return
     try {
@@ -442,6 +464,12 @@ export default function EventDetails() {
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
               >
                 ✏️ {language === "ar" ? "تعديل" : "Edit"}
+              </button>
+              <button
+                onClick={handleArchiveEvent}
+                className={`px-6 py-3 ${event.isArchived ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-orange-600 hover:bg-orange-700'} text-white rounded-xl font-bold transition-all`}
+              >
+                📁 {event.isArchived ? (language === "ar" ? "إلغاء الأرشفة" : "Unarchive") : (language === "ar" ? "أرشفة" : "Archive")}
               </button>
               <button
                 onClick={() => setShowDeleteModal(true)}

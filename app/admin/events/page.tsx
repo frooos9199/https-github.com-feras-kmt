@@ -7,6 +7,153 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
 
+// مكون عرض التقويم للإدارة
+function AdminCalendarView({ events, onEventClick }: {
+  events: CalendarEvent[],
+  onEventClick: (event: CalendarEvent) => void
+}) {
+  const { language } = useLanguage()
+  const [currentDate, setCurrentDate] = useState(new Date())
+
+  // تجميع الأحداث حسب التاريخ
+  const eventsByDate = events.reduce((acc, event) => {
+    // تحويل التاريخ إلى التوقيت المحلي وضمان أنه يمثل بداية اليوم
+    const eventDate = new Date(event.date)
+    const dateKey = eventDate.toLocaleDateString('en-CA') // YYYY-MM-DD format
+    if (!acc[dateKey]) acc[dateKey] = []
+    acc[dateKey].push(event)
+    return acc
+  }, {} as Record<string, CalendarEvent[]>)
+
+  // الحصول على أيام الشهر الحالي
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+
+    const days = []
+
+    // إضافة أيام فارغة للبداية
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null)
+    }
+
+    // إضافة أيام الشهر
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(year, month, day))
+    }
+
+    return days
+  }
+
+  const days = getDaysInMonth(currentDate)
+  const monthNames = language === "ar"
+    ? ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate((prev: Date) => {
+      const newDate = new Date(prev)
+      if (direction === 'prev') {
+        newDate.setMonth(prev.getMonth() - 1)
+      } else {
+        newDate.setMonth(prev.getMonth() + 1)
+      }
+      return newDate
+    })
+  }
+
+  return (
+    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+      {/* رأس التقويم */}
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={() => navigateMonth('prev')}
+          className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+        >
+          <span className="text-white text-xl">←</span>
+        </button>
+
+        <h2 className="text-2xl font-bold text-white">
+          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+        </h2>
+
+        <button
+          onClick={() => navigateMonth('next')}
+          className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+        >
+          <span className="text-white text-xl">→</span>
+        </button>
+      </div>
+
+      {/* أسماء الأيام */}
+      <div className="grid grid-cols-7 gap-2 mb-4">
+        {(language === "ar" ? ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
+          : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]).map(day => (
+          <div key={day} className="text-center text-gray-400 font-medium py-2">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* شبكة الأيام */}
+      <div className="grid grid-cols-7 gap-2">
+        {days.map((day, index) => {
+          if (!day) {
+            return <div key={`empty-${index}`} className="min-h-32"></div>
+          }
+
+          const dateKey = day.toLocaleDateString('en-CA') // YYYY-MM-DD format
+          const dayEvents = eventsByDate[dateKey] || []
+          const isToday = day.toDateString() === new Date().toDateString()
+
+          return (
+            <div
+              key={dateKey}
+              className={`min-h-32 border rounded-lg p-2 transition-colors ${
+                isToday
+                  ? 'border-red-600 bg-red-600/10'
+                  : 'border-zinc-700 hover:border-zinc-600'
+              }`}
+            >
+              <div className={`text-sm font-medium mb-2 ${isToday ? 'text-red-400' : 'text-gray-300'}`}>
+                {day.getDate()}
+              </div>
+
+              <div className="space-y-1 max-h-40 overflow-y-auto">
+                {dayEvents.map(event => {
+                  return (
+                    <div
+                      key={event.id}
+                      onClick={() => onEventClick(event)}
+                      className={`text-xs p-1.5 rounded cursor-pointer transition-colors ${
+                        event.isArchived
+                          ? 'bg-orange-600/30 text-orange-400 hover:bg-orange-600/50'
+                          : 'bg-blue-600/30 text-blue-400 hover:bg-blue-600/50'
+                      }`}
+                    >
+                      <div className="font-medium truncate text-xs">
+                        {event.isArchived && '📁 '}
+                        {language === "ar" ? event.titleAr : event.titleEn}
+                      </div>
+                      <div className="text-xs opacity-75">{event.time}</div>
+                      {event.isArchived && (
+                        <div className="text-xs opacity-75">� Archived</div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 interface Event {
   id: string
   titleEn: string
@@ -25,16 +172,33 @@ interface Event {
   }
 }
 
+interface CalendarEvent {
+  id: string
+  titleEn: string
+  titleAr: string
+  date: string
+  endDate: string | null
+  time: string
+  endTime: string | null
+  location: string
+  isArchived: boolean
+}
+
 export default function EventsManagement() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { language } = useLanguage()
   const [events, setEvents] = useState<Event[]>([])
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [showEventDetails, setShowEventDetails] = useState(false)
+  const [eventDetails, setEventDetails] = useState<any>(null)
 
   const [formData, setFormData] = useState({
     titleEn: "",
@@ -67,25 +231,39 @@ export default function EventsManagement() {
   const fetchEvents = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/events", {
+      // Fetch events for list view (non-archived only)
+      const eventsRes = await fetch("/api/admin/events", {
         credentials: 'include'
       })
       
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
+      if (eventsRes.ok) {
+        const eventsData = await eventsRes.json()
+        if (Array.isArray(eventsData)) {
+          setEvents(eventsData)
+        } else if (Array.isArray(eventsData.events)) {
+          setEvents(eventsData.events)
+        } else {
+          setEvents([])
+        }
       }
-      
-      const data = await res.json()
-      if (Array.isArray(data)) {
-        setEvents(data)
-      } else if (Array.isArray(data.events)) {
-        setEvents(data.events)
-      } else {
-        setEvents([])
+
+      // Fetch events for calendar view (all events including archived)
+      const calendarRes = await fetch("/api/events/calendar", {
+        credentials: 'include'
+      })
+
+      if (calendarRes.ok) {
+        const calendarData = await calendarRes.json()
+        if (Array.isArray(calendarData)) {
+          setCalendarEvents(calendarData)
+        } else {
+          setCalendarEvents([])
+        }
       }
     } catch (error) {
       console.error("Error fetching events:", error)
       setEvents([])
+      setCalendarEvents([])
     } finally {
       setLoading(false)
     }
@@ -129,6 +307,23 @@ export default function EventsManagement() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const fetchEventDetails = async (eventId: string) => {
+    try {
+      const res = await fetch(`/api/admin/events/${eventId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setEventDetails(data)
+        setShowEventDetails(true)
+      }
+    } catch (error) {
+      console.error("Error fetching event details:", error)
+    }
+  }
+
+  const handleEventClick = (event: CalendarEvent) => {
+    router.push(`/admin/events/${event.id}`)
   }
 
   const handleEdit = (event: Event) => {
@@ -236,127 +431,160 @@ export default function EventsManagement() {
               {language === "ar" ? "إنشاء وتعديل وحذف الفعاليات" : "Create, edit and delete events"}
             </p>
           </div>
-          <button
-            onClick={() => {
-              resetForm()
-              setShowModal(true)
-            }}
-            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors"
-          >
-            ➕ {language === "ar" ? "فعالية جديدة" : "New Event"}
-          </button>
+          
+          <div className="flex items-center gap-4">
+            {/* View Toggle Buttons */}
+            <div className="flex bg-zinc-800/50 rounded-lg p-1 border border-zinc-700">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-red-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                📋 {language === "ar" ? "قائمة" : "List"}
+              </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  viewMode === 'calendar'
+                    ? 'bg-red-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                📅 {language === "ar" ? "تقويم" : "Calendar"}
+              </button>
+            </div>
+            
+            <button
+              onClick={() => {
+                resetForm()
+                setShowModal(true)
+              }}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors"
+            >
+              ➕ {language === "ar" ? "فعالية جديدة" : "New Event"}
+            </button>
+          </div>
         </motion.div>
 
-        {/* Events Grid */}
-        {events.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 text-center"
-          >
-            <p className="text-gray-400 text-lg">
-              {language === "ar" ? "لا توجد فعاليات" : "No events found"}
-            </p>
-          </motion.div>
+        {/* Events Display - List or Calendar */}
+        {viewMode === 'calendar' ? (
+          <AdminCalendarView events={calendarEvents} onEventClick={handleEventClick} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event, index) => (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => router.push(`/admin/events/${event.id}`)}
-                className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer transform hover:scale-105"
-              >
-                <div className="relative h-32 overflow-hidden">
-                  {/* صورة الهيدر فقط */}
-                  <div className="absolute inset-0 w-full h-full z-0">
-                    <div
-                      style={{
-                        backgroundImage: 'url(/test.jpg)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        width: '100%',
-                        height: '100%',
-                        position: 'absolute',
-                        inset: 0
-                      }}
-                    />
-                    {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
-                  </div>
-                </div>
-                <div className="flex">
-                  {/* أيقونات المارشال في الجانب الأيسر */}
-                  <div className="flex flex-col items-center justify-center px-3 py-4 gap-2">
-                    {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
-                      const typeIcons: Record<string, string> = {
-                        'karting': '🏎️',
-                        'motocross': '🏍️',
-                        'rescue': '🚑',
-                        'circuit': '🏁',
-                        'drift': '💨',
-                        'drag-race': '🚦',
-                        'pit': '🔧'
-                      }
-                      return <span key={type} className="text-2xl md:text-3xl">{typeIcons[type] || '❓'}</span>
-                    })}
-                  </div>
-                  {/* معلومات الفعالية */}
-                  <div className="flex-1 p-4">
-                    <h3 className="text-lg font-bold text-white mb-2 truncate">
-                      {language === "ar" ? event.titleAr : event.titleEn}
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-                      {language === "ar" ? event.descriptionAr : event.descriptionEn}
-                    </p>
-                    <div className="space-y-1 text-sm text-gray-300 mb-4">
-                      <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
-                      <div>🕐 {event.time}</div>
-                      <div>📍 {event.location}</div>
-                      <div>👥 {event._count.attendances}/{event.maxMarshals}</div>
-                    </div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        event.status === "active"
-                          ? "bg-green-600/20 text-green-500"
-                          : event.status === "cancelled"
-                          ? "bg-red-600/20 text-red-500"
-                          : "bg-gray-600/20 text-gray-500"
-                      }`}>
-                        {event.status.toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => window.open(`/admin/attendance/print/${event.id}`, '_blank')}
-                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
-                        title={language === "ar" ? "طباعة قائمة الحضور" : "Print Attendance List"}
-                      >
-                        🖨️ {language === "ar" ? "طباعة" : "Print"}
-                      </button>
-                      <button
-                        onClick={() => handleEdit(event)}
-                        className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
-                      >
-                        ✏️ {language === "ar" ? "تعديل" : "Edit"}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(event.id)}
-                        disabled={deleting === event.id}
-                        className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
-                      >
-                        {deleting === event.id ? "..." : (language === "ar" ? "🗑️ حذف" : "🗑️ Delete")}
-                      </button>
+          /* Events Grid */
+          events.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 text-center"
+            >
+              <p className="text-gray-400 text-lg">
+                {language === "ar" ? "لا توجد فعاليات" : "No events found"}
+              </p>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => router.push(`/admin/events/${event.id}`)}
+                  className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer transform hover:scale-105"
+                >
+                  <div className="relative h-32 overflow-hidden">
+                    {/* صورة الهيدر فقط */}
+                    <div className="absolute inset-0 w-full h-full z-0">
+                      <div
+                        style={{
+                          backgroundImage: 'url(/test.jpg)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                          width: '100%',
+                          height: '100%',
+                          position: 'absolute',
+                          inset: 0
+                        }}
+                      />
+                      {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  <div className="flex">
+                    {/* أيقونات المارشال في الجانب الأيسر */}
+                    <div className="flex flex-col items-center justify-center px-3 py-4 gap-2">
+                      {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
+                        const typeIcons: Record<string, string> = {
+                          'karting': '🏎️',
+                          'motocross': '🏍️',
+                          'rescue': '🚑',
+                          'circuit': '🏁',
+                          'drift': '💨',
+                          'drag-race': '🚦',
+                          'pit': '🔧'
+                        }
+                        return <span key={type} className="text-2xl md:text-3xl">{typeIcons[type] || '❓'}</span>
+                      })}
+                    </div>
+                    {/* معلومات الفعالية */}
+                    <div className="flex-1 p-4">
+                      <h3 className="text-lg font-bold text-white mb-2 truncate">
+                        {language === "ar" ? event.titleAr : event.titleEn}
+                      </h3>
+                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+                        {language === "ar" ? event.descriptionAr : event.descriptionEn}
+                      </p>
+                      <div className="space-y-1 text-sm text-gray-300 mb-4">
+                        <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
+                        <div>🕐 {event.time}</div>
+                        <div>📍 {event.location}</div>
+                        <div>👥 {event._count.attendances}/{event.maxMarshals}</div>
+                      </div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          event.status === "active"
+                            ? "bg-green-600/20 text-green-500"
+                            : event.status === "cancelled"
+                            ? "bg-red-600/20 text-red-500"
+                            : "bg-gray-600/20 text-gray-500"
+                        }`}>
+                          {event.status.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => window.open(`/admin/attendance/print/${event.id}`, '_blank')}
+                          className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+                          title={language === "ar" ? "طباعة قائمة الحضور" : "Print Attendance List"}
+                        >
+                          🖨️ {language === "ar" ? "طباعة" : "Print"}
+                        </button>
+                        <button
+                          onClick={() => handleEdit(event)}
+                          className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+                        >
+                          ✏️ {language === "ar" ? "تعديل" : "Edit"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(event.id)}
+                          disabled={deleting === event.id}
+                          className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
+                        >
+                          {deleting === event.id ? "..." : (language === "ar" ? "🗑️ حذف" : "🗑️ Delete")}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )
         )}
+
       </main>
 
       {/* Modal */}
@@ -580,6 +808,7 @@ export default function EventsManagement() {
           </motion.div>
         </div>
       )}
+
     </div>
   )
 }
