@@ -336,17 +336,30 @@ export default function EventDetails() {
 
     // Close modal immediately for better UX and prevent double clicks
     setShowRemoveMarshalModal(false)
+    const marshalToRemove = selectedMarshalId
+    const reasonToUse = removalReason
     setSelectedMarshalId(null)
     setRemovalReason("")
     setRemovingMarshal(true)
     setUpdatingStats(true)
 
+    // Optimistic update: Remove marshal from UI immediately
+    const marshalToRemoveDetails = event.eventMarshals?.find((m: any) => m.marshal.id === marshalToRemove)
+    if (marshalToRemoveDetails) {
+      console.log('⚡ Optimistic update: Removing marshal from UI immediately')
+      const updatedEvent = {
+        ...event,
+        eventMarshals: event.eventMarshals?.filter((m: any) => m.marshal.id !== marshalToRemove) || []
+      }
+      setEvent(updatedEvent)
+    }
+
     try {
       console.log('🔄 Making DELETE request to API...')
-      const res = await fetch(`/api/admin/events/${event.id}-admin/marshals/${selectedMarshalId}`, {
+      const res = await fetch(`/api/admin/events/${event.id}-admin/marshals/${marshalToRemove}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: removalReason })
+        body: JSON.stringify({ reason: reasonToUse })
       })
 
       console.log('📡 API Response status:', res.status)
@@ -354,7 +367,7 @@ export default function EventDetails() {
       if (res.ok) {
         console.log('✅ Marshal removal successful')
         console.log('🔄 Updating UI state - calling fetchEvent()')
-        // Fetch updated data in background with force refresh
+        // Fetch updated data in background with force refresh (will override optimistic update if needed)
         fetchEvent(true)
         // Notify events list page to refresh
         localStorage.setItem('eventUpdated', 'true')
@@ -363,12 +376,14 @@ export default function EventDetails() {
         const errData = await res.json()
         console.error('❌ Marshal removal failed:', errData)
         setError(errData.error || "حدث خطأ أثناء جلب بيانات الحدث.")
-        setEvent(null)
+        // Revert optimistic update on failure
+        fetchEvent(true)
       }
     } catch (error) {
       console.error('💥 Error during marshal removal:', error)
       setError("حدث خطأ أثناء الاتصال بالخادم.")
-      setEvent(null)
+      // Revert optimistic update on failure
+      fetchEvent(true)
     } finally {
       setRemovingMarshal(false)
       setUpdatingStats(false)

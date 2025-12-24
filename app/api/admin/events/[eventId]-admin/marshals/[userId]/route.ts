@@ -69,15 +69,15 @@ export async function DELETE(
       } : null
     })
 
-    // If found in eventMarshals, remove it and send email
+    // If found in eventMarshals, remove it and send email asynchronously
     if (eventMarshals.length > 0) {
       const eventMarshal = eventMarshals[0]
       console.log('[API] Removing marshal from eventMarshals', { eventId, userId });
 
-      // Send removal notification email BEFORE deletion
+      // Send removal notification email asynchronously (don't wait for it)
       if (eventMarshal.marshal.email) {
-        console.log('[API] Sending removal email', { to: eventMarshal.marshal.email });
-        await sendEmail({
+        console.log('[API] Sending removal email asynchronously', { to: eventMarshal.marshal.email });
+        sendEmail({
           to: eventMarshal.marshal.email,
           subject: `⚠️ Removed from Event - ${eventMarshal.event.titleEn}`,
           html: removalEmailTemplate(
@@ -86,7 +86,9 @@ export async function DELETE(
             new Date(eventMarshal.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
             reason || undefined // Pass the removal reason
           )
-        })
+        }).catch(emailError => {
+          console.error('[API] Failed to send removal email:', emailError);
+        });
       }
 
       // Delete the eventMarshal record
@@ -143,10 +145,10 @@ export async function DELETE(
       const attendance = attendances[0]
       console.log('[API] Cancelling attendance', { eventId: eventId, userId });
 
-      // Send removal notification email BEFORE update (only if not already sent for eventMarshals)
+      // Send removal notification email asynchronously (only if not already sent for eventMarshals)
       if (!removedFromEventMarshals && attendance.user.email) {
-        console.log('[API] Sending removal email', { to: attendance.user.email });
-        await sendEmail({
+        console.log('[API] Sending removal email asynchronously', { to: attendance.user.email });
+        sendEmail({
           to: attendance.user.email,
           subject: `⚠️ Removed from Event - ${attendance.event.titleEn}`,
           html: removalEmailTemplate(
@@ -155,7 +157,9 @@ export async function DELETE(
             new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
             reason || undefined // Pass the removal reason
           )
-        })
+        }).catch(emailError => {
+          console.error('[API] Failed to send removal email:', emailError);
+        });
       }
 
       // Update the attendance record to cancelled status with reason
