@@ -130,6 +130,30 @@ export default function EventDetails() {
     }
   }, [eventId])
 
+  // Refresh data when page becomes visible (user returns to tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && eventId) {
+        console.log('Page became visible, refreshing data')
+        fetchEvent(true)
+      }
+    }
+
+    const handleFocus = () => {
+      if (eventId) {
+        console.log('Window focused, refreshing data')
+        fetchEvent(true)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [eventId])
+
   useEffect(() => {
     if (showAddMarshalModal && event) {
       fetchAvailableMarshals()
