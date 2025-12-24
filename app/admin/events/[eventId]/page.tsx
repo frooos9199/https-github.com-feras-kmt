@@ -89,6 +89,7 @@ export default function EventDetails() {
   const [eventId, setEventId] = useState<string | null>(null)
   const [lastFetchTime, setLastFetchTime] = useState<number>(0)
   const [updatingStats, setUpdatingStats] = useState(false)
+  const [manualRefresh, setManualRefresh] = useState(false)
   const [editForm, setEditForm] = useState({
     titleEn: "",
     titleAr: "",
@@ -130,42 +131,7 @@ export default function EventDetails() {
     }
   }, [eventId])
 
-  // Refresh data when page becomes visible (user returns to tab) - with throttling
-  useEffect(() => {
-    let visibilityTimeout: NodeJS.Timeout
-    let focusTimeout: NodeJS.Timeout
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden && eventId) {
-        // Add delay to prevent rapid firing
-        clearTimeout(visibilityTimeout)
-        visibilityTimeout = setTimeout(() => {
-          console.log('Page became visible, refreshing data')
-          fetchEvent(true)
-        }, 1000) // Wait 1 second after visibility change
-      }
-    }
-
-    const handleFocus = () => {
-      if (eventId) {
-        // Add delay to prevent rapid firing
-        clearTimeout(focusTimeout)
-        focusTimeout = setTimeout(() => {
-          console.log('Window focused, refreshing data')
-          fetchEvent(true)
-        }, 1000) // Wait 1 second after focus
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-      clearTimeout(visibilityTimeout)
-      clearTimeout(focusTimeout)
-    }
-  }, [eventId])
+  // Removed automatic refresh on visibility/focus to prevent annoying refreshes
 
   useEffect(() => {
     if (showAddMarshalModal && event) {
@@ -365,6 +331,20 @@ export default function EventDetails() {
     } catch (error) {
       console.error("Error archiving event:", error)
       setError("حدث خطأ أثناء الاتصال بالخادم.")
+    }
+  }
+
+  const handleManualRefresh = async () => {
+    console.log('🔄 Manual refresh requested by user')
+    setManualRefresh(true)
+    try {
+      await fetchEvent(true)
+      console.log('✅ Manual refresh completed')
+    } catch (error) {
+      console.error('❌ Manual refresh failed:', error)
+      setError('فشل في تحديث البيانات')
+    } finally {
+      setManualRefresh(false)
     }
   }
 
@@ -788,6 +768,22 @@ export default function EventDetails() {
               </span>
             </div>
             <div className="flex gap-3">
+              <button
+                onClick={handleManualRefresh}
+                disabled={manualRefresh}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all flex items-center gap-2"
+              >
+                {manualRefresh ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    {language === "ar" ? "جاري التحديث..." : "Refreshing..."}
+                  </>
+                ) : (
+                  <>
+                    🔄 {language === "ar" ? "تحديث" : "Refresh"}
+                  </>
+                )}
+              </button>
               <button
                 onClick={() => setShowAddMarshalModal(true)}
                 className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all"
