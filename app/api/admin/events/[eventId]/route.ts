@@ -4,6 +4,9 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { getUserFromToken } from "@/lib/auth"
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+
 // GET - Fetch single event with registered marshals
 export async function GET(
   req: NextRequest,
@@ -113,9 +116,11 @@ export async function GET(
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Add cache headers for better performance
+    // Add cache headers to prevent stale data
     const response = NextResponse.json(event);
-    response.headers.set('Cache-Control', 'private, max-age=30'); // Cache for 30 seconds
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
     response.headers.set('X-Event-Data-Fresh', 'true');
 
     return response;
