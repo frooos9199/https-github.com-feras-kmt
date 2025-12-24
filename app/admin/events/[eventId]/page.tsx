@@ -172,7 +172,7 @@ export default function EventDetails() {
 
     const now = Date.now()
     // Prevent fetching more than once every 2 seconds unless forced
-    if (!force && now - lastFetchTime < 2000) {
+    if (!force && now - lastFetchTime < 500) {
       console.log('⏳ Skipping fetchEvent - too soon since last fetch')
       return
     }
