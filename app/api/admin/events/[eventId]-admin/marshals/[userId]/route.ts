@@ -33,11 +33,13 @@ export async function DELETE(
 
     // Use transaction to ensure atomicity
     const result = await prisma.$transaction(async (tx) => {
+      console.log('[API] Starting transaction for marshal removal:', { eventId, userId })
       // Always try to remove from both tables to ensure complete cleanup
       let removedFromEventMarshals = false
       let removedFromAttendances = false
 
       // First, try to find and remove from eventMarshals table
+      console.log('[API] Searching for eventMarshals with:', { eventId, userId })
       const eventMarshals = await tx.eventMarshal.findMany({
         where: {
           eventId: eventId,
@@ -74,7 +76,7 @@ export async function DELETE(
       // If found in eventMarshals, remove it and send email asynchronously
       if (eventMarshals.length > 0) {
         const eventMarshal = eventMarshals[0]
-        console.log('[API] Removing marshal from eventMarshals', { eventId, userId });
+        console.log('[API] Removing marshal from eventMarshals', { eventId, userId, eventMarshalId: eventMarshal.id });
 
         // Send removal notification email asynchronously (don't wait for it)
         if (eventMarshal.marshal.email) {
@@ -94,12 +96,13 @@ export async function DELETE(
         }
 
         // Delete the eventMarshal record
-        await tx.eventMarshal.deleteMany({
+        const deleteResult = await tx.eventMarshal.deleteMany({
           where: {
             eventId: eventId,
             marshalId: userId
           }
         })
+        console.log('[API] Delete result for eventMarshals:', deleteResult);
 
         removedFromEventMarshals = true
         console.log('[API] Successfully removed marshal from eventMarshals');
@@ -165,7 +168,7 @@ export async function DELETE(
         }
 
         // Update the attendance record to cancelled status with reason
-        await tx.attendance.updateMany({
+        const updateResult = await tx.attendance.updateMany({
           where: {
             eventId: eventId,
             userId: userId,
@@ -179,6 +182,7 @@ export async function DELETE(
             cancellationReason: reason || "Removed by admin"
           }
         })
+        console.log('[API] Update result for attendances:', updateResult);
 
         removedFromAttendances = true
         console.log('[API] Successfully cancelled attendance');
