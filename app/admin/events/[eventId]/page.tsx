@@ -130,19 +130,30 @@ export default function EventDetails() {
     }
   }, [eventId])
 
-  // Refresh data when page becomes visible (user returns to tab)
+  // Refresh data when page becomes visible (user returns to tab) - with throttling
   useEffect(() => {
+    let visibilityTimeout: NodeJS.Timeout
+    let focusTimeout: NodeJS.Timeout
+
     const handleVisibilityChange = () => {
       if (!document.hidden && eventId) {
-        console.log('Page became visible, refreshing data')
-        fetchEvent(true)
+        // Add delay to prevent rapid firing
+        clearTimeout(visibilityTimeout)
+        visibilityTimeout = setTimeout(() => {
+          console.log('Page became visible, refreshing data')
+          fetchEvent(true)
+        }, 1000) // Wait 1 second after visibility change
       }
     }
 
     const handleFocus = () => {
       if (eventId) {
-        console.log('Window focused, refreshing data')
-        fetchEvent(true)
+        // Add delay to prevent rapid firing
+        clearTimeout(focusTimeout)
+        focusTimeout = setTimeout(() => {
+          console.log('Window focused, refreshing data')
+          fetchEvent(true)
+        }, 1000) // Wait 1 second after focus
       }
     }
 
@@ -151,6 +162,8 @@ export default function EventDetails() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
+      clearTimeout(visibilityTimeout)
+      clearTimeout(focusTimeout)
     }
   }, [eventId])
 
