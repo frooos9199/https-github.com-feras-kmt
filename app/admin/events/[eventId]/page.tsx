@@ -164,7 +164,11 @@ export default function EventDetails() {
   }, [showEditModal, event])
 
   const fetchEvent = useCallback(async (force = false) => {
-    if (!eventId) return
+    console.log('🔄 fetchEvent called', { force, eventId })
+    if (!eventId) {
+      console.log('❌ No eventId, skipping fetchEvent')
+      return
+    }
 
     const now = Date.now()
     // Prevent fetching more than once every 2 seconds unless forced
@@ -205,6 +209,7 @@ export default function EventDetails() {
           marshalId: m.marshal.id
         })));
 
+        console.log('🔄 Setting event data in state')
         setEvent(data)
         setError(null) // Clear any previous errors
 
@@ -327,12 +332,17 @@ export default function EventDetails() {
   }
 
   const handleRemoveMarshal = async () => {
-    if (!event || !selectedMarshalId) return
+    if (!event || !selectedMarshalId) {
+      console.log('❌ Cannot remove marshal: event or selectedMarshalId missing', { event: !!event, selectedMarshalId })
+      return
+    }
 
     console.log('🚨 Starting marshal removal process')
     console.log('📋 Event ID:', event.id)
     console.log('👤 Marshal ID to remove:', selectedMarshalId)
     console.log('📝 Removal reason:', removalReason || 'No reason provided')
+    console.log('📊 Current eventMarshals count:', event.eventMarshals?.length || 0)
+    console.log('📊 Marshal exists in current data:', event.eventMarshals?.some(m => m.marshal.id === selectedMarshalId))
 
     // Close modal immediately for better UX and prevent double clicks
     setShowRemoveMarshalModal(false)
@@ -368,7 +378,8 @@ export default function EventDetails() {
         console.log('✅ Marshal removal successful')
         console.log('🔄 Updating UI state - calling fetchEvent()')
         // Fetch updated data in background with force refresh (will override optimistic update if needed)
-        fetchEvent(true)
+        await fetchEvent(true)
+        console.log('✅ fetchEvent completed after marshal removal')
         // Notify events list page to refresh
         localStorage.setItem('eventUpdated', 'true')
         console.log('✅ Marshal removal process completed successfully')
