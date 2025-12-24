@@ -13,7 +13,7 @@ export async function DELETE(
     console.log('[API] Remove Marshal from Event', { params: await params, body: await req.clone().json() });
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "admin") {
-  console.error('[API] Unauthorized remove marshal', { session });
+      console.error('[API] Unauthorized remove marshal', { session });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -31,139 +31,82 @@ export async function DELETE(
       params: await params
     })
 
-    // Always try to remove from both tables to ensure complete cleanup
-    let removedFromEventMarshals = false
-    let removedFromAttendances = false
+    // Use transaction to ensure atomicity
+    const result = await prisma.$transaction(async (tx) => {
+      // Always try to remove from both tables to ensure complete cleanup
+      let removedFromEventMarshals = false
+      let removedFromAttendances = false
 
-    // First, try to find and remove from eventMarshals table
-    const eventMarshals = await prisma.eventMarshal.findMany({
-      where: {
-        eventId: eventId,
-        marshalId: userId
-      },
-      include: {
-        marshal: {
-          select: {
-            name: true,
-            email: true,
-          }
-        },
-        event: {
-          select: {
-            titleEn: true,
-            titleAr: true,
-            date: true,
-          }
-        }
-      }
-    })
-
-    console.log('[API] EventMarshal search result:', {
-      found: eventMarshals.length > 0,
-      count: eventMarshals.length,
-      eventMarshal: eventMarshals[0] ? {
-        id: eventMarshals[0].id,
-        status: eventMarshals[0].status,
-        marshalId: eventMarshals[0].marshalId,
-        eventId: eventMarshals[0].eventId
-      } : null
-    })
-
-    // If found in eventMarshals, remove it and send email asynchronously
-    if (eventMarshals.length > 0) {
-      const eventMarshal = eventMarshals[0]
-      console.log('[API] Removing marshal from eventMarshals', { eventId, userId });
-
-      // Send removal notification email asynchronously (don't wait for it)
-      if (eventMarshal.marshal.email) {
-        console.log('[API] Sending removal email asynchronously', { to: eventMarshal.marshal.email });
-        sendEmail({
-          to: eventMarshal.marshal.email,
-          subject: `⚠️ Removed from Event - ${eventMarshal.event.titleEn}`,
-          html: removalEmailTemplate(
-            eventMarshal.marshal.name,
-            eventMarshal.event.titleEn,
-            new Date(eventMarshal.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-            reason || undefined // Pass the removal reason
-          )
-        }).catch(emailError => {
-          console.error('[API] Failed to send removal email:', emailError);
-        });
-      }
-
-      // Delete the eventMarshal record
-      await prisma.eventMarshal.deleteMany({
+      // First, try to find and remove from eventMarshals table
+      const eventMarshals = await tx.eventMarshal.findMany({
         where: {
           eventId: eventId,
           marshalId: userId
+        },
+        include: {
+          marshal: {
+            select: {
+              name: true,
+              email: true,
+            }
+          },
+          event: {
+            select: {
+              titleEn: true,
+              titleAr: true,
+              date: true,
+            }
+          }
         }
       })
 
-      removedFromEventMarshals = true
-      console.log('[API] Successfully removed marshal from eventMarshals');
-    }
+      console.log('[API] EventMarshal search result:', {
+        found: eventMarshals.length > 0,
+        count: eventMarshals.length,
+        eventMarshal: eventMarshals[0] ? {
+          id: eventMarshals[0].id,
+          status: eventMarshals[0].status,
+          marshalId: eventMarshals[0].marshalId,
+          eventId: eventMarshals[0].eventId
+        } : null
+      })
 
-    // Now check attendances table and update status to cancelled
-    const attendances = await prisma.attendance.findMany({
-      where: {
-        eventId: eventId,
-        userId: userId,
-        status: {
-          not: "cancelled" // Only update if not already cancelled
+      // If found in eventMarshals, remove it and send email asynchronously
+      if (eventMarshals.length > 0) {
+        const eventMarshal = eventMarshals[0]
+        console.log('[API] Removing marshal from eventMarshals', { eventId, userId });
+
+        // Send removal notification email asynchronously (don't wait for it)
+        if (eventMarshal.marshal.email) {
+          console.log('[API] Sending removal email asynchronously', { to: eventMarshal.marshal.email });
+          sendEmail({
+            to: eventMarshal.marshal.email,
+            subject: `⚠️ Removed from Event - ${eventMarshal.event.titleEn}`,
+            html: removalEmailTemplate(
+              eventMarshal.marshal.name,
+              eventMarshal.event.titleEn,
+              new Date(eventMarshal.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+              reason || undefined // Pass the removal reason
+            )
+          }).catch(emailError => {
+            console.error('[API] Failed to send removal email:', emailError);
+          });
         }
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
+
+        // Delete the eventMarshal record
+        await tx.eventMarshal.deleteMany({
+          where: {
+            eventId: eventId,
+            marshalId: userId
           }
-        },
-        event: {
-          select: {
-            titleEn: true,
-            titleAr: true,
-            date: true,
-          }
-        }
-      }
-    })
+        })
 
-    console.log('[API] Attendance search result:', {
-      found: attendances.length > 0,
-      count: attendances.length,
-      attendance: attendances[0] ? {
-        id: attendances[0].id,
-        status: attendances[0].status,
-        userId: attendances[0].userId,
-        eventId: attendances[0].eventId
-      } : null
-    })
-
-    // If found in attendances and not already cancelled, update it
-    if (attendances.length > 0) {
-      const attendance = attendances[0]
-      console.log('[API] Cancelling attendance', { eventId: eventId, userId });
-
-      // Send removal notification email asynchronously (only if not already sent for eventMarshals)
-      if (!removedFromEventMarshals && attendance.user.email) {
-        console.log('[API] Sending removal email asynchronously', { to: attendance.user.email });
-        sendEmail({
-          to: attendance.user.email,
-          subject: `⚠️ Removed from Event - ${attendance.event.titleEn}`,
-          html: removalEmailTemplate(
-            attendance.user.name,
-            attendance.event.titleEn,
-            new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-            reason || undefined // Pass the removal reason
-          )
-        }).catch(emailError => {
-          console.error('[API] Failed to send removal email:', emailError);
-        });
+        removedFromEventMarshals = true
+        console.log('[API] Successfully removed marshal from eventMarshals');
       }
 
-      // Update the attendance record to cancelled status with reason
-      await prisma.attendance.updateMany({
+      // Now check attendances table and update status to cancelled
+      const attendances = await tx.attendance.findMany({
         where: {
           eventId: eventId,
           userId: userId,
@@ -171,32 +114,91 @@ export async function DELETE(
             not: "cancelled" // Only update if not already cancelled
           }
         },
-        data: {
-          status: "cancelled",
-          cancelledAt: new Date(),
-          cancellationReason: reason || "Removed by admin"
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+            }
+          },
+          event: {
+            select: {
+              titleEn: true,
+              titleAr: true,
+              date: true,
+            }
+          }
         }
       })
 
-      removedFromAttendances = true
-      console.log('[API] Successfully cancelled attendance');
-    }
+      console.log('[API] Attendance search result:', {
+        found: attendances.length > 0,
+        count: attendances.length,
+        attendance: attendances[0] ? {
+          id: attendances[0].id,
+          status: attendances[0].status,
+          userId: attendances[0].userId,
+          eventId: attendances[0].eventId
+        } : null
+      })
+
+      // If found in attendances and not already cancelled, update it
+      if (attendances.length > 0) {
+        const attendance = attendances[0]
+        console.log('[API] Cancelling attendance', { eventId: eventId, userId });
+
+        // Send removal notification email asynchronously (only if not already sent for eventMarshals)
+        if (!removedFromEventMarshals && attendance.user.email) {
+          console.log('[API] Sending removal email asynchronously', { to: attendance.user.email });
+          sendEmail({
+            to: attendance.user.email,
+            subject: `⚠️ Removed from Event - ${attendance.event.titleEn}`,
+            html: removalEmailTemplate(
+              attendance.user.name,
+              attendance.event.titleEn,
+              new Date(attendance.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+              reason || undefined // Pass the removal reason
+            )
+          }).catch(emailError => {
+            console.error('[API] Failed to send removal email:', emailError);
+          });
+        }
+
+        // Update the attendance record to cancelled status with reason
+        await tx.attendance.updateMany({
+          where: {
+            eventId: eventId,
+            userId: userId,
+            status: {
+              not: "cancelled" // Only update if not already cancelled
+            }
+          },
+          data: {
+            status: "cancelled",
+            cancelledAt: new Date(),
+            cancellationReason: reason || "Removed by admin"
+          }
+        })
+
+        removedFromAttendances = true
+        console.log('[API] Successfully cancelled attendance');
+      }
+
+      return { removedFromEventMarshals, removedFromAttendances }
+    })
 
     // Check if we actually removed/cancelled anything
-    if (!removedFromEventMarshals && !removedFromAttendances) {
+    if (!result.removedFromEventMarshals && !result.removedFromAttendances) {
       console.log('[API] Marshal not found - may have already been removed or never existed', { eventId, userId });
       // Instead of returning 404, return success since the marshal is not in the event (desired state)
       return NextResponse.json({ success: true, message: "Marshal is not assigned to this event" })
     }
 
-    console.log('[API] Marshal removal completed successfully', {
-      removedFromEventMarshals,
-      removedFromAttendances
-    });
+    console.log('[API] Marshal removal completed successfully', result);
 
     return NextResponse.json({ success: true })
   } catch (error) {
-  console.error("Error removing marshal:", error)
+    console.error("Error removing marshal:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

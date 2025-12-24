@@ -407,6 +407,8 @@ export default function EventDetails() {
       if (res.ok) {
         console.log('✅ Marshal removal successful')
         console.log('🔄 Updating UI state - calling fetchEvent()')
+        // Add small delay to ensure database commit before fetching
+        await new Promise(resolve => setTimeout(resolve, 500))
         // Fetch updated data in background with force refresh (will override optimistic update if needed)
         await fetchEvent(true)
         console.log('✅ fetchEvent completed after marshal removal')
