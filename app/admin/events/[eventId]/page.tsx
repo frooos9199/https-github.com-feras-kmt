@@ -171,7 +171,7 @@ export default function EventDetails() {
     }
 
     const now = Date.now()
-    // Prevent fetching more than once every 2 seconds unless forced
+    // Prevent fetching more than once every 0.5 seconds unless forced
     if (!force && now - lastFetchTime < 500) {
       console.log('⏳ Skipping fetchEvent - too soon since last fetch')
       return
@@ -362,6 +362,12 @@ export default function EventDetails() {
         eventMarshals: event.eventMarshals?.filter((m: any) => m.marshal.id !== marshalToRemove) || []
       }
       setEvent(updatedEvent)
+    } else {
+      console.log('⚠️ Marshal not found in local data, refreshing from server')
+      // Marshal not found in local data, refresh from server
+      await fetchEvent(true)
+      alert(language === "ar" ? "المارشال غير موجود أو تم حذفه بالفعل" : "Marshal not found or already removed")
+      return
     }
 
     try {
@@ -913,12 +919,24 @@ export default function EventDetails() {
               <h2 className="text-xl font-bold text-white mb-4">
                 ✅ {language === "ar" ? "المارشالات المضافين" : "Accepted Marshals"} ({event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0}/{event.maxMarshals})
               </h2>
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center gap-4 mb-6">
                 <button
                   onClick={() => setShowAddMarshalModal(true)}
                   className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all flex items-center gap-2"
                 >
                   ➕ {language === "ar" ? "إضافة مارشال" : "Add Marshal"}
+                </button>
+                <button
+                  onClick={() => fetchEvent(true)}
+                  disabled={updatingStats}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                >
+                  {updatingStats ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    '🔄'
+                  )}
+                  {language === "ar" ? "تحديث" : "Refresh"}
                 </button>
               </div>
               {!event.eventMarshals || event.eventMarshals.filter(m => m.status === 'accepted' || m.status === 'approved').length === 0 ? (
