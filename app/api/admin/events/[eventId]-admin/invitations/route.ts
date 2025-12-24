@@ -127,7 +127,7 @@ export async function GET(
 // POST - Invite marshal to event
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -135,7 +135,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const eventId = params.id
+    const { id: eventId } = await params
     const { marshalId } = await request.json()
 
     if (!marshalId) {

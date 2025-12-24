@@ -175,6 +175,14 @@ export async function GET(request: NextRequest) {
           select: {
             attendances: {
               where: { status: 'approved' }
+            },
+            eventMarshals: {
+              where: { 
+                OR: [
+                  { status: 'accepted' },
+                  { status: 'approved' }
+                ]
+              }
             }
           }
         }

@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -73,11 +73,22 @@ export default function EventDetails() {
   const [showRemoveMarshalModal, setShowRemoveMarshalModal] = useState(false)
   const [selectedMarshalId, setSelectedMarshalId] = useState<string | null>(null)
   const [removalReason, setRemovalReason] = useState<string>("")
+  const [removingMarshal, setRemovingMarshal] = useState(false)
+  const [addingMarshal, setAddingMarshal] = useState(false)
+  const [invitingMarshal, setInvitingMarshal] = useState(false)
+  const [approvingAttendance, setApprovingAttendance] = useState<string | null>(null)
+  const [rejectingAttendance, setRejectingAttendance] = useState<string | null>(null)
+  const [acceptingInvitation, setAcceptingInvitation] = useState<string | null>(null)
+  const [rejectingInvitation, setRejectingInvitation] = useState<string | null>(null)
   const [showAddMarshalModal, setShowAddMarshalModal] = useState(false)
+  const [showInviteMarshalModal, setShowInviteMarshalModal] = useState(false)
   const [availableMarshals, setAvailableMarshals] = useState<any[]>([])
   const [selectedMarshalToAdd, setSelectedMarshalToAdd] = useState<string | null>(null)
+  const [selectedMarshalToInvite, setSelectedMarshalToInvite] = useState<string | null>(null)
   const [marshalSearchQuery, setMarshalSearchQuery] = useState<string>("")
   const [eventId, setEventId] = useState<string | null>(null)
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0)
+  const [updatingStats, setUpdatingStats] = useState(false)
   const [editForm, setEditForm] = useState({
     titleEn: "",
     titleAr: "",
@@ -126,6 +137,12 @@ export default function EventDetails() {
   }, [showAddMarshalModal, event])
 
   useEffect(() => {
+    if (showInviteMarshalModal && event) {
+      fetchAvailableMarshals()
+    }
+  }, [showInviteMarshalModal, event])
+
+  useEffect(() => {
     if (showEditModal && event) {
       console.log('Initializing edit form with event data:', event)
       setEditForm({
@@ -146,19 +163,51 @@ export default function EventDetails() {
     }
   }, [showEditModal, event])
 
-  const fetchEvent = async () => {
+  const fetchEvent = useCallback(async (force = false) => {
     if (!eventId) return
+
+    const now = Date.now()
+    // Prevent fetching more than once every 2 seconds unless forced
+    if (!force && now - lastFetchTime < 2000) {
+      console.log('⏳ Skipping fetchEvent - too soon since last fetch')
+      return
+    }
+
+    setLastFetchTime(now)
     setLoading(true)
+    setUpdatingStats(true)
+
     try {
+      console.log('🚀 Fetching event data...')
+      const startTime = performance.now()
+
       const res = await fetch(`/api/admin/events/${eventId}`, {
         credentials: 'include',
-        headers: { 'Accept': 'application/json' }
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache' // Force fresh data
+        }
       })
-      console.log('API RESPONSE:', res);
+
+      const fetchTime = performance.now() - startTime
+      console.log(`📡 API Response received in ${fetchTime.toFixed(2)}ms:`, res.status)
+
       if (res.ok) {
         const data = await res.json()
-        console.log('EVENT DATA:', data);
+        const parseTime = performance.now() - startTime - fetchTime
+        console.log(`📊 Data parsed in ${parseTime.toFixed(2)}ms`)
+
+        console.log('📊 Event Marshals count:', data.eventMarshals?.length || 0);
+        console.log('📊 Event Marshals details:', data.eventMarshals?.map((m: any) => ({
+          id: m.id,
+          status: m.status,
+          marshalName: m.marshal.name,
+          marshalId: m.marshal.id
+        })));
+
         setEvent(data)
+        setError(null) // Clear any previous errors
+
         setEditForm({
           titleEn: data.titleEn,
           titleAr: data.titleAr,
@@ -173,17 +222,22 @@ export default function EventDetails() {
           maxMarshals: data.maxMarshals,
           status: data.status
         })
+
+        const totalTime = performance.now() - startTime
+        console.log(`✅ Event data updated successfully in ${totalTime.toFixed(2)}ms`)
       } else {
         const text = await res.text();
-        console.error('API ERROR:', res.status, text);
+        console.error('❌ API ERROR:', res.status, text);
         setError(`حدث خطأ في جلب بيانات الحدث: ${res.status}`);
       }
     } catch (error) {
-      console.error('FETCH ERROR:', error);
+      console.error('💥 FETCH ERROR:', error);
       setError('حدث خطأ في الاتصال بالخادم أو جلب بيانات الحدث.');
+    } finally {
+      setLoading(false)
+      setUpdatingStats(false)
     }
-    setLoading(false)
-  }
+  }, [eventId, lastFetchTime])
 
   const handleEdit = async () => {
     if (!event) return
@@ -274,27 +328,50 @@ export default function EventDetails() {
 
   const handleRemoveMarshal = async () => {
     if (!event || !selectedMarshalId) return
+
+    console.log('🚨 Starting marshal removal process')
+    console.log('📋 Event ID:', event.id)
+    console.log('👤 Marshal ID to remove:', selectedMarshalId)
+    console.log('📝 Removal reason:', removalReason || 'No reason provided')
+
+    // Close modal immediately for better UX and prevent double clicks
+    setShowRemoveMarshalModal(false)
+    setSelectedMarshalId(null)
+    setRemovalReason("")
+    setRemovingMarshal(true)
+    setUpdatingStats(true)
+
     try {
-      const res = await fetch(`/api/admin/events/${event.id}/marshals/${selectedMarshalId}`, {
+      console.log('🔄 Making DELETE request to API...')
+      const res = await fetch(`/api/admin/events/${event.id}-admin/marshals/${selectedMarshalId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason: removalReason })
       })
+
+      console.log('📡 API Response status:', res.status)
+
       if (res.ok) {
-        setShowRemoveMarshalModal(false)
-        setSelectedMarshalId(null)
-        setRemovalReason("")
-        fetchEvent()
+        console.log('✅ Marshal removal successful')
+        console.log('🔄 Updating UI state - calling fetchEvent()')
+        // Fetch updated data in background with force refresh
+        fetchEvent(true)
+        // Notify events list page to refresh
+        localStorage.setItem('eventUpdated', 'true')
+        console.log('✅ Marshal removal process completed successfully')
       } else {
         const errData = await res.json()
+        console.error('❌ Marshal removal failed:', errData)
         setError(errData.error || "حدث خطأ أثناء جلب بيانات الحدث.")
         setEvent(null)
-        setSelectedMarshalId(null)
       }
     } catch (error) {
-      console.error("Error removing marshal:", error)
+      console.error('💥 Error during marshal removal:', error)
       setError("حدث خطأ أثناء الاتصال بالخادم.")
       setEvent(null)
+    } finally {
+      setRemovingMarshal(false)
+      setUpdatingStats(false)
     }
   }
 
@@ -313,25 +390,148 @@ export default function EventDetails() {
 
   const handleAddMarshal = async () => {
     if (!event || !selectedMarshalToAdd) return
+    console.log('➕ Starting marshal addition process')
+    console.log('📋 Event ID:', event.id)
+    console.log('👤 Marshal ID to add:', selectedMarshalToAdd)
+
+    // Close modal immediately for better UX and prevent double clicks
+    setShowAddMarshalModal(false)
+    const marshalToAdd = selectedMarshalToAdd
+    setSelectedMarshalToAdd(null)
+    setMarshalSearchQuery("")
+    setAddingMarshal(true)
+    setUpdatingStats(true)
+
+    // Optimistic update - add marshal to UI immediately
+    const marshalData = availableMarshals.find(m => m.id === marshalToAdd)
+    if (marshalData && event) {
+      const newEventMarshal = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        status: 'accepted' as const,
+        invitedAt: new Date().toISOString(),
+        respondedAt: new Date().toISOString(),
+        marshal: marshalData
+      }
+      const updatedEvent = {
+        ...event,
+        eventMarshals: [...(event.eventMarshals || []), newEventMarshal]
+      }
+      setEvent(updatedEvent)
+      console.log('⚡ Optimistic update: Marshal added to UI immediately')
+    }
+
     try {
+      console.log('🔄 Making POST request to API...')
+      const res = await fetch(`/api/admin/events/${event.id}/add-marshal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ marshalId: marshalToAdd }),
+        credentials: 'include'
+      })
+      console.log('📡 API Response status:', res.status)
+
+      if (res.ok) {
+        console.log('✅ Marshal addition successful')
+        console.log('🔄 Updating UI state - calling fetchEvent()')
+        // Fetch updated data in background with force refresh
+        fetchEvent(true)
+        // Notify events list page to refresh
+        localStorage.setItem('eventUpdated', 'true')
+        console.log('✅ Marshal addition process completed successfully')
+      } else {
+        // Revert optimistic update on failure
+        console.error('❌ Marshal addition failed on server')
+        fetchEvent(true) // Refresh to get correct data
+        console.error('❌ Marshal addition failed with status:', res.status)
+        console.error('❌ Response headers:', Object.fromEntries(res.headers.entries()))
+
+        try {
+          const responseText = await res.text()
+          console.error('❌ Raw response text:', responseText)
+          console.error('❌ Response text length:', responseText.length)
+
+          if (!responseText || !responseText.trim()) {
+            console.error('❌ Response text is empty')
+            alert(`حدث خطأ أثناء إضافة المارشال (رمز الحالة: ${res.status}) - الاستجابة فارغة`)
+            return
+          }
+
+          const errData = JSON.parse(responseText)
+          console.error('❌ Parsed error data:', errData)
+          alert(errData.error || `حدث خطأ أثناء إضافة المارشال (رمز الحالة: ${res.status})`)
+        } catch (parseError) {
+          console.error('❌ Failed to parse error response:', parseError)
+          alert(`حدث خطأ في معالجة الاستجابة (رمز الحالة: ${res.status})`)
+        }
+      }
+    } catch (error) {
+      // Revert optimistic update on error
+      console.error('💥 Error during marshal addition:', error)
+      fetchEvent(true) // Refresh to get correct data
+      alert("حدث خطأ أثناء الاتصال بالخادم")
+    } finally {
+      setAddingMarshal(false)
+      setUpdatingStats(false)
+    }
+  }
+
+  const handleInviteMarshal = async () => {
+    if (!event || !selectedMarshalToInvite) return
+
+    console.log('📨 Marshal ID to invite:', selectedMarshalToInvite)
+
+    setShowInviteMarshalModal(false)
+    const marshalToInvite = selectedMarshalToInvite
+    setSelectedMarshalToInvite(null)
+
+    setInvitingMarshal(true)
+    setUpdatingStats(true)
+
+    try {
+      // Optimistic update - add marshal to invited list immediately
+      const marshalToAdd = availableMarshals.find(m => m.id === marshalToInvite)
+      if (marshalToAdd) {
+        setEvent(prev => prev ? {
+          ...prev,
+          eventMarshals: [...(prev.eventMarshals || []), {
+            id: `temp-${Date.now()}`,
+            status: 'invited',
+            invitedAt: new Date().toISOString(),
+            respondedAt: null,
+            marshal: marshalToAdd
+          }]
+        } : null)
+      }
+
       const res = await fetch(`/api/admin/events/${event.id}/invitations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ marshalId: selectedMarshalToAdd })
+        body: JSON.stringify({ marshalId: marshalToInvite })
       })
+
       if (res.ok) {
-        setShowAddMarshalModal(false)
-        setSelectedMarshalToAdd(null)
-        setMarshalSearchQuery("")
+        console.log('✅ Marshal invited successfully')
+        fetchEvent()
+      } else {
+        const errData = await res.json()
+        console.error('❌ Error inviting marshal:', errData)
+        alert(errData.error || "حدث خطأ أثناء دعوة المارشال")
+        // Revert optimistic update on error
         fetchEvent()
       }
     } catch (error) {
-      console.error("Error adding marshal:", error)
+      console.error('❌ Error inviting marshal:', error)
+      alert("حدث خطأ أثناء دعوة المارشال")
+      fetchEvent()
+    } finally {
+      setInvitingMarshal(false)
+      setUpdatingStats(false)
     }
   }
 
   const handleApproveAttendance = async (attendanceId: string) => {
     if (!event) return
+    setApprovingAttendance(attendanceId)
     try {
       const res = await fetch(`/api/admin/events/${event.id}/attendance/${attendanceId}/approve`, {
         method: "POST",
@@ -339,6 +539,8 @@ export default function EventDetails() {
       })
       if (res.ok) {
         fetchEvent()
+        // Notify events list page to refresh
+        localStorage.setItem('eventUpdated', 'true')
       } else {
         const errData = await res.json()
         alert(errData.error || "حدث خطأ أثناء قبول الطلب")
@@ -346,11 +548,14 @@ export default function EventDetails() {
     } catch (error) {
       console.error("Error approving attendance:", error)
       alert("حدث خطأ أثناء الاتصال بالخادم")
+    } finally {
+      setApprovingAttendance(null)
     }
   }
 
   const handleRejectAttendance = async (attendanceId: string) => {
     if (!event) return
+    setRejectingAttendance(attendanceId)
     try {
       const res = await fetch(`/api/admin/events/${event.id}/attendance/${attendanceId}/reject`, {
         method: "POST",
@@ -358,15 +563,74 @@ export default function EventDetails() {
       })
       if (res.ok) {
         fetchEvent()
+        // Notify events list page to refresh
+        localStorage.setItem('eventUpdated', 'true')
       } else {
         const errData = await res.json()
         alert(errData.error || "حدث خطأ أثناء رفض الطلب")
       }
     } catch (error) {
-        console.error("Error rejecting attendance:", error)
-        alert("حدث خطأ أثناء الاتصال بالخادم")
-      }
+      console.error("Error rejecting attendance:", error)
+      alert("حدث خطأ أثناء الاتصال بالخادم")
+    } finally {
+      setRejectingAttendance(null)
     }
+  }
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    if (!event) return
+    setAcceptingInvitation(invitationId)
+    try {
+      const res = await fetch(`/api/admin/events/${event.id}/invitations/${invitationId}/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include'
+      })
+      if (res.ok) {
+        fetchEvent()
+        // Notify events list page to refresh
+        localStorage.setItem('eventUpdated', 'true')
+      } else {
+        const errData = await res.json()
+        alert(errData.error || "حدث خطأ أثناء قبول الدعوة")
+      }
+    } catch (error) {
+      console.error("Error accepting invitation:", error)
+      alert("حدث خطأ أثناء الاتصال بالخادم")
+    } finally {
+      setAcceptingInvitation(null)
+    }
+  }
+
+  const handleRejectInvitation = async (invitationId: string) => {
+    console.log('🚫 UI - Rejecting invitation:', invitationId)
+    if (!event) return
+    setRejectingInvitation(invitationId)
+    try {
+      console.log('📡 UI - Calling reject API:', `/api/admin/events/${event.id}/invitations/${invitationId}/reject`)
+      const res = await fetch(`/api/admin/events/${event.id}/invitations/${invitationId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include'
+      })
+      console.log('📡 UI - Reject API response status:', res.status)
+      if (res.ok) {
+        console.log('✅ UI - Reject successful, fetching updated event data')
+        fetchEvent()
+        // Notify events list page to refresh
+        localStorage.setItem('eventUpdated', 'true')
+      } else {
+        const errData = await res.json()
+        console.log('❌ UI - Reject failed:', errData)
+        alert(errData.error || "حدث خطأ أثناء رفض الدعوة")
+      }
+    } catch (error) {
+      console.error("Error rejecting invitation:", error)
+      alert("حدث خطأ أثناء الاتصال بالخادم")
+    } finally {
+      setRejectingInvitation(null)
+    }
+  }
 
   if (status === "loading" || loading) {
     return (
@@ -621,27 +885,8 @@ export default function EventDetails() {
             {/* Accepted Marshals */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">
-                ✅ {language === "ar" ? "المارشالات المقبولين" : "Accepted Marshals"} ({event.attendances.filter(a => a.status === 'approved').length}/{event.maxMarshals})
+                ✅ {language === "ar" ? "المارشالات المضافين" : "Accepted Marshals"} ({event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0}/{event.maxMarshals})
               </h2>
-              <div className="relative h-32 flex items-center justify-center overflow-hidden rounded-xl mb-6 bg-zinc-900/50 border border-zinc-800">
-                {/* مستطيل أحمر خلف الشعارات */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-7 w-[340px] max-w-[90%] h-12 rounded-lg bg-gradient-to-r from-red-900/70 via-red-700/60 to-red-600/60 opacity-70 z-0" />
-                {/* أيقونات المارشال */}
-                <div className="relative flex flex-wrap gap-2 justify-center px-4 z-10">
-                  {event.marshalTypes && event.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
-                    const typeIcons: Record<string, string> = {
-                      'karting': '🏎️',
-                      'motocross': '🏍️',
-                      'rescue': '🚑',
-                      'circuit': '🏁',
-                      'drift': '💨',
-                      'drag-race': '🚦',
-                      'pit': '🔧'
-                    }
-                    return <span key={type} className="text-3xl relative">{typeIcons[type] || '�'}</span>
-                  })}
-                </div>
-              </div>
               <div className="flex justify-center mb-6">
                 <button
                   onClick={() => setShowAddMarshalModal(true)}
@@ -650,88 +895,92 @@ export default function EventDetails() {
                   ➕ {language === "ar" ? "إضافة مارشال" : "Add Marshal"}
                 </button>
               </div>
-              {event.attendances.filter(a => a.status === 'approved').length === 0 ? (
+              {!event.eventMarshals || event.eventMarshals.filter(m => m.status === 'accepted' || m.status === 'approved').length === 0 ? (
                 <p className="text-gray-400 text-center py-8">
-                  {language === "ar" ? "لا يوجد مارشالات مقبولين" : "No accepted marshals yet"}
+                  {language === "ar" ? "لا يوجد مارشالات مضافين" : "No accepted marshals yet"}
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {event.attendances.filter(a => a.status === 'approved').map((attendance) => (
+                  {event.eventMarshals.filter(m => m.status === 'accepted' || m.status === 'approved').map((invitation) => {
+                    console.log('📊 Rendering accepted marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id, '- Status:', invitation.status);
+                    return (
                     <div
-                      key={attendance.id}
-                      className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 ${
-                        attendance.status === 'cancelled' 
-                          ? 'border-red-600/50 bg-red-900/20' 
-                          : 'border-zinc-700'
-                      }`}
+                      key={`accepted-${invitation.id}`}
+                      className="flex items-center justify-between bg-zinc-800/50 border border-green-600/50 bg-green-900/20 rounded-xl p-4"
                     >
                       <div className="flex items-center gap-3">
-                        {attendance.user.image ? (
+                        {invitation.marshal.image ? (
                           <img
-                            src={attendance.user.image}
-                            alt={attendance.user.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-red-600"
+                            src={invitation.marshal.image}
+                            alt={invitation.marshal.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-green-600"
                           />
                         ) : (
-                          <div className="w-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white font-bold">
-                            {attendance.user.name.charAt(0).toUpperCase()}
+                          <div className="w-12 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-white font-bold">
+                            {invitation.marshal.name.charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div>
                           <p className="text-white font-medium">
-                            {attendance.user.employeeId && (
-                              <span className="text-blue-400 font-bold mr-2">
-                                {attendance.user.employeeId}
+                            {invitation.marshal.employeeId && (
+                              <span className="text-green-400 font-bold mr-2">
+                                {invitation.marshal.employeeId}
                               </span>
                             )}
-                            {attendance.user.name}
+                            {invitation.marshal.name}
                           </p>
                           <p className="text-sm text-gray-400">
-                            {attendance.user.email}
-                            {attendance.user.phone && (
-                              <span className="ml-2 text-gray-500">• {attendance.user.phone}</span>
+                            {invitation.marshal.email}
+                            {invitation.marshal.phone && (
+                              <span className="ml-2 text-gray-500">• {invitation.marshal.phone}</span>
                             )}
                           </p>
-                          {attendance.status === 'cancelled' && attendance.cancellationReason && (
-                            <p className="text-xs text-red-400 mt-1">
-                              {language === "ar" ? "سبب الإلغاء:" : "Cancelled:"} {attendance.cancellationReason}
-                            </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {language === "ar" ? "مضاف في:" : "Added:"} {new Date(invitation.invitedAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                          </p>
+                          {/* عرض تخصصات المارشال */}
+                          {invitation.marshal.marshalTypes && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {invitation.marshal.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
+                                const typeLabels: Record<string, {en: string, ar: string, icon: string, color: string}> = {
+                                  'karting': {en: 'Karting', ar: 'كارتنج', icon: '🏎️', color: 'bg-yellow-600'},
+                                  'motocross': {en: 'Motocross', ar: 'موتوكروس', icon: '🏍️', color: 'bg-orange-600'},
+                                  'rescue': {en: 'Rescue', ar: 'إنقاذ', icon: '🚑', color: 'bg-red-600'},
+                                  'circuit': {en: 'Circuit', ar: 'سيركت', icon: '🏁', color: 'bg-blue-600'},
+                                  'drift': {en: 'Drift', ar: 'دريفت', icon: '💨', color: 'bg-purple-600'},
+                                  'drag-race': {en: 'Drag Race', ar: 'دراق ريس', icon: '🚦', color: 'bg-pink-600'},
+                                  'pit': {en: 'Pit', ar: 'بت', icon: '🔧', color: 'bg-teal-600'}
+                                }
+                                const label = typeLabels[type]
+                                if (!label) return null
+                                return (
+                                  <span 
+                                    key={type}
+                                    className={`${label.color} text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1`}
+                                  >
+                                    <span>{label.icon}</span>
+                                    <span>{language === "ar" ? label.ar : label.en}</span>
+                                  </span>
+                                )
+                              })}
+                            </div>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          attendance.status === 'approved' 
-                            ? 'bg-green-600/20 text-green-500' 
-                            : attendance.status === 'pending'
-                            ? 'bg-yellow-600/20 text-yellow-500'
-                            : attendance.status === 'rejected'
-                            ? 'bg-red-600/20 text-red-500'
-                            : 'bg-gray-600/20 text-gray-500'
-                        }`}>
-                          {attendance.status === 'approved' 
-                            ? (language === "ar" ? "مؤكد" : "Approved")
-                            : attendance.status === 'pending'
-                            ? (language === "ar" ? "في الانتظار" : "Pending")
-                            : attendance.status === 'rejected'
-                            ? (language === "ar" ? "مرفوض" : "Rejected")
-                            : (language === "ar" ? "ملغي" : "Cancelled")
-                          }
-                        </span>
-                        {attendance.status !== 'cancelled' && (
-                          <button
-                            onClick={() => {
-                              setSelectedMarshalId(attendance.userId)
-                              setShowRemoveMarshalModal(true)
-                            }}
-                            className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
-                          >
-                            {language === "ar" ? "إزالة" : "Remove"}
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            setSelectedMarshalId(invitation.marshal.id)
+                            setShowRemoveMarshalModal(true)
+                          }}
+                          className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
+                        >
+                          {language === "ar" ? "إزالة" : "Remove"}
+                        </button>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               )}
             </div>
@@ -739,23 +988,25 @@ export default function EventDetails() {
             {/* Invited Marshals */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">
-                📨 {language === "ar" ? "المارشالات المدعوين" : "Invited Marshals"} ({event.eventMarshals?.length || 0})
+                📨 {language === "ar" ? "المارشالات المدعوين" : "Invited Marshals"} ({event.eventMarshals?.filter(m => m.status !== 'accepted' && m.status !== 'approved').length || 0})
               </h2>
               <div className="flex justify-center mb-6">
                 <button
-                  onClick={() => setShowAddMarshalModal(true)}
+                  onClick={() => setShowInviteMarshalModal(true)}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-2"
                 >
                   ➕ {language === "ar" ? "دعوة مارشال" : "Invite Marshal"}
                 </button>
               </div>
-              {!event.eventMarshals || event.eventMarshals.length === 0 ? (
+              {!event.eventMarshals || event.eventMarshals.filter(m => m.status !== 'accepted' && m.status !== 'approved').length === 0 ? (
                 <p className="text-gray-400 text-center py-8">
                   {language === "ar" ? "لا يوجد مارشالات مدعوين" : "No invited marshals yet"}
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {event.eventMarshals.map((invitation) => (
+                  {event.eventMarshals.filter(m => m.status !== 'accepted' && m.status !== 'approved').map((invitation) => {
+                    console.log('📊 Rendering marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id, '- Status:', invitation.status);
+                    return (
                     <div
                       key={invitation.id}
                       className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 ${
@@ -846,18 +1097,27 @@ export default function EventDetails() {
                           }
                         </span>
                         {invitation.status === 'invited' && (
-                          <button
-                            onClick={() => {
-                              // يمكن إضافة إعادة إرسال الدعوة هنا
-                            }}
-                            className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 rounded-lg transition-all text-sm font-bold"
-                          >
-                            {language === "ar" ? "إعادة إرسال" : "Resend"}
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleAcceptInvitation(invitation.id)}
+                              disabled={acceptingInvitation === invitation.id}
+                              className="px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                            >
+                              {acceptingInvitation === invitation.id ? (language === "ar" ? "جاري..." : "Accepting...") : (language === "ar" ? "قبول" : "Accept")}
+                            </button>
+                            <button
+                              onClick={() => handleRejectInvitation(invitation.id)}
+                              disabled={rejectingInvitation === invitation.id}
+                              className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                            >
+                              {rejectingInvitation === invitation.id ? (language === "ar" ? "جاري..." : "Rejecting...") : (language === "ar" ? "رفض" : "Reject")}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               )}
             </div>
@@ -916,15 +1176,17 @@ export default function EventDetails() {
                         </span>
                         <button
                           onClick={() => handleApproveAttendance(attendance.id)}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all text-sm font-bold"
+                          disabled={approvingAttendance === attendance.id}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 disabled:cursor-not-allowed text-white rounded-lg transition-all text-sm font-bold"
                         >
-                          {language === "ar" ? "قبول" : "Approve"}
+                          {approvingAttendance === attendance.id ? (language === "ar" ? "جاري..." : "Approving...") : (language === "ar" ? "قبول" : "Approve")}
                         </button>
                         <button
                           onClick={() => handleRejectAttendance(attendance.id)}
-                          className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
+                          disabled={rejectingAttendance === attendance.id}
+                          className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 disabled:bg-red-600/10 disabled:cursor-not-allowed text-red-500 rounded-lg transition-all text-sm font-bold"
                         >
-                          {language === "ar" ? "رفض" : "Reject"}
+                          {rejectingAttendance === attendance.id ? (language === "ar" ? "جاري..." : "Rejecting...") : (language === "ar" ? "رفض" : "Reject")}
                         </button>
                       </div>
                     </div>
@@ -941,21 +1203,29 @@ export default function EventDetails() {
             className="lg:col-span-1 space-y-6"
           >
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                📊 {language === "ar" ? "الإحصائيات" : "Statistics"}
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">
+                  📊 {language === "ar" ? "الإحصائيات" : "Statistics"}
+                </h2>
+                {updatingStats && (
+                  <div className="flex items-center gap-2 text-yellow-500">
+                    <div className="w-4 h-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm">{language === "ar" ? "جاري التحديث..." : "Updating..."}</span>
+                  </div>
+                )}
+              </div>
               <div className="space-y-4">
                 <div className="bg-green-600/10 border border-green-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المقبولين" : "Accepted"}</p>
-                  <p className="text-green-500 font-bold text-3xl">{event.attendances.filter(a => a.status === 'approved').length}</p>
+                  <p className="text-green-500 font-bold text-3xl">{event.eventMarshals?.filter(em => em.status === 'accepted' || em.status === 'approved').length || 0}</p>
                 </div>
                 <div className="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المدعوين" : "Invited"}</p>
-                  <p className="text-blue-500 font-bold text-3xl">{event.eventMarshals?.length || 0}</p>
+                  <p className="text-blue-500 font-bold text-3xl">{event.eventMarshals?.filter(em => em.status === 'invited').length || 0}</p>
                 </div>
                 <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المتبقي" : "Available"}</p>
-                  <p className="text-yellow-500 font-bold text-3xl">{event.maxMarshals - event.attendances.filter(a => a.status === 'approved').length}</p>
+                  <p className="text-yellow-500 font-bold text-3xl">{event.maxMarshals - (event.eventMarshals?.filter(em => em.status === 'accepted' || em.status === 'approved').length || 0)}</p>
                 </div>
                 <div className="bg-purple-600/10 border border-purple-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ الإنشاء" : "Created"}</p>
@@ -1318,15 +1588,151 @@ export default function EventDetails() {
             <div className="flex gap-3">
               <button
                 onClick={handleAddMarshal}
-                disabled={!selectedMarshalToAdd}
+                disabled={!selectedMarshalToAdd || addingMarshal}
                 className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-xl font-bold transition-all disabled:cursor-not-allowed"
               >
-                {language === "ar" ? "إضافة المارشال" : "Add Marshal"}
+                {addingMarshal ? (language === "ar" ? "جاري الإضافة..." : "Adding...") : (language === "ar" ? "إضافة المارشال" : "Add Marshal")}
               </button>
               <button
                 onClick={() => {
                   setShowAddMarshalModal(false)
                   setSelectedMarshalToAdd(null)
+                  setAvailableMarshals([])
+                  setMarshalSearchQuery("")
+                }}
+                className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold transition-all"
+              >
+                {language === "ar" ? "إلغاء" : "Cancel"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Invite Marshal Modal */}
+      {showInviteMarshalModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-zinc-900 border border-blue-600/50 rounded-2xl p-8 max-w-2xl w-full my-8 max-h-[80vh] overflow-y-auto"
+          >
+            <h3 className="text-2xl font-bold text-white mb-6">
+              📨 {language === "ar" ? "دعوة مارشال للفعالية" : "Invite Marshal to Event"}
+            </h3>
+            
+            {/* Search Filter */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                🔍 {language === "ar" ? "البحث عن مارشال" : "Search Marshal"}
+              </label>
+              <input
+                type="text"
+                value={marshalSearchQuery}
+                onChange={(e) => setMarshalSearchQuery(e.target.value)}
+                placeholder={language === "ar" ? "ابحث بالاسم أو رقم الموظف أو الإيميل..." : "Search by name, employee ID, or email..."}
+                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-300 mb-4">
+                {language === "ar" 
+                  ? "اختر مارشال من القائمة أدناه لدعوته إلى الفعالية:"
+                  : "Select a marshal from the list below to invite to the event:"
+                }
+              </p>
+              
+              {availableMarshals.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">
+                  {language === "ar" ? "لا يوجد مارشالات متاحين" : "No available marshals found"}
+                </p>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {availableMarshals
+                    .filter((marshal) => {
+                      if (!marshalSearchQuery.trim()) return true
+                      const query = marshalSearchQuery.toLowerCase()
+                      return (
+                        marshal.name.toLowerCase().includes(query) ||
+                        marshal.email.toLowerCase().includes(query) ||
+                        (marshal.employeeId && marshal.employeeId.toLowerCase().includes(query))
+                      )
+                    })
+                    .map((marshal) => (
+                    <div
+                      key={marshal.id}
+                      className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 cursor-pointer transition-all ${
+                        selectedMarshalToInvite === marshal.id 
+                          ? 'border-blue-600 bg-blue-900/20' 
+                          : 'border-zinc-700 hover:bg-zinc-800'
+                      }`}
+                      onClick={() => setSelectedMarshalToInvite(marshal.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        {marshal.image ? (
+                          <img
+                            src={marshal.image}
+                            alt={marshal.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-blue-600"
+                          />
+                        ) : (
+                          <div className="w-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold">
+                            {marshal.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-white font-medium">{marshal.name}</p>
+                          <p className="text-sm text-gray-400">{marshal.employeeId}</p>
+                          <p className="text-sm text-gray-400">{marshal.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {marshal.marshalTypes && (
+                          <div className="flex flex-wrap gap-1">
+                            {marshal.marshalTypes.split(',').filter((t: string) => t.trim()).slice(0, 2).map((type: string) => {
+                              const typeIcons: Record<string, string> = {
+                                'karting': '🏎️',
+                                'motocross': '🏍️',
+                                'rescue': '🚑',
+                                'circuit': '🏁',
+                                'drift': '💨',
+                                'drag-race': '🚦',
+                                'pit': '🔧'
+                              }
+                              return (
+                                <span key={type} className="text-sm" title={type}>
+                                  {typeIcons[type] || '�'}
+                                </span>
+                              )
+                            })}
+                          </div>
+                        )}
+                        <input
+                          type="radio"
+                          checked={selectedMarshalToInvite === marshal.id}
+                          onChange={() => setSelectedMarshalToInvite(marshal.id)}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-600"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleInviteMarshal}
+                disabled={!selectedMarshalToInvite || invitingMarshal}
+                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-xl font-bold transition-all disabled:cursor-not-allowed"
+              >
+                {invitingMarshal ? (language === "ar" ? "جاري الدعوة..." : "Inviting...") : (language === "ar" ? "دعوة المارشال" : "Invite Marshal")}
+              </button>
+              <button
+                onClick={() => {
+                  setShowInviteMarshalModal(false)
+                  setSelectedMarshalToInvite(null)
                   setAvailableMarshals([])
                   setMarshalSearchQuery("")
                 }}
@@ -1373,9 +1779,17 @@ export default function EventDetails() {
             <div className="flex gap-3">
               <button
                 onClick={handleRemoveMarshal}
-                className="flex-1 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl font-bold transition-all"
+                disabled={removingMarshal}
+                className="flex-1 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-800 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all"
               >
-                {language === "ar" ? "نعم، أزل" : "Yes, Remove"}
+                {removingMarshal ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    {language === "ar" ? "جاري الإزالة..." : "Removing..."}
+                  </div>
+                ) : (
+                  language === "ar" ? "نعم، أزل" : "Yes, Remove"
+                )}
               </button>
               <button
                 onClick={() => {

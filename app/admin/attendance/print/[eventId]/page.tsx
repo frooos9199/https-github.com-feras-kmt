@@ -4,7 +4,9 @@ import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 
 interface AttendanceRecord {
-  user: {
+  id: string
+  status: string
+  marshal: {
     employeeId: string
     name: string
   }
@@ -19,13 +21,13 @@ interface Event {
   endTime: string | null
   endDate: string | null
   location: string
+  eventMarshals: AttendanceRecord[]
 }
 
 export default function PrintAttendancePage() {
   const params = useParams()
   const eventId = params.eventId as string
   const [event, setEvent] = useState<Event | null>(null)
-  const [attendances, setAttendances] = useState<AttendanceRecord[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function PrintAttendancePage() {
 
   const fetchData = async () => {
     try {
-      // Fetch event details
+      // Fetch event details with eventMarshals
       const eventRes = await fetch(`/api/admin/events/${eventId}`)
       if (!eventRes.ok) {
         console.error("Event not found")
@@ -42,15 +44,16 @@ export default function PrintAttendancePage() {
         return
       }
       const eventData = await eventRes.json()
+      
+      // Debug: log marshal counts
+      console.log('🖨️ Print Sheet Data:', {
+        totalMarshals: eventData.eventMarshals?.length || 0,
+        acceptedMarshals: eventData.eventMarshals?.filter((m: any) => m.status === 'accepted' || m.status === 'approved').length || 0,
+        invitedMarshals: eventData.eventMarshals?.filter((m: any) => m.status === 'invited').length || 0
+      })
+      
       setEvent(eventData)
 
-      // Fetch approved attendances for this specific event
-      const attendanceRes = await fetch(`/api/admin/attendance?eventId=${eventId}&status=approved`)
-      const attendanceData = await attendanceRes.json()
-      console.log('Total attendances fetched:', attendanceData.length)
-      console.log('Attendances:', attendanceData)
-      setAttendances(attendanceData)
-      
       setLoading(false)
       
       // Auto print after data loads
@@ -222,8 +225,8 @@ export default function PrintAttendancePage() {
         <div className="mb-8">
           <div className="mb-4 text-center bg-yellow-100 p-3 border-2 border-yellow-500 rounded">
             <p className="text-lg font-bold">
-              Total Registered: {attendances.length} Marshals / 
-              إجمالي المسجلين: {attendances.length} مارشال
+              Total Registered: {event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0} Marshals / 
+              إجمالي المسجلين: {event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0} مارشال
             </p>
           </div>
           <table className="w-full border-collapse border-2 border-black">
@@ -244,30 +247,34 @@ export default function PrintAttendancePage() {
               </tr>
             </thead>
             <tbody>
-              {attendances.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="border-2 border-black p-6 text-center text-gray-500">
-                    No approved attendances yet / لا توجد حضور مقبول بعد
-                  </td>
-                </tr>
-              ) : (
-                attendances.map((attendance, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="border-2 border-black p-3 text-center font-semibold">
-                      {index + 1}
-                    </td>
-                    <td className="border-2 border-black p-3 font-semibold text-center">
-                      {attendance.user.name}
-                    </td>
-                    <td className="border-2 border-black p-3 font-mono font-bold text-center">
-                      {attendance.user.employeeId}
-                    </td>
-                    <td className="border-2 border-black p-3">
-                      {/* Empty cell for signature */}
+              {(() => {
+                const acceptedMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
+                console.log('🖨️ Rendering accepted marshals:', acceptedMarshals.length);
+                return !event.eventMarshals || acceptedMarshals.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="border-2 border-black p-6 text-center text-gray-500">
+                      No marshals registered yet / لا يوجد مارشالز مسجلين بعد
                     </td>
                   </tr>
-                ))
-              )}
+                ) : (
+                  acceptedMarshals.map((marshal, index) => (
+                    <tr key={marshal.id} className="hover:bg-gray-50">
+                      <td className="border-2 border-black p-3 text-center font-semibold">
+                        {index + 1}
+                      </td>
+                      <td className="border-2 border-black p-3 font-semibold text-center">
+                        {marshal.marshal.name}
+                      </td>
+                      <td className="border-2 border-black p-3 font-mono font-bold text-center">
+                        {marshal.marshal.employeeId}
+                      </td>
+                      <td className="border-2 border-black p-3">
+                        {/* Empty cell for signature */}
+                      </td>
+                    </tr>
+                  ))
+                );
+              })()}
             </tbody>
           </table>
         </div>
@@ -277,7 +284,7 @@ export default function PrintAttendancePage() {
           <div className="grid grid-cols-2 gap-8">
             <div>
               <p className="font-semibold mb-2">Total Marshals / إجمالي المارشالات:</p>
-              <p className="text-2xl font-bold">{attendances.length}</p>
+              <p className="text-2xl font-bold">{event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0}</p>
             </div>
             <div>
               <p className="font-semibold mb-2">Print Date / تاريخ الطباعة:</p>

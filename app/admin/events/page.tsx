@@ -169,6 +169,7 @@ interface Event {
   status: string
   _count: {
     attendances: number
+    eventMarshals: number
   }
 }
 
@@ -228,6 +229,54 @@ export default function EventsManagement() {
     }
   }, [session])
 
+  // Refresh events when page becomes visible (after returning from event details)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session?.user?.role === "admin") {
+        console.log('🔄 Page became visible, refreshing events...')
+        fetchEvents()
+      }
+    }
+
+    const handleFocus = () => {
+      if (session?.user?.role === "admin") {
+        console.log('🎯 Window focused, refreshing events...')
+        fetchEvents()
+      }
+    }
+
+    // Check for updates from localStorage (set by event details page)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'eventUpdated' && e.newValue === 'true') {
+        console.log('📡 Event updated detected, refreshing events...')
+        localStorage.removeItem('eventUpdated')
+        fetchEvents()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('storage', handleStorageChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [session])
+
+  // Auto refresh events every 5 seconds (increased frequency)
+  useEffect(() => {
+    if (session?.user?.role !== "admin") return
+
+    const interval = setInterval(() => {
+      console.log('⏰ Auto-refreshing events...')
+      fetchEvents()
+    }, 5000) // 5 seconds instead of 30
+
+    return () => clearInterval(interval)
+  }, [session])
+
   const fetchEvents = async () => {
     setLoading(true)
     try {
@@ -238,6 +287,7 @@ export default function EventsManagement() {
       
       if (eventsRes.ok) {
         const eventsData = await eventsRes.json()
+        console.log('📊 Events data received:', eventsData.map((e: any) => ({ id: e.id, title: e.titleEn, count: e._count.eventMarshals, max: e.maxMarshals })))
         if (Array.isArray(eventsData)) {
           setEvents(eventsData)
         } else if (Array.isArray(eventsData.events)) {
@@ -542,7 +592,7 @@ export default function EventsManagement() {
                         <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
                         <div>🕐 {event.time}</div>
                         <div>📍 {event.location}</div>
-                        <div>👥 {event._count.attendances}/{event.maxMarshals}</div>
+                        <div className={`👥 ${event._count.eventMarshals >= event.maxMarshals ? 'bg-red-500/20 text-red-400 font-bold px-2 py-1 rounded' : ''}`}>{event._count.eventMarshals}/{event.maxMarshals}</div>
                       </div>
                       <div className="flex items-center justify-between mb-3">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${

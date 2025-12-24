@@ -8,7 +8,6 @@ export async function GET(
   { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
-    console.log('🚀 API called with params:', params)
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'admin') {
       console.log('❌ Unauthorized - session:', !!session, 'role:', session?.user?.role)
@@ -182,7 +181,10 @@ export async function POST(
             id: true,
             name: true,
             email: true,
-            marshalTypes: true
+            phone: true,
+            marshalTypes: true,
+            employeeId: true,
+            image: true
           }
         },
         event: {

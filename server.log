@@ -1,23 +1,439 @@
-
-> kmt-marshal-system@1.0.0 dev
-> next dev --port 3000
-
-⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
- We detected multiple lockfiles and selected the directory of /Users/mac/Documents/package-lock.json as the root directory.
- To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
-   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
- Detected additional lockfiles: 
-   * /Users/mac/Documents/GitHub/kmtmaster/https-github.com-feras-kmt/package-lock.json
-   * /Users/mac/Documents/GitHub/kmtmaster/package-lock.json
-
 ▲ Next.js 16.1.0 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://192.168.8.68:3000
+- Local:         http://localhost:3002
+- Network:       http://169.254.171.97:3002
 - Environments: .env.local, .env
 - Experiments (use with caution):
   · serverActions
 
 ✓ Starting...
-✓ Ready in 233ms
- GET /notifications 200 in 209ms (compile: 101ms, render: 108ms)
- GET /api/auth/session 200 in 446ms (compile: 433ms, render: 13ms)
+✓ Ready in 196ms
+LanguageContext t() called with language: ar key: english
+Translation result: English
+LanguageContext t() called with language: ar key: marshalManagementSystem
+Translation result: نظام إدارة المارشال
+LanguageContext t() called with language: ar key: signUp
+Translation result: تسجيل جديد
+LanguageContext t() called with language: ar key: login
+Translation result: تسجيل الدخول
+LanguageContext t() called with language: ar key: scrollDown
+Translation result: اسحب للأسفل
+LanguageContext t() called with language: ar key: aboutTheSystem
+Translation result: About the System
+LanguageContext t() called with language: ar key: systemDescription
+Translation result: نظام متقدم لإدارة المارشال في الفعاليات والسباقات بمدينة الكويت لرياضة المحركات
+LanguageContext t() called with language: ar key: readyToGetStarted
+Translation result: Ready to Get Started?
+LanguageContext t() called with language: ar key: registerNow
+Translation result: Register Now
+LanguageContext t() called with language: ar key: allRightsReserved
+Translation result: © 2025 All Rights Reserved
+LanguageContext t() called with language: ar key: designedAndDevelopedBy
+Translation result: Designed & Developed by: 
+ GET / 200 in 1930ms (compile: 1819ms, render: 111ms)
+ GET /api/test/check-env 200 in 158ms (compile: 151ms, render: 7ms)
+LanguageContext t() called with language: ar key: english
+Translation result: English
+LanguageContext t() called with language: ar key: marshalManagementSystem
+Translation result: نظام إدارة المارشال
+LanguageContext t() called with language: ar key: signUp
+Translation result: تسجيل جديد
+LanguageContext t() called with language: ar key: login
+Translation result: تسجيل الدخول
+LanguageContext t() called with language: ar key: scrollDown
+Translation result: اسحب للأسفل
+LanguageContext t() called with language: ar key: aboutTheSystem
+Translation result: About the System
+LanguageContext t() called with language: ar key: systemDescription
+Translation result: نظام متقدم لإدارة المارشال في الفعاليات والسباقات بمدينة الكويت لرياضة المحركات
+LanguageContext t() called with language: ar key: readyToGetStarted
+Translation result: Ready to Get Started?
+LanguageContext t() called with language: ar key: registerNow
+Translation result: Register Now
+LanguageContext t() called with language: ar key: allRightsReserved
+Translation result: © 2025 All Rights Reserved
+LanguageContext t() called with language: ar key: designedAndDevelopedBy
+Translation result: Designed & Developed by: 
+ GET / 200 in 26ms (compile: 3ms, render: 23ms)
+ GET /api/auth/session 200 in 690ms (compile: 680ms, render: 10ms)
+ GET /signup 200 in 259ms (compile: 252ms, render: 7ms)
+ GET /videos/marshal-bg.mp4 404 in 150ms (compile: 130ms, render: 20ms)
+ GET /login 200 in 202ms (compile: 195ms, render: 7ms)
+ GET /videos/marshal-bg.mp4 404 in 17ms (compile: 3ms, render: 14ms)
+ GET /videos/marshal-bg.mp4 404 in 29ms (compile: 4ms, render: 25ms)
+ GET /login 200 in 23ms (compile: 6ms, render: 17ms)
+ GET /videos/marshal-bg.mp4 404 in 24ms (compile: 4ms, render: 20ms)
+ GET /login 200 in 21ms (compile: 4ms, render: 16ms)
+ GET /videos/marshal-bg.mp4 404 in 22ms (compile: 3ms, render: 19ms)
+ GET /api/auth/providers 200 in 18ms (compile: 7ms, render: 10ms)
+ GET /api/auth/csrf 200 in 9ms (compile: 1697µs, render: 7ms)
+ POST /api/auth/callback/credentials 200 in 2.2s (compile: 1423µs, render: 2.2s)
+LanguageContext t() called with language: ar key: english
+Translation result: English
+LanguageContext t() called with language: ar key: marshalManagementSystem
+Translation result: نظام إدارة المارشال
+LanguageContext t() called with language: ar key: signUp
+Translation result: تسجيل جديد
+LanguageContext t() called with language: ar key: login
+Translation result: تسجيل الدخول
+LanguageContext t() called with language: ar key: scrollDown
+Translation result: اسحب للأسفل
+LanguageContext t() called with language: ar key: aboutTheSystem
+Translation result: About the System
+LanguageContext t() called with language: ar key: systemDescription
+Translation result: نظام متقدم لإدارة المارشال في الفعاليات والسباقات بمدينة الكويت لرياضة المحركات
+LanguageContext t() called with language: ar key: readyToGetStarted
+Translation result: Ready to Get Started?
+LanguageContext t() called with language: ar key: registerNow
+Translation result: Register Now
+LanguageContext t() called with language: ar key: allRightsReserved
+Translation result: © 2025 All Rights Reserved
+LanguageContext t() called with language: ar key: designedAndDevelopedBy
+Translation result: Designed & Developed by: 
+ GET / 200 in 28ms (compile: 2ms, render: 26ms)
+ GET /api/test/check-env 200 in 4ms (compile: 1121µs, render: 2ms)
+ GET /admin/events 200 in 250ms (compile: 213ms, render: 37ms)
+ GET /api/auth/session 200 in 14ms (compile: 3ms, render: 11ms)
+ GET /api/admin/events 200 in 1035ms (compile: 257ms, render: 778ms)
+ GET /api/events/calendar 200 in 493ms (compile: 101ms, render: 392ms)
+ GET /admin/events/cmjfe5xj60000jv04sqcd6bds 200 in 343ms (compile: 335ms, render: 7ms)
+API EVENT GET {
+  url: 'http://localhost:3002/api/admin/events/cmjfe5xj60000jv04sqcd6bds',
+  headers: {
+    accept: 'application/json',
+    'accept-encoding': 'gzip, deflate',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    connection: 'keep-alive',
+    cookie: 'next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..R24anzIaqmBAOqNb.WvZCrPmbHWbCZrWulFOIWcYECh2kldgCV0nFXNlC5xfeMUSx_fvKTLPF40bPsrNOme7Py2FcrY8Uf6LW798UfC38aTPxmCs4ceF0pHuvZzyFOtb31Ls0voORq6vLTvi45ytoG_zO4plEk7QyPOKXRPu1glaGHQbp7rjH-lE_uRyV16-Z4uGkVq2SG4MYPeR6GTOjA0q6EcZEUYscdwkNFQIPKnBqgFMFpKoEZR4_vuWHyU3NBaRY4DUImWnJ1R92nIUJScS0AXYtrH2yIFsuplXChxEinTpWyXAzWiz6NwH-jGJDeoYRfFo6_R3OvgObl1jhjViXULHC2H0iXE8Dqwi19N9Na7pTa_J5470JGRJibQQSIb_s7VWlQTTdFoAxyEglSAcA_PA1IkH-pVupDg8kFux3iuBimaSuuyKrc4KLVQ.LcHte7ComexYLwRAtnU3rA; __next_hmr_refresh_hash__=40; next-auth.callback-url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard; next-auth.csrf-token=c465322eed0e84e3f0aec51aa81d1fbd056f0c98eed8578534981e930963d729%7C3d3e28896938b57fa3423937d325e89c87616bed7477738ee9c7fd53916f9a93',
+    host: 'localhost:3002',
+    priority: 'u=3, i',
+    referer: 'http://localhost:3002/admin/events/cmjfe5xj60000jv04sqcd6bds',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15',
+    'x-forwarded-for': '::1',
+    'x-forwarded-host': 'localhost:3002',
+    'x-forwarded-port': '3002',
+    'x-forwarded-proto': 'http'
+  },
+  params: { eventId: 'cmjfe5xj60000jv04sqcd6bds' }
+}
+ GET /api/admin/events/cmjfe5xj60000jv04sqcd6bds 200 in 2.7s (compile: 438ms, render: 2.3s)
+ GET /admin/events 200 in 22ms (compile: 6ms, render: 16ms)
+ GET /admin/events/cmjgv3vap0000jx04obgcga7x 200 in 27ms (compile: 11ms, render: 16ms)
+API EVENT GET {
+  url: 'http://localhost:3002/api/admin/events/cmjgv3vap0000jx04obgcga7x',
+  headers: {
+    accept: 'application/json',
+    'accept-encoding': 'gzip, deflate',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    connection: 'keep-alive',
+    cookie: 'next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..R24anzIaqmBAOqNb.WvZCrPmbHWbCZrWulFOIWcYECh2kldgCV0nFXNlC5xfeMUSx_fvKTLPF40bPsrNOme7Py2FcrY8Uf6LW798UfC38aTPxmCs4ceF0pHuvZzyFOtb31Ls0voORq6vLTvi45ytoG_zO4plEk7QyPOKXRPu1glaGHQbp7rjH-lE_uRyV16-Z4uGkVq2SG4MYPeR6GTOjA0q6EcZEUYscdwkNFQIPKnBqgFMFpKoEZR4_vuWHyU3NBaRY4DUImWnJ1R92nIUJScS0AXYtrH2yIFsuplXChxEinTpWyXAzWiz6NwH-jGJDeoYRfFo6_R3OvgObl1jhjViXULHC2H0iXE8Dqwi19N9Na7pTa_J5470JGRJibQQSIb_s7VWlQTTdFoAxyEglSAcA_PA1IkH-pVupDg8kFux3iuBimaSuuyKrc4KLVQ.LcHte7ComexYLwRAtnU3rA; __next_hmr_refresh_hash__=40; next-auth.callback-url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard; next-auth.csrf-token=c465322eed0e84e3f0aec51aa81d1fbd056f0c98eed8578534981e930963d729%7C3d3e28896938b57fa3423937d325e89c87616bed7477738ee9c7fd53916f9a93',
+    host: 'localhost:3002',
+    priority: 'u=3, i',
+    referer: 'http://localhost:3002/admin/events/cmjgv3vap0000jx04obgcga7x',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15',
+    'x-forwarded-for': '::1',
+    'x-forwarded-host': 'localhost:3002',
+    'x-forwarded-port': '3002',
+    'x-forwarded-proto': 'http'
+  },
+  params: { eventId: 'cmjgv3vap0000jx04obgcga7x' }
+}
+ GET /api/admin/events/cmjgv3vap0000jx04obgcga7x 200 in 2.2s (compile: 3ms, render: 2.2s)
+🚀 API called with params: Promise {
+  { eventId: 'cmjgv3vap0000jx04obgcga7x' },
+  [Symbol(async_id_symbol)]: 36868,
+  [Symbol(trigger_async_id_symbol)]: 36860,
+  [Symbol(kResourceStore)]: {
+    isStaticGeneration: false,
+    page: '/api/admin/events/[eventId]/invitations/route',
+    route: '/api/admin/events/[eventId]/invitations',
+    incrementalCache: IncrementalCache {
+      locks: Map(0) {},
+      hasCustomCacheHandler: false,
+      dev: true,
+      disableForTestmode: false,
+      minimalMode: false,
+      requestHeaders: [Object],
+      allowedRevalidateHeaderKeys: undefined,
+      prerenderManifest: [Object],
+      cacheControls: [SharedCacheControls],
+      fetchCacheKeyPrefix: '',
+      cacheHandler: [FileSystemCache]
+    },
+    cacheLifeProfiles: {
+      default: [Object],
+      seconds: [Object],
+      minutes: [Object],
+      hours: [Object],
+      days: [Object],
+      weeks: [Object],
+      max: [Object]
+    },
+    isBuildTimePrerendering: undefined,
+    hasReadableErrorStacks: undefined,
+    fetchCache: undefined,
+    isOnDemandRevalidate: undefined,
+    isDraftMode: undefined,
+    isPrefetchRequest: undefined,
+    buildId: 'development',
+    reactLoadableManifest: {},
+    assetPrefix: '',
+    nonce: undefined,
+    afterContext: AfterContext {
+      workUnitStores: Set(0) {},
+      waitUntil: [Function (anonymous)],
+      onClose: [Function: onClose],
+      onTaskError: undefined,
+      callbackQueue: [EventEmitter]
+    },
+    cacheComponentsEnabled: false,
+    dev: false,
+    previouslyRevalidatedTags: [],
+    refreshTagsByCacheKind: Map(2) { 'default' => [Object], 'remote' => [Object] },
+    runInCleanSnapshot: [Function: bound] { asyncResource: [Getter/Setter] },
+    shouldTrackFetchMetrics: false,
+    reactServerErrorsByDigest: Map(0) {}
+  },
+  [Symbol(kResourceStore)]: undefined,
+  [Symbol(kResourceStore)]: undefined,
+  [Symbol(kResourceStore)]: undefined,
+  [Symbol(kResourceStore)]: { isAppRoute: true, isAction: false },
+  [Symbol(kResourceStore)]: {
+    type: 'request',
+    phase: 'action',
+    implicitTags: { tags: [Array], expirationsByCacheKind: [Map] },
+    url: {
+      pathname: '/api/admin/events/cmjgv3vap0000jx04obgcga7x/invitations',
+      search: ''
+    },
+    rootParams: {},
+    headers: [Getter],
+    cookies: [Getter/Setter],
+    mutableCookies: [Getter],
+    userspaceMutableCookies: [Getter],
+    draftMode: [Getter],
+    renderResumeDataCache: null,
+    isHmrRefresh: false,
+    serverComponentsHmrCache: undefined,
+    devFallbackParams: null
+  }
+}
+Error: Route "/api/admin/events/[eventId]/invitations" used `...params` or similar expression. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at GET (app/api/admin/events/[eventId]/invitations/route.ts:11:13)
+   9 | ) {
+  10 |   try {
+> 11 |     console.log('🚀 API called with params:', params)
+     |             ^
+  12 |     const session = await getServerSession(authOptions)
+  13 |     if (!session || session.user.role !== 'admin') {
+  14 |       console.log('❌ Unauthorized - session:', !!session, 'role:', session?.user?.role)
+📝 eventId: cmjgv3vap0000jx04obgcga7x
+📋 Event found: {
+  id: 'cmjgv3vap0000jx04obgcga7x',
+  titleEn: 'Karting',
+  titleAr: 'Karting',
+  marshalTypes: 'karting',
+  maxMarshals: 4
+}
+🏷️ Event types: [ 'karting' ]
+👥 All marshals found: 168
+✅ Matching marshals: 47
+📊 Final result - availableMarshals count: 47
+ GET /api/admin/events/cmjgv3vap0000jx04obgcga7x/invitations 200 in 2.4s (compile: 474ms, render: 1965ms)
+ POST /api/admin/events/cmjgv3vap0000jx04obgcga7x/invitations/cmjjxdvk200018ok5zq00xdhd/reject 200 in 5.3s (compile: 466ms, render: 4.8s)
+ GET /admin/events/cmjgv3vap0000jx04obgcga7x 200 in 47ms (compile: 11ms, render: 36ms)
+ GET /api/auth/session 200 in 13ms (compile: 4ms, render: 9ms)
+ GET /admin/events 200 in 25ms (compile: 5ms, render: 19ms)
+ GET /admin 200 in 177ms (compile: 170ms, render: 7ms)
+ GET /api/admin/stats 200 in 4.5s (compile: 60ms, render: 4.4s)
+ GET /api/admin/stats 200 in 4.9s (compile: 62ms, render: 4.8s)
+ GET /api/notifications?unreadOnly=true 200 in 727ms (compile: 115ms, render: 611ms)
+ GET /api/notifications?unreadOnly=true 200 in 2.3s (compile: 116ms, render: 2.2s)
+ GET /admin/events 200 in 23ms (compile: 5ms, render: 18ms)
+ GET /admin/events/cmjgv3vap0000jx04obgcga7x 200 in 25ms (compile: 9ms, render: 16ms)
+ POST /api/admin/events/cmjgv3vap0000jx04obgcga7x/invitations/cmjjxdvk200018ok5zq00xdhd/reject 404 in 398ms (compile: 7ms, render: 391ms)
+ GET /admin/events/cmjgv3vap0000jx04obgcga7x 200 in 38ms (compile: 7ms, render: 31ms)
+ GET /api/auth/session 200 in 11ms (compile: 5ms, render: 6ms)
+ GET /api/test/check-env 200 in 3ms (compile: 1061µs, render: 1684µs)
+ GET /api/auth/session 200 in 15ms (compile: 6ms, render: 9ms)
+ GET /api/admin/events 401 in 5ms (compile: 1342µs, render: 3ms)
+✓ Compiled in 94ms
+ GET /api/test/check-env 200 in 2ms (compile: 862µs, render: 1354µs)
+✓ Compiled in 115ms
+✓ Compiled in 108ms
+✓ Compiled in 96ms
+ GET /api/test/check-env 200 in 5ms (compile: 877µs, render: 4ms)
+ GET /api/auth/session 200 in 18ms (compile: 8ms, render: 11ms)
+ GET /admin/events/cmjgv3vap0000jx04obgcga7x 200 in 137ms (compile: 68ms, render: 69ms)
+ GET /api/auth/session 200 in 11ms (compile: 5ms, render: 6ms)
+API EVENT GET {
+  url: 'http://localhost:3002/api/admin/events/cmjgv3vap0000jx04obgcga7x',
+  headers: {
+    accept: 'application/json',
+    'accept-encoding': 'gzip, deflate',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    connection: 'keep-alive',
+    cookie: 'next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..SVQMdD9FtOttGJ67.O_JSMNxxdL6fxovSKCU-aFIhCwhY5KXCJ0ciiAUmMZ56DwHZZzHbcowtz2AkSnily98wyXunZQs06mkK0_cOgAB5n2VYzJ4C02ZRz0TqMmVsty6qpU9hX8h44OxewLyPFlN6e-0HiDEWSskfYsz-6Bx7ZYX2V8zrFBg1pXuk1ejgu93VbHm-USqSA0-fiR7e0-0HunqCKazRuryPHnsGyL3WBP_F5fHkIAR9CzJGiC7x8GbDs8DAbZRjSaA3DfYoqkbjZ5CGvO0_5265eK4hBnto6sxCVxmKREG6CFlAnxNdWu6yD6lr1KxgeEpWGAgUay_UHil_VE-5djuK5Y02_XqHebDNe3Zai4PbG0Jkq7BOA7htnN4wiRMqDmuhLvJB0lx79kI55gblAOMIY9BGUpewO7eFUbMJcw8qNRMt26RMew.OjppPMp7v0feNlVLbj2eOA; __next_hmr_refresh_hash__=40; next-auth.callback-url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard; next-auth.csrf-token=c465322eed0e84e3f0aec51aa81d1fbd056f0c98eed8578534981e930963d729%7C3d3e28896938b57fa3423937d325e89c87616bed7477738ee9c7fd53916f9a93',
+    host: 'localhost:3002',
+    priority: 'u=3, i',
+    referer: 'http://localhost:3002/admin/events/cmjgv3vap0000jx04obgcga7x',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15',
+    'x-forwarded-for': '::1',
+    'x-forwarded-host': 'localhost:3002',
+    'x-forwarded-port': '3002',
+    'x-forwarded-proto': 'http'
+  },
+  params: { eventId: 'cmjgv3vap0000jx04obgcga7x' }
+}
+ GET /api/admin/events/cmjgv3vap0000jx04obgcga7x 200 in 3.6s (compile: 3ms, render: 3.6s)
+✓ Compiled in 120ms
+ GET /api/auth/session 200 in 12ms (compile: 4ms, render: 8ms)
+✓ Compiled in 104ms
+ GET /api/auth/session 200 in 10ms (compile: 4ms, render: 7ms)
+✓ Compiled in 120ms
+✓ Compiled in 100ms
+✓ Compiled in 93ms
+✓ Compiled in 125ms
+✓ Compiled in 122ms
+ GET /api/test/check-env 200 in 3ms (compile: 1210µs, render: 1530µs)
+ GET /api/auth/session 200 in 16ms (compile: 6ms, render: 9ms)
+ GET /admin/events/cmjgv3vap0000jx04obgcga7x 200 in 133ms (compile: 65ms, render: 68ms)
+ GET /api/auth/session 200 in 12ms (compile: 2ms, render: 10ms)
+ GET /api/auth/session 200 in 16ms (compile: 6ms, render: 10ms)
+🚀 API called with params: Promise {
+  { eventId: 'cmjgv3vap0000jx04obgcga7x' },
+  [Symbol(async_id_symbol)]: 68986,
+  [Symbol(trigger_async_id_symbol)]: 68978,
+  [Symbol(kResourceStore)]: {
+    isStaticGeneration: false,
+    page: '/api/admin/events/[eventId]/invitations/route',
+    route: '/api/admin/events/[eventId]/invitations',
+    incrementalCache: IncrementalCache {
+      locks: Map(0) {},
+      hasCustomCacheHandler: false,
+      dev: true,
+      disableForTestmode: false,
+      minimalMode: false,
+      requestHeaders: [Object],
+      allowedRevalidateHeaderKeys: undefined,
+      prerenderManifest: [Object],
+      cacheControls: [SharedCacheControls],
+      fetchCacheKeyPrefix: '',
+      cacheHandler: [FileSystemCache]
+    },
+    cacheLifeProfiles: {
+      default: [Object],
+      seconds: [Object],
+      minutes: [Object],
+      hours: [Object],
+      days: [Object],
+      weeks: [Object],
+      max: [Object]
+    },
+    isBuildTimePrerendering: undefined,
+    hasReadableErrorStacks: undefined,
+    fetchCache: undefined,
+    isOnDemandRevalidate: undefined,
+    isDraftMode: undefined,
+    isPrefetchRequest: undefined,
+    buildId: 'development',
+    reactLoadableManifest: {},
+    assetPrefix: '',
+    nonce: undefined,
+    afterContext: AfterContext {
+      workUnitStores: Set(0) {},
+      waitUntil: [Function (anonymous)],
+      onClose: [Function: onClose],
+      onTaskError: undefined,
+      callbackQueue: [EventEmitter]
+    },
+    cacheComponentsEnabled: false,
+    dev: false,
+    previouslyRevalidatedTags: [],
+    refreshTagsByCacheKind: Map(2) { 'default' => [Object], 'remote' => [Object] },
+    runInCleanSnapshot: [Function: bound] { asyncResource: [Getter/Setter] },
+    shouldTrackFetchMetrics: false,
+    reactServerErrorsByDigest: Map(0) {}
+  },
+  [Symbol(kResourceStore)]: undefined,
+  [Symbol(kResourceStore)]: undefined,
+  [Symbol(kResourceStore)]: undefined,
+  [Symbol(kResourceStore)]: { isAppRoute: true, isAction: false },
+  [Symbol(kResourceStore)]: {
+    type: 'request',
+    phase: 'action',
+    implicitTags: { tags: [Array], expirationsByCacheKind: [Map] },
+    url: {
+      pathname: '/api/admin/events/cmjgv3vap0000jx04obgcga7x/invitations',
+      search: ''
+    },
+    rootParams: {},
+    headers: [Getter],
+    cookies: [Getter/Setter],
+    mutableCookies: [Getter],
+    userspaceMutableCookies: [Getter],
+    draftMode: [Getter],
+    renderResumeDataCache: null,
+    isHmrRefresh: false,
+    serverComponentsHmrCache: undefined,
+    devFallbackParams: null
+  }
+}
+Error: Route "/api/admin/events/[eventId]/invitations" used `...params` or similar expression. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at GET (app/api/admin/events/[eventId]/invitations/route.ts:11:13)
+   9 | ) {
+  10 |   try {
+> 11 |     console.log('🚀 API called with params:', params)
+     |             ^
+  12 |     const session = await getServerSession(authOptions)
+  13 |     if (!session || session.user.role !== 'admin') {
+  14 |       console.log('❌ Unauthorized - session:', !!session, 'role:', session?.user?.role)
+📝 eventId: cmjgv3vap0000jx04obgcga7x
+📋 Event found: {
+  id: 'cmjgv3vap0000jx04obgcga7x',
+  titleEn: 'Karting',
+  titleAr: 'Karting',
+  marshalTypes: 'karting',
+  maxMarshals: 4
+}
+🏷️ Event types: [ 'karting' ]
+👥 All marshals found: 168
+✅ Matching marshals: 47
+📊 Final result - availableMarshals count: 47
+ GET /api/admin/events/cmjgv3vap0000jx04obgcga7x/invitations 200 in 2.3s (compile: 4ms, render: 2.3s)
+ POST /api/admin/events/cmjgv3vap0000jx04obgcga7x/add-marshal 200 in 5.2s (compile: 476ms, render: 4.7s)
+API EVENT GET {
+  url: 'http://localhost:3002/api/admin/events/cmjgv3vap0000jx04obgcga7x',
+  headers: {
+    accept: 'application/json',
+    'accept-encoding': 'gzip, deflate',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    connection: 'keep-alive',
+    cookie: 'next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..rHMOyD4hzX0moWdG.57ylw_shKa6yuYaz4mfWZELqy3DwoW5GtjZVUwF3-hYaZsvnVdsiWvwvi0RuCOU0WbsP7ugoNoKtrKntXB5uKRd-41z2exFrOVH_Ee_L4OswGze02eO8Xpo71eFUUhEwg0p4Qkzv5ihniv4uwZ4Son9jvkjHZwfxoTh0srFNXcuQAr0r6H-dRRYIkgOFdfrVYnsXSeO3c9F_BFgS-h133XWpaUhkE3Wuoqx1lhBgJ-CUXxRW-Uebc02zO90AeULva7FIRIuhJOLvWwiA6WPmHTxyod7Q7REixkM2E3n6dQjA6zEUJlyBIqs5ZXNHSt84V_C-7roWriw8ivospqlCMMm12CpG_Raa_GYXQwYcWues3NKZZd_9jv3PfyDSZ9UCy6vYKh3NZrrB3WWG-KqqFHdoareOfedNzCZs48fAMxq-0w.qkives1FyZHyvp-1tpYomw; __next_hmr_refresh_hash__=40; next-auth.callback-url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard; next-auth.csrf-token=c465322eed0e84e3f0aec51aa81d1fbd056f0c98eed8578534981e930963d729%7C3d3e28896938b57fa3423937d325e89c87616bed7477738ee9c7fd53916f9a93',
+    host: 'localhost:3002',
+    priority: 'u=3, i',
+    referer: 'http://localhost:3002/admin/events/cmjgv3vap0000jx04obgcga7x',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15',
+    'x-forwarded-for': '::1',
+    'x-forwarded-host': 'localhost:3002',
+    'x-forwarded-port': '3002',
+    'x-forwarded-proto': 'http'
+  },
+  params: { eventId: 'cmjgv3vap0000jx04obgcga7x' }
+}
+ GET /api/admin/events/cmjgv3vap0000jx04obgcga7x 200 in 2.2s (compile: 11ms, render: 2.2s)
+ GET /api/auth/session 200 in 18ms (compile: 8ms, render: 10ms)
+ GET /api/auth/session 200 in 16ms (compile: 6ms, render: 10ms)
+ GET /api/auth/session 200 in 13ms (compile: 5ms, render: 8ms)
+[?25h

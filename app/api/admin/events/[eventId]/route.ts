@@ -53,6 +53,11 @@ export async function GET(
       where: { id: eventId },
       include: {
         attendances: {
+          where: {
+            status: {
+              not: "cancelled" // Exclude cancelled attendances
+            }
+          },
           select: {
             id: true,
             userId: true,
@@ -108,7 +113,12 @@ export async function GET(
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    return NextResponse.json(event);
+    // Add cache headers for better performance
+    const response = NextResponse.json(event);
+    response.headers.set('Cache-Control', 'private, max-age=30'); // Cache for 30 seconds
+    response.headers.set('X-Event-Data-Fresh', 'true');
+
+    return response;
   } catch (error) {
     console.error("Error fetching event:", error);
     return NextResponse.json({ error: "Internal server error", details: String(error) }, { status: 500 });

@@ -8,6 +8,7 @@ const nextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  outputFileTracingRoot: __dirname,
   // Disable static optimization for better compatibility with different networks
   trailingSlash: false,
   // Enable compression
