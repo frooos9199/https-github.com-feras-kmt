@@ -126,7 +126,7 @@ export default function EventDetails() {
   useEffect(() => {
     console.log('eventId:', eventId)
     if (eventId) {
-      fetchEvent()
+      fetchEvent(true) // Force refresh on initial load
     }
   }, [eventId])
 
