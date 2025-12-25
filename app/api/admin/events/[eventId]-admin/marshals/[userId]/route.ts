@@ -18,8 +18,8 @@ export async function DELETE(
     }
 
     const { eventId: eventIdWithAdmin, userId } = await params
-    // Remove '-admin' suffix from eventId for database queries
-    const eventId = eventIdWithAdmin.replace('-admin', '')
+    // Remove all '-admin' suffixes from eventId for database queries
+    const eventId = eventIdWithAdmin.replace(/-admin/g, '')
     const body = await req.json()
     const { reason } = body
 
@@ -103,9 +103,14 @@ export async function DELETE(
           }
         })
         console.log('[API] Delete result for eventMarshals:', deleteResult);
+        console.log('[API] Deleted count:', deleteResult.count);
 
-        removedFromEventMarshals = true
-        console.log('[API] Successfully removed marshal from eventMarshals');
+        if (deleteResult.count > 0) {
+          removedFromEventMarshals = true
+          console.log('[API] Successfully removed marshal from eventMarshals');
+        } else {
+          console.log('[API] No records deleted from eventMarshals - marshal may not exist');
+        }
       }
 
       // Now check attendances table and update status to cancelled

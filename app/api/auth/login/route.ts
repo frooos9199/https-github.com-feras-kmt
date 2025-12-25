@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
         bloodType: user.bloodType,
         civilId: user.civilId,
         nationality: user.nationality,
-        birthdate: user.dateOfBirth
+        birthdate: user.dateOfBirth,
+        marshalTypes: user.marshalTypes
       },
       accessToken
     });

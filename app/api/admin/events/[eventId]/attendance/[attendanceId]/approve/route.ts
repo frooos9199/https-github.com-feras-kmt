@@ -39,6 +39,27 @@ export async function POST(
       }
     })
 
+    // Create EventMarshal record for approved attendance
+    await prisma.eventMarshal.upsert({
+      where: {
+        eventId_marshalId: {
+          eventId: updatedAttendance.eventId,
+          marshalId: updatedAttendance.userId
+        }
+      },
+      update: {
+        status: 'approved',
+        respondedAt: new Date()
+      },
+      create: {
+        eventId: updatedAttendance.eventId,
+        marshalId: updatedAttendance.userId,
+        status: 'approved',
+        invitedAt: new Date(),
+        respondedAt: new Date()
+      }
+    })
+
     return NextResponse.json({
       success: true,
       attendance: updatedAttendance

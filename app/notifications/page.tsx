@@ -36,12 +36,12 @@ export default function NotificationsPage() {
     } else if (session) {
       fetchNotifications()
       
-      // Auto-refresh every 60 seconds for real-time updates
-      const interval = setInterval(() => {
-        fetchNotifications()
-      }, 60000)
+      // Auto-refresh disabled to prevent annoying refreshes
+      // const interval = setInterval(() => {
+      //   fetchNotifications()
+      // }, 60000)
       
-      return () => clearInterval(interval)
+      // return () => clearInterval(interval)
     }
   }, [status, session])
 

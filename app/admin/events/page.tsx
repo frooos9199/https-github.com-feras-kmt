@@ -266,16 +266,16 @@ export default function EventsManagement() {
   }, [session])
 
   // Auto refresh events every 5 seconds (increased frequency)
-  useEffect(() => {
-    if (session?.user?.role !== "admin") return
+  // useEffect(() => {
+  //   if (session?.user?.role !== "admin") return
 
-    const interval = setInterval(() => {
-      console.log('⏰ Auto-refreshing events...')
-      fetchEvents()
-    }, 5000) // 5 seconds instead of 30
+  //   const interval = setInterval(() => {
+  //     console.log('⏰ Auto-refreshing events...')
+  //     fetchEvents()
+  //   }, 5000) // 5 seconds instead of 30
 
-    return () => clearInterval(interval)
-  }, [session])
+  //   return () => clearInterval(interval)
+  // }, [session])
 
   const fetchEvents = async () => {
     setLoading(true)

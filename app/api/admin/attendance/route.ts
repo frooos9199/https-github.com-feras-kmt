@@ -191,6 +191,54 @@ export async function PUT(request: NextRequest) {
       }
     })
 
+    // If approving attendance, create EventMarshal record
+    if (status === "approved") {
+      try {
+        // Check if EventMarshal record already exists
+        const existingEventMarshal = await prisma.eventMarshal.findUnique({
+          where: {
+            eventId_marshalId: {
+              eventId: attendance.eventId,
+              marshalId: attendance.userId
+            }
+          }
+        })
+
+        if (!existingEventMarshal) {
+          // Create EventMarshal record
+          await prisma.eventMarshal.create({
+            data: {
+              eventId: attendance.eventId,
+              marshalId: attendance.userId,
+              status: "approved",
+              notes: "Approved via attendance request"
+            }
+          })
+          console.log(`✅ Created EventMarshal record for user ${attendance.userId} in event ${attendance.eventId}`)
+        } else {
+          // Update existing EventMarshal record if not already approved
+          if (existingEventMarshal.status !== "approved") {
+            await prisma.eventMarshal.update({
+              where: {
+                eventId_marshalId: {
+                  eventId: attendance.eventId,
+                  marshalId: attendance.userId
+                }
+              },
+              data: {
+                status: "approved",
+                notes: "Approved via attendance request"
+              }
+            })
+            console.log(`✅ Updated EventMarshal record for user ${attendance.userId} in event ${attendance.eventId}`)
+          }
+        }
+      } catch (eventMarshalError) {
+        console.error("Error creating/updating EventMarshal record:", eventMarshalError)
+        // Don't fail the entire request if EventMarshal creation fails
+      }
+    }
+
     // Send email notification to user
     if (attendance.user.email) {
       if (status === "approved") {

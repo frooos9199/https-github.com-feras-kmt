@@ -89,7 +89,6 @@ export default function EventDetails() {
   const [eventId, setEventId] = useState<string | null>(null)
   const [lastFetchTime, setLastFetchTime] = useState<number>(0)
   const [updatingStats, setUpdatingStats] = useState(false)
-  const [manualRefresh, setManualRefresh] = useState(false)
   const [editForm, setEditForm] = useState({
     titleEn: "",
     titleAr: "",
@@ -334,20 +333,6 @@ export default function EventDetails() {
     }
   }
 
-  const handleManualRefresh = async () => {
-    console.log('🔄 Manual refresh requested by user')
-    setManualRefresh(true)
-    try {
-      await fetchEvent(true)
-      console.log('✅ Manual refresh completed')
-    } catch (error) {
-      console.error('❌ Manual refresh failed:', error)
-      setError('فشل في تحديث البيانات')
-    } finally {
-      setManualRefresh(false)
-    }
-  }
-
   const handleRemoveMarshal = async () => {
     if (!event || !selectedMarshalId) {
       console.log('❌ Cannot remove marshal: event or selectedMarshalId missing', { event: !!event, selectedMarshalId })
@@ -401,7 +386,7 @@ export default function EventDetails() {
         console.log('✅ Marshal removal successful')
         console.log('🔄 Updating UI state - calling fetchEvent()')
         // Add small delay to ensure database commit before fetching
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Increased delay to 1 second
         // Fetch updated data in background with force refresh (will override optimistic update if needed)
         await fetchEvent(true)
         console.log('✅ fetchEvent completed after marshal removal')
@@ -768,22 +753,6 @@ export default function EventDetails() {
               </span>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={handleManualRefresh}
-                disabled={manualRefresh}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all flex items-center gap-2"
-              >
-                {manualRefresh ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    {language === "ar" ? "جاري التحديث..." : "Refreshing..."}
-                  </>
-                ) : (
-                  <>
-                    🔄 {language === "ar" ? "تحديث" : "Refresh"}
-                  </>
-                )}
-              </button>
               <button
                 onClick={() => setShowAddMarshalModal(true)}
                 className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all"

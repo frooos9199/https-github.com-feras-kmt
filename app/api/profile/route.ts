@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
         licenseFrontImage: true,
         licenseBackImage: true,
         role: true,
+        marshalTypes: true
       }
     })
 

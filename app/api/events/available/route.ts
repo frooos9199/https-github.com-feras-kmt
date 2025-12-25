@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         userId = user.id
       }
     }
-    
+
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -33,13 +33,13 @@ export async function GET(req: NextRequest) {
     const userTypes = user?.marshalTypes ? user.marshalTypes.split(',').filter((t: string) => t) : []
 
     // Filter events based on user's marshal types
-    // If user has no types, return no events
+    // Show events that match user's types AND are available for registration
     if (userTypes.length === 0) {
       return NextResponse.json([])
     }
 
     // Get events that match at least one of the user's marshal types
-    // AND where the user is either invited or has approved attendance
+    // AND are not cancelled/completed, not full, and not in the past
     const allEvents = await prisma.event.findMany({
       where: {
         AND: [
@@ -51,28 +51,14 @@ export async function GET(req: NextRequest) {
             }))
           },
           {
-            OR: [
-              // Events where user is invited (has eventMarshal record)
-              {
-                eventMarshals: {
-                  some: {
-                    marshalId: userId,
-                    status: {
-                      in: ['invited', 'accepted', 'approved']
-                    }
-                  }
-                }
-              },
-              // Events where user has approved attendance
-              {
-                attendances: {
-                  some: {
-                    userId: userId,
-                    status: 'approved'
-                  }
-                }
-              }
-            ]
+            status: {
+              notIn: ['cancelled', 'completed']
+            }
+          },
+          {
+            date: {
+              gte: new Date() // Events in the future or today
+            }
           }
         ]
       },
@@ -83,30 +69,46 @@ export async function GET(req: NextRequest) {
           }
         },
         eventMarshals: {
+          where: {
+            marshalId: userId
+          },
           select: {
-            id: true,
-            status: true,
-            marshal: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
+            marshalId: true,
+            status: true
           }
         },
         _count: {
           select: {
-            attendances: true
+            attendances: {
+              where: {
+                status: 'approved'
+              }
+            },
+            eventMarshals: true
           }
         }
       }
+    })
+
+    // Filter out events where user already has approved attendance or is invited
+    const availableEvents = allEvents.filter(event => {
+      // Check if user has approved attendance
+      const hasApprovedAttendance = event.attendances.some(att => att.status === 'approved')
+
+      // Check if user is invited (has eventMarshal record)
+      const hasEventMarshal = event.eventMarshals?.some(em =>
+        em.marshalId === userId && ['invited', 'accepted', 'approved'].includes(em.status)
+      )
+
+      // Include event only if user is not already approved/invited AND event is not full
+      return !hasApprovedAttendance && !hasEventMarshal && event._count.attendances < event.maxMarshals
     })
 
     // ترتيب الأحداث: اليوم أولاً، القادمة بعد ذلك، المنتهية في النهاية
     const today = new Date()
     today.setHours(0, 0, 0, 0) // بداية اليوم
 
-    const sortedEvents = allEvents.sort((a, b) => {
+    const sortedEvents = availableEvents.sort((a, b) => {
       const dateA = new Date(a.date)
       const dateB = new Date(b.date)
 
@@ -121,30 +123,9 @@ export async function GET(req: NextRequest) {
       return dateA.getTime() - dateB.getTime()
     })
 
-    // Add approved and rejected counts to each event
-    const eventsWithCounts = await Promise.all(sortedEvents.map(async (event) => {
-      const approvedCount = await prisma.attendance.count({
-        where: {
-          eventId: event.id,
-          status: "approved"
-        }
-      })
-      const rejectedCount = await prisma.attendance.count({
-        where: {
-          eventId: event.id,
-          status: "rejected"
-        }
-      })
-      return {
-        ...event,
-        approvedCount,
-        rejectedCount
-      }
-    }))
-
-    return NextResponse.json(eventsWithCounts)
+    return NextResponse.json(sortedEvents)
   } catch (error) {
-    console.error("Error fetching events:", error)
+    console.error("Error fetching available events:", error)
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }

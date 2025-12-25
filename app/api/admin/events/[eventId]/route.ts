@@ -116,6 +116,14 @@ export async function GET(
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
+    console.log('📊 Event Marshals count:', event.eventMarshals?.length || 0);
+    console.log('📊 Event Marshals details:', event.eventMarshals?.map((m: any) => ({
+      id: m.id,
+      status: m.status,
+      marshalName: m.marshal.name,
+      marshalId: m.marshal.id
+    })));
+
     // Add cache headers to prevent stale data
     const response = NextResponse.json(event);
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
