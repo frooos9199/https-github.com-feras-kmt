@@ -13,18 +13,29 @@ if (!admin.apps.length) {
       console.log('⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)');
     } else {
       // Create complete service account object
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+      if (!privateKey) {
+        throw new Error('FIREBASE_PRIVATE_KEY is missing');
+      }
+      
       const serviceAccount = {
         type: "service_account",
-        project_id: process.env.FIREBASE_PROJECT_ID || "eventapp-a421e",
-        private_key_id: "103610344044355519300",
-        private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') || "",
-        client_email: process.env.FIREBASE_CLIENT_EMAIL || "firebase-adminsdk-fbsvc@eventapp-a421e.iam.gserviceaccount.com",
-        client_id: process.env.FIREBASE_CLIENT_ID || "103610344044355519300",
+        project_id: process.env.FIREBASE_PROJECT_ID!,
+        private_key_id: process.env.FIREBASE_CLIENT_ID!,
+        private_key: privateKey.replace(/\\n/g, '\n'),
+        client_email: process.env.FIREBASE_CLIENT_EMAIL!,
+        client_id: process.env.FIREBASE_CLIENT_ID!,
         auth_uri: "https://accounts.google.com/o/oauth2/auth",
         token_uri: "https://oauth2.googleapis.com/token",
         auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-        client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL || "firebase-adminsdk-fbsvc@eventapp-a421e.iam.gserviceaccount.com"}`
+        client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
       };
+      
+      console.log('🔑 Firebase credentials loaded:', {
+        project_id: serviceAccount.project_id,
+        client_email: serviceAccount.client_email,
+        private_key_length: serviceAccount.private_key.length
+      });
 
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
