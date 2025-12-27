@@ -4,52 +4,31 @@ import admin from 'firebase-admin';
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
   try {
-    // Skip initialization during build or with dummy credentials
-    const isBuildTime = process.env.NODE_ENV === 'production' && !process.env.FIREBASE_PROJECT_ID;
-    const hasDummyCredentials = process.env.FIREBASE_PROJECT_ID === 'dummy-project' ||
-                               process.env.FIREBASE_SERVICE_ACCOUNT?.includes('dummy-project');
+    // Use environment variables to create service account
+    const serviceAccount = {
+      type: "service_account",
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      private_key_id: "610646ecef289054ee01ac33773763fc484ce81c",
+      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
+    };
 
-    if (isBuildTime || hasDummyCredentials) {
-      console.log('⚠️ Skipping Firebase Admin initialization (build time or dummy credentials)');
-    } else {
-      // Create complete service account object
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-      if (!privateKey) {
-        throw new Error('FIREBASE_PRIVATE_KEY is missing');
-      }
-      
-      console.log('🔍 Environment check:', {
-        hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
-        hasPrivateKey: !!privateKey,
-        hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
-        privateKeyStart: privateKey.substring(0, 50) + '...'
-      });
-      
-      const serviceAccount = {
-        type: "service_account",
-        project_id: process.env.FIREBASE_PROJECT_ID!,
-        private_key_id: process.env.FIREBASE_CLIENT_ID!,
-        private_key: privateKey.replace(/\\n/g, '\n'),
-        client_email: process.env.FIREBASE_CLIENT_EMAIL!,
-        client_id: process.env.FIREBASE_CLIENT_ID!,
-        auth_uri: "https://accounts.google.com/o/oauth2/auth",
-        token_uri: "https://oauth2.googleapis.com/token",
-        auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-        client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
-      };
-      
-      console.log('🔑 Firebase credentials loaded:', {
-        project_id: serviceAccount.project_id,
-        client_email: serviceAccount.client_email,
-        private_key_length: serviceAccount.private_key.length
-      });
-
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
-      });
-
-      console.log('✅ Firebase Admin initialized successfully');
+    // Validate required fields
+    if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
+      throw new Error('Missing Firebase credentials');
     }
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+      projectId: serviceAccount.project_id
+    });
+
+    console.log('✅ Firebase Admin initialized successfully');
   } catch (error) {
     console.error('❌ Firebase Admin initialization failed:', error);
   }
