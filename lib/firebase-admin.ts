@@ -18,6 +18,13 @@ if (!admin.apps.length) {
         throw new Error('FIREBASE_PRIVATE_KEY is missing');
       }
       
+      console.log('🔍 Environment check:', {
+        hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
+        hasPrivateKey: !!privateKey,
+        hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+        privateKeyStart: privateKey.substring(0, 50) + '...'
+      });
+      
       const serviceAccount = {
         type: "service_account",
         project_id: process.env.FIREBASE_PROJECT_ID!,
