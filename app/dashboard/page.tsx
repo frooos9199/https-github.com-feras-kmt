@@ -38,6 +38,13 @@ export default function DashboardPage() {
   const fetchStats = async () => {
     try {
       const res = await fetch("/api/dashboard/stats")
+      
+      if (res.status === 401) {
+        // Session expired - redirect to login
+        router.push("/login")
+        return
+      }
+      
       const data = await res.json()
       setStats(data)
     } catch (error) {
@@ -50,6 +57,13 @@ export default function DashboardPage() {
   const fetchUserImage = async () => {
     try {
       const res = await fetch("/api/profile")
+      
+      if (res.status === 401) {
+        // Session expired - redirect to login
+        router.push("/login")
+        return
+      }
+      
       const data = await res.json()
       setUserImage(data.image)
     } catch (error) {

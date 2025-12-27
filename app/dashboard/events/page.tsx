@@ -345,6 +345,13 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     try {
       const res = await fetch("/api/events")
+      
+      if (res.status === 401) {
+        // Session expired - redirect to login
+        router.push("/login")
+        return
+      }
+      
       const data = await res.json()
       setEvents(data)
     } catch (error) {
@@ -362,6 +369,12 @@ export default function EventsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ eventId })
       })
+
+      if (res.status === 401) {
+        // Session expired - redirect to login
+        router.push("/login")
+        return
+      }
 
       if (res.ok) {
         fetchEvents() // Refresh events

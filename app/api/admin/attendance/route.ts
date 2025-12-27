@@ -68,6 +68,16 @@ export async function GET(request: NextRequest) {
       orderBy: { registeredAt: "desc" }
     })
 
+    // ترتيب حسب الحالة: pending أولاً، ثم approved، rejected، cancelled
+    const statusOrder = { pending: 1, approved: 2, rejected: 3, cancelled: 4 }
+    attendances.sort((a, b) => {
+      const orderA = statusOrder[a.status as keyof typeof statusOrder] || 5
+      const orderB = statusOrder[b.status as keyof typeof statusOrder] || 5
+      if (orderA !== orderB) return orderA - orderB
+      // ضمن نفس الحالة، الأحدث أولاً
+      return new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime()
+    })
+
     return NextResponse.json(attendances)
   } catch (error) {
     console.error("Error fetching attendances:", error)

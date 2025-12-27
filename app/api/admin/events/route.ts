@@ -3,9 +3,24 @@
 // POST - Create new event
 export async function POST(request: NextRequest) {
   try {
-    // تحقق من session (next-auth) للأدمن فقط
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session.user.role !== "admin") {
+    let userId: string | null = null
+    let userRole: string | null = null
+
+    // Try NextAuth session first
+    const session = await getServerSession(authOptions)
+    if (session?.user?.id && session.user.role === "admin") {
+      userId = session.user.id
+      userRole = session.user.role
+    } else {
+      // Try JWT token for mobile app
+      const user = await getUserFromToken(request)
+      if (user && user.role === "admin") {
+        userId = user.id
+        userRole = user.role
+      }
+    }
+
+    if (!userId || userRole !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -47,14 +62,13 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // لا نرسل إشعارات تلقائية - المارشال يرى الأحداث في الكلندر
-    // والإشعارات تُرسل فقط عندما يقرر الأدمن إرسالها خصيصاً
-    // await notifyMatchingMarshalsAboutNewEvent(
-    //   event.id,
-    //   event.titleEn,
-    //   event.titleAr,
-    //   event.marshalTypes
-    // );
+    // إرسال إشعارات فورية للمارشال المناسبين حسب تخصصهم
+    await notifyMatchingMarshalsAboutNewEvent(
+      event.id,
+      event.titleEn,
+      event.titleAr,
+      event.marshalTypes
+    );
 
     // Send email only to matching marshals
     const eventTypes = event.marshalTypes.split(',').filter((t: string) => t)
@@ -117,6 +131,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, newEventEmailTemplate } from "@/lib/email"
+import { getUserFromToken } from "@/lib/auth"
+import { notifyMatchingMarshalsAboutNewEvent } from "@/lib/notifications"
 import jwt from "jsonwebtoken"
 // استخراج التوكن والتحقق منه
 function verifyJWT(request: NextRequest) {

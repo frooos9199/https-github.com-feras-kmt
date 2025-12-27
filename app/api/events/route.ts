@@ -24,83 +24,92 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get user's marshal types
+    // Get user details including role and marshal types
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { marshalTypes: true }
+      select: { role: true, marshalTypes: true }
     })
 
-    const userTypes = user?.marshalTypes ? user.marshalTypes.split(',').filter((t: string) => t) : []
-
-    // Filter events based on user's marshal types
-    // If user has no types, return no events
-    if (userTypes.length === 0) {
-      return NextResponse.json([])
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // Get events that match at least one of the user's marshal types
-    // AND where the user is either invited or has approved attendance
-    const allEvents = await prisma.event.findMany({
-      where: {
-        AND: [
-          {
-            OR: userTypes.map((type: string) => ({
-              marshalTypes: {
-                contains: type.trim()
-              }
-            }))
+    let allEvents
+
+    if (user.role === 'admin') {
+      // Admin sees all events
+      allEvents = await prisma.event.findMany({
+        include: {
+          attendances: {
+            where: {
+              userId: userId
+            }
           },
-          {
-            OR: [
-              // Events where user is invited (has eventMarshal record)
-              {
-                eventMarshals: {
-                  some: {
-                    marshalId: userId,
-                    status: {
-                      in: ['invited', 'accepted', 'approved']
-                    }
-                  }
+          eventMarshals: {
+            select: {
+              id: true,
+              status: true,
+              marshal: {
+                select: {
+                  id: true,
+                  name: true
                 }
-              },
-              // Events where user has approved attendance
-              {
-                attendances: {
-                  some: {
-                    userId: userId,
-                    status: 'approved'
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      },
-      include: {
-        attendances: {
-          where: {
-            userId: userId
-          }
-        },
-        eventMarshals: {
-          select: {
-            id: true,
-            status: true,
-            marshal: {
-              select: {
-                id: true,
-                name: true
               }
             }
-          }
-        },
-        _count: {
-          select: {
-            attendances: true
+          },
+          _count: {
+            select: {
+              attendances: true
+            }
           }
         }
+      })
+    } else {
+      // Marshal sees only events matching their specialization types
+      const userTypes = user.marshalTypes ? user.marshalTypes.split(',').filter((t: string) => t.trim()) : []
+      
+      if (userTypes.length === 0) {
+        return NextResponse.json([])
       }
-    })
+
+      // Get all events first
+      const allEventsData = await prisma.event.findMany({
+        include: {
+          attendances: {
+            where: {
+              userId: userId
+            }
+          },
+          eventMarshals: {
+            select: {
+              id: true,
+              status: true,
+              marshal: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            }
+          },
+          _count: {
+            select: {
+              attendances: true
+            }
+          }
+        }
+      })
+
+      // Filter events based on marshal types
+      allEvents = allEventsData.filter(event => {
+        if (!event.marshalTypes) return false
+        
+        const eventTypes = event.marshalTypes.split(',').map((t: string) => t.trim())
+        return userTypes.some((userType: string) => 
+          eventTypes.includes(userType.trim())
+        )
+      })
+    }
 
     // ترتيب الأحداث: اليوم أولاً، القادمة بعد ذلك، المنتهية في النهاية
     const today = new Date()

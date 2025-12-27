@@ -48,15 +48,28 @@ export async function POST(request: NextRequest) {
       eventId,
       sendEmail: shouldSendEmail,
       sendNotification: shouldSendNotification,
-      priority
+      priority,
+      // Mobile app fields (convert to API format)
+      titleEn,
+      titleAr,
+      bodyEn,
+      bodyAr,
+      target
     } = body
 
+    // Convert mobile app format to API format
+    const actualSubject = subject || titleEn || titleAr
+    const actualMessage = message || bodyEn || bodyAr
+    const actualRecipientFilter = recipientFilter || target || 'all'
+    const actualSendEmail = shouldSendEmail !== undefined ? shouldSendEmail : true
+    const actualSendNotification = shouldSendNotification !== undefined ? shouldSendNotification : true
+
     // Validate required fields
-    if (!subject || !message || !recipientFilter) {
+    if (!actualSubject || !actualMessage || !actualRecipientFilter) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    if (!shouldSendEmail && !shouldSendNotification) {
+    if (!actualSendEmail && !actualSendNotification) {
       return NextResponse.json({ error: "Must select at least one delivery method" }, { status: 400 })
     }
 
@@ -67,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Filter by marshal types
-    if (recipientFilter === "by-type" && marshalTypes) {
+    if (actualRecipientFilter === "by-type" && marshalTypes) {
       const types = marshalTypes.split(',').map((t: string) => t.trim())
       whereClause.OR = types.map((type: string) => ({
         marshalTypes: { contains: type }
@@ -75,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Filter by event (approved marshals for specific event)
-    if (recipientFilter === "by-event" && eventId) {
+    if (actualRecipientFilter === "by-event" && eventId) {
       const approvedAttendances = await prisma.attendance.findMany({
         where: {
           eventId: eventId,
@@ -90,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Filter by approval status
-    if (recipientFilter === "approved") {
+    if (actualRecipientFilter === "approved") {
       const approvedUserIds = await prisma.attendance.findMany({
         where: { status: 'approved' },
         select: { userId: true },
@@ -102,7 +115,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (recipientFilter === "pending") {
+    if (actualRecipientFilter === "pending") {
       const pendingUserIds = await prisma.attendance.findMany({
         where: { status: 'pending' },
         select: { userId: true },
@@ -133,13 +146,13 @@ export async function POST(request: NextRequest) {
     try {
       await prisma.broadcastMessage.create({
         data: {
-          subject,
-          message,
-          recipientFilter,
+          subject: actualSubject,
+          message: actualMessage,
+          recipientFilter: actualRecipientFilter,
           marshalTypes: marshalTypes || null,
           eventId: eventId || null,
-          sendEmail: shouldSendEmail,
-          sendNotification: shouldSendNotification,
+          sendEmail: actualSendEmail,
+          sendNotification: actualSendNotification,
           priority: priority || 'normal',
           sentBy: userId,
           recipientCount: recipients.length
@@ -151,17 +164,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Send emails (if enabled)
-    if (shouldSendEmail) {
+    if (actualSendEmail) {
       const emailPromises = recipients
         .filter(r => r.email)
         .map(recipient =>
           sendEmail({
             to: recipient.email!,
-            subject: `${priority === 'urgent' ? '🔴 URGENT: ' : priority === 'high' ? '⚠️ ' : '📢 '}${subject}`,
+            subject: `${priority === 'urgent' ? '🔴 URGENT: ' : priority === 'high' ? '⚠️ ' : '📢 '}${actualSubject}`,
             html: broadcastEmailTemplate(
               recipient.name,
-              subject,
-              message,
+              actualSubject,
+              actualMessage,
               priority
             )
           }).catch(error => {
@@ -174,7 +187,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send in-app notifications (if enabled)
-    if (shouldSendNotification) {
+    if (actualSendNotification) {
       const notificationType = priority === 'urgent' ? 'URGENT_BROADCAST' : 
                                priority === 'high' ? 'IMPORTANT_BROADCAST' : 
                                'BROADCAST'
@@ -184,10 +197,10 @@ export async function POST(request: NextRequest) {
         data: recipients.map(recipient => ({
           userId: recipient.id,
           type: notificationType,
-          titleEn: subject,
-          titleAr: subject,
-          messageEn: message,
-          messageAr: message,
+          titleEn: actualSubject,
+          titleAr: actualSubject,
+          messageEn: actualMessage,
+          messageAr: actualMessage,
           isRead: false
         }))
       })
@@ -202,13 +215,13 @@ export async function POST(request: NextRequest) {
         
         const pushResult = await sendPushNotification(
           fcmTokens,
-          subject,
-          message,
+          actualSubject,
+          actualMessage,
           {
             type: notificationType,
             priority: priority || 'normal',
-            title: subject,
-            body: message
+            title: actualSubject,
+            body: actualMessage
           }
         )
         

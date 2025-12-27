@@ -1,15 +1,32 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { getUserFromToken } from '@/lib/auth'
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
+    let userId: string | null = null
+    let userRole: string | null = null
+
+    // Try NextAuth session
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'admin') {
+    if (session?.user?.id) {
+      userId = session.user.id
+      userRole = session.user.role
+    } else {
+      // Try JWT token
+      const user = await getUserFromToken(request)
+      if (user) {
+        userId = user.id
+        userRole = user.role
+      }
+    }
+    
+    if (!userId || userRole !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

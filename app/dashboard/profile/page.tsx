@@ -414,6 +414,34 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+            
+            {/* Notification Settings Button */}
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => {
+                  // Open system notification settings
+                  if (typeof window !== 'undefined' && 'Notification' in window) {
+                    if (Notification.permission === 'default') {
+                      Notification.requestPermission()
+                    } else {
+                      // For web, we can show a modal or redirect to browser settings
+                      alert(language === "ar" 
+                        ? "يمكنك تغيير إعدادات الإشعارات من إعدادات المتصفح"
+                        : "You can change notification settings from your browser settings"
+                      )
+                    }
+                  }
+                }}
+                className="group relative px-6 py-3 bg-gradient-to-r from-purple-600/20 to-purple-700/20 border border-purple-500/30 rounded-xl hover:from-purple-600/30 hover:to-purple-700/30 transition-all duration-300 hover:scale-105"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🔔</span>
+                  <span className="text-purple-300 font-medium">
+                    {t("notificationSettings")}
+                  </span>
+                </div>
+              </button>
+            </div>
           </div>
         </motion.div>
 

@@ -350,13 +350,7 @@ export default function AdminMarshalProfile() {
     setMessage(null)
     try {
       const updateData: any = {
-        name: formData.name,
         employeeId: formData.employeeId,
-        phone: formData.phone,
-        civilId: formData.civilId,
-        dateOfBirth: formData.dateOfBirth,
-        nationality: formData.nationality,
-        bloodType: formData.bloodType,
         marshalTypes: formData.marshalTypes.join(","),
       }
       const res = await fetch(`/api/admin/marshals/${profile.id}`, {
@@ -368,13 +362,13 @@ export default function AdminMarshalProfile() {
       if (res.ok) {
         setProfile(data)
         setFormData({
-          name: data.name || "",
+          name: "",
           employeeId: data.employeeId || "",
-          phone: data.phone || "",
-          civilId: data.civilId || "",
-          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
-          nationality: data.nationality || "",
-          bloodType: data.bloodType || "",
+          phone: "",
+          civilId: "",
+          dateOfBirth: "",
+          nationality: "",
+          bloodType: "",
           marshalTypes: data.marshalTypes ? data.marshalTypes.split(",").filter((t: string) => t) : [],
         })
         setShowEdit(false)
@@ -675,82 +669,11 @@ export default function AdminMarshalProfile() {
           </motion.div>
         ) : (
           <motion.form onSubmit={handleEdit} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden p-6 space-y-6">
-            {/* صورة الملف الشخصي */}
-            <div className="flex justify-center">
-              <div className="relative">
-                {profile.image ? (
-                  <img src={profile.image} alt={profile.name} className="w-32 h-32 rounded-full object-cover border-4 border-red-600" />
-                ) : (
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white text-4xl font-bold">{profile.name.charAt(0).toUpperCase()}</div>
-                )}
-                <label className="absolute bottom-0 right-0 w-10 h-10 bg-red-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700 transition-colors">
-                  {uploading ? (<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />) : (<span className="text-xl">📸</span>)}
-                  <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="hidden" />
-                </label>
-              </div>
-            </div>
-            {/* نموذج التعديل */}
+            {/* نموذج التعديل - الرقم الوظيفي ونوع المارشال فقط */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الاسم" : "Name"}</label>
-                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
-              </div>
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم الوظيفي" : "Employee ID"}</label>
                 <input type="text" value={formData.employeeId} onChange={e => setFormData({ ...formData, employeeId: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white font-bold focus:border-red-600 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "رقم الهاتف" : "Phone Number"}</label>
-                <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم المدني" : "Civil ID"}</label>
-                <input type="text" value={formData.civilId} onChange={e => setFormData({ ...formData, civilId: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
-                <input type="date" value={formData.dateOfBirth} onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
-                {/* عرض التاريخ بشكل مقروء حسب اللغة */}
-                {formData.dateOfBirth && (
-                  <div className="mt-2 text-gray-400 text-sm">
-                    {language === "ar"
-                      ? new Date(formData.dateOfBirth).toLocaleDateString("ar-EG")
-                      : new Date(formData.dateOfBirth).toLocaleDateString("en-GB")}
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
-                <select
-                  value={formData.nationality}
-                  onChange={e => setFormData({ ...formData, nationality: e.target.value })}
-                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none cursor-pointer"
-                >
-                  <option value="">{language === "ar" ? "اختر الجنسية" : "Select Nationality"}</option>
-                  {NATIONALITIES.map(nat => (
-                    <option key={nat.value} value={nat.value}>
-                      {language === "ar" ? nat.label.ar : nat.label.en}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "فصيلة الدم" : "Blood Type"}</label>
-                <select
-                  value={formData.bloodType}
-                  onChange={e => setFormData({ ...formData, bloodType: e.target.value })}
-                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none cursor-pointer font-bold"
-                >
-                  <option value="">{language === "ar" ? "اختر فصيلة الدم" : "Select Blood Type"}</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                </select>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>

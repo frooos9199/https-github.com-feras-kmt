@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, addedToEventEmailTemplate } from "@/lib/email"
+import { getUserFromToken } from "@/lib/auth"
 
 // POST - Add marshal to event
 export async function POST(
@@ -11,8 +12,24 @@ export async function POST(
 ) {
   try {
     console.log('[API] Add Marshal to Event', { params: await params, body: await req.clone().json() });
+    let authUserId: string | null = null
+    let userRole: string | null = null
+
+    // Try NextAuth session
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
+    if (session?.user?.id) {
+      authUserId = session.user.id
+      userRole = session.user.role
+    } else {
+      // Try JWT token
+      const user = await getUserFromToken(req)
+      if (user) {
+        authUserId = user.id
+        userRole = user.role
+      }
+    }
+    
+    if (!authUserId || userRole !== "admin") {
   console.error('[API] Unauthorized add marshal', { session });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
