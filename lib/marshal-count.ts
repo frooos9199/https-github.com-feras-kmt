@@ -63,15 +63,6 @@ export function calculateMarshalCount(event: any) {
   const accepted = uniqueMarshals.length
   const available = event.maxMarshals - accepted
 
-  console.log('🔢 Marshal Count Calculation:', {
-    eventMarshals: acceptedEventMarshals.length,
-    attendances: approvedAttendances.length,
-    total: allMarshals.length,
-    unique: accepted,
-    available,
-    maxMarshals: event.maxMarshals
-  })
-
   return {
     accepted,
     available,

@@ -292,7 +292,6 @@ export default function EventsManagement() {
       
       if (eventsRes.ok) {
         const eventsData = await eventsRes.json()
-        console.log('📊 Events data received:', eventsData.map((e: any) => ({ id: e.id, title: e.titleEn, count: e._count.eventMarshals, max: e.maxMarshals })))
         if (Array.isArray(eventsData)) {
           setEvents(eventsData)
         } else if (Array.isArray(eventsData.events)) {

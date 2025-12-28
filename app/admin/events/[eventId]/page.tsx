@@ -1004,7 +1004,6 @@ export default function EventDetails() {
                   index === self.findIndex(m => m.marshal.employeeId === marshal.marshal.employeeId)
                 );
                 
-                console.log('🔍 Total marshals before dedup:', allMarshals.length);
                 console.log('✅ Unique marshals after dedup:', uniqueMarshals.length);
                 
                 return uniqueMarshals.length === 0 ? (
@@ -1014,7 +1013,7 @@ export default function EventDetails() {
                 ) : (
                   <div className="space-y-3">
                     {uniqueMarshals.map((invitation) => {
-                      console.log('📊 Rendering unique marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id);
+                      console.log('📊 Rendering unique marshal:', invitation.marshal.name);
                       return (
                       <div
                         key={`unique-${invitation.marshal.employeeId}`}
