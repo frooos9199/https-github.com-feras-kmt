@@ -1,39 +1,49 @@
 import { prisma } from '@/lib/prisma'
 
-// Function موحدة لحساب المارشال المقبولين
+// Function موحدة لحساب المارشال المقبولين مع إزالة التكرار
 export async function getEventMarshalCount(eventId: string) {
-  const result = await prisma.event.findUnique({
+  const event = await prisma.event.findUnique({
     where: { id: eventId },
     select: {
       maxMarshals: true,
-      _count: {
+      attendances: {
+        where: { status: 'approved' },
         select: {
-          // طلبات الحضور المعتمدة
-          attendances: {
-            where: { status: 'approved' }
-          },
-          // الدعوات المقبولة
-          eventMarshals: {
-            where: { 
-              status: { in: ['accepted', 'approved'] }
-            }
+          user: {
+            select: { employeeId: true }
+          }
+        }
+      },
+      eventMarshals: {
+        where: { 
+          status: { in: ['accepted', 'approved'] }
+        },
+        select: {
+          marshal: {
+            select: { employeeId: true }
           }
         }
       }
     }
   })
 
-  if (!result) {
+  if (!event) {
     return { accepted: 0, available: 0, maxMarshals: 0 }
   }
 
-  const accepted = result._count.attendances + result._count.eventMarshals
-  const available = result.maxMarshals - accepted
+  // جمع جميع employeeIds وإزالة التكرار
+  const attendanceIds = event.attendances.map(a => a.user.employeeId)
+  const eventMarshalIds = event.eventMarshals.map(m => m.marshal.employeeId)
+  const allIds = [...attendanceIds, ...eventMarshalIds]
+  const uniqueIds = [...new Set(allIds)]
+
+  const accepted = uniqueIds.length
+  const available = event.maxMarshals - accepted
 
   return {
     accepted,
     available,
-    maxMarshals: result.maxMarshals
+    maxMarshals: event.maxMarshals
   }
 }
 
