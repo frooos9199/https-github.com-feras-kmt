@@ -289,10 +289,8 @@ export async function POST(
         data: {
           userId: marshalId,
           type: 'INVITATION',
-          title: 'Event Invitation',
           titleEn: 'Event Invitation',
           titleAr: 'دعوة فعالية',
-          message: `You have been invited to "${invitation.event.titleEn}" on ${new Date(invitation.event.date).toLocaleDateString()}.`,
           messageEn: `You have been invited to "${invitation.event.titleEn}" on ${new Date(invitation.event.date).toLocaleDateString()}.`,
           messageAr: `تم دعوتك إلى "${invitation.event.titleAr || invitation.event.titleEn}" في ${new Date(invitation.event.date).toLocaleDateString('ar-EG')}.`,
           data: JSON.stringify({
