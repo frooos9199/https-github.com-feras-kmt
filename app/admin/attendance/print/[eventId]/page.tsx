@@ -254,11 +254,8 @@ export default function PrintAttendancePage() {
                 // حساب العدد الفريد للمارشال
                 const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
                 const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
-                const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { id: a.user.id } }));
+                const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { employeeId: a.user.employeeId } }));
                 const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
-                const uniqueCount = allMarshals.filter((marshal, index, self) => 
-                  index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
-                ).length;
                 
                 return `Total Registered: ${uniqueCount} Marshals / إجمالي المسجلين: ${uniqueCount} مارشال`;
               })()}
@@ -298,10 +295,10 @@ export default function PrintAttendancePage() {
                   }
                 }));
                 
-                // إزالة التكرار بناءً على marshal.id
+                // إزالة التكرار بناءً على employeeId (رقم الوظيفي)
                 const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
                 const uniqueMarshals = allMarshals.filter((marshal, index, self) => 
-                  index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+                  index === self.findIndex(m => m.marshal.employeeId === marshal.marshal.employeeId)
                 );
                 
                 console.log('🖨️ Print: Total before dedup:', allMarshals.length, 'After dedup:', uniqueMarshals.length);
@@ -314,7 +311,7 @@ export default function PrintAttendancePage() {
                   </tr>
                 ) : (
                   uniqueMarshals.map((marshal, index) => (
-                    <tr key={`unique-${marshal.marshal.id}`} className="hover:bg-gray-50">
+                    <tr key={`unique-${marshal.marshal.employeeId}`} className="hover:bg-gray-50">
                       <td className="border-2 border-black p-3 text-center font-semibold">
                         {index + 1}
                       </td>
@@ -345,10 +342,10 @@ export default function PrintAttendancePage() {
                   // حساب العدد الفريد للمارشال
                   const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
                   const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
-                  const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { id: a.user.id } }));
+                  const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { employeeId: a.user.employeeId } }));
                   const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
                   return allMarshals.filter((marshal, index, self) => 
-                    index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+                    index === self.findIndex(m => m.marshal.employeeId === marshal.marshal.employeeId)
                   ).length;
                 })()}
               </p>

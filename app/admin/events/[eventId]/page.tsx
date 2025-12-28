@@ -998,10 +998,10 @@ export default function EventDetails() {
                   }
                 }));
                 
-                // إزالة التكرار بناءً على marshal.id
+                // إزالة التكرار بناءً على employeeId (رقم الوظيفي)
                 const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
                 const uniqueMarshals = allMarshals.filter((marshal, index, self) => 
-                  index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+                  index === self.findIndex(m => m.marshal.employeeId === marshal.marshal.employeeId)
                 );
                 
                 console.log('🔍 Total marshals before dedup:', allMarshals.length);
@@ -1017,7 +1017,7 @@ export default function EventDetails() {
                       console.log('📊 Rendering unique marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id);
                       return (
                       <div
-                        key={`unique-${invitation.marshal.id}`}
+                        key={`unique-${invitation.marshal.employeeId}`}
                         className="flex items-center justify-between bg-zinc-800/50 border border-green-600/50 bg-green-900/20 rounded-xl p-4"
                       >
                         <div className="flex items-center gap-3">
@@ -1082,7 +1082,7 @@ export default function EventDetails() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => {
-                              setSelectedMarshalId(invitation.marshal.id)
+                              setSelectedMarshalId(invitation.marshal.employeeId)
                               setShowRemoveMarshalModal(true)
                             }}
                             className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"

@@ -51,13 +51,13 @@ export function calculateMarshalCount(event: any) {
   
   // تحويل attendances إلى نفس التنسيق
   const attendancesAsMarshals = approvedAttendances.map((a: any) => ({
-    marshal: { id: a.user?.id || a.userId }
+    marshal: { employeeId: a.user?.employeeId || a.employeeId }
   }))
   
-  // جمع جميع المارشال وإزالة التكرار بناءً على marshal.id
+  // جمع جميع المارشال وإزالة التكرار بناءً على employeeId (رقم الوظيفي)
   const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals]
   const uniqueMarshals = allMarshals.filter((marshal, index, self) => 
-    index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+    index === self.findIndex(m => m.marshal.employeeId === marshal.marshal.employeeId)
   )
   
   const accepted = uniqueMarshals.length
