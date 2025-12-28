@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
     
     const events = await prisma.event.findMany({
       where: {
-        isArchived: false
+        isArchived: false // فلترة الأحداث المؤرشفة من القائمة الرئيسية
       },
       include: {
         _count: {
