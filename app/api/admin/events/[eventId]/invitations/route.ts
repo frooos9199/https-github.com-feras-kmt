@@ -282,7 +282,49 @@ export async function POST(
       }
     })
 
-    // TODO: Send notification email to marshal
+    // Send notification to marshal
+    try {
+      // Create in-app notification
+      await prisma.notification.create({
+        data: {
+          userId: marshalId,
+          type: 'INVITATION',
+          title: 'Event Invitation',
+          message: `You have been invited to "${invitation.event.titleEn}" on ${new Date(invitation.event.date).toLocaleDateString()}.`,
+          data: JSON.stringify({
+            eventId,
+            invitationId: invitation.id,
+            eventTitle: invitation.event.titleEn,
+            eventDate: invitation.event.date,
+            eventTime: invitation.event.time,
+            eventLocation: invitation.event.location
+          })
+        }
+      })
+
+      // Send push notification if marshal has FCM token
+      const marshalWithToken = await prisma.user.findUnique({
+        where: { id: marshalId },
+        select: { fcmToken: true }
+      })
+
+      if (marshalWithToken?.fcmToken) {
+        const { sendPushNotification } = await import('@/lib/firebase-admin')
+        await sendPushNotification(
+          [marshalWithToken.fcmToken],
+          'Event Invitation',
+          `You have been invited to "${invitation.event.titleEn}" on ${new Date(invitation.event.date).toLocaleDateString()}.`,
+          {
+            type: 'INVITATION',
+            eventId,
+            invitationId: invitation.id
+          }
+        )
+      }
+    } catch (notificationError) {
+      console.error('Error sending invitation notification:', notificationError)
+      // Don't fail the invitation if notification fails
+    }
 
     return NextResponse.json({
       success: true,
