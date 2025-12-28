@@ -57,11 +57,6 @@ export async function GET(
       where: { id: eventId },
       include: {
         attendances: {
-          where: {
-            status: {
-              not: "cancelled" // Exclude cancelled attendances
-            }
-          },
           select: {
             id: true,
             userId: true,
