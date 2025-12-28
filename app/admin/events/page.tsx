@@ -141,7 +141,7 @@ function AdminCalendarView({ events, onEventClick }: {
                       </div>
                       <div className="text-xs opacity-75">{event.time}</div>
                       {event.isArchived && (
-                        <div className="text-xs opacity-75">� Archived</div>
+                        <div className="text-xs opacity-75"> Archived</div>
                       )}
                     </div>
                   )
@@ -154,6 +154,7 @@ function AdminCalendarView({ events, onEventClick }: {
     </div>
   )
 }
+
 interface Event {
   id: string
   titleEn: string
@@ -203,9 +204,6 @@ export default function EventsManagement() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
-  const [showEventDetails, setShowEventDetails] = useState(false)
-  const [eventDetails, setEventDetails] = useState<any>(null)
 
   const [formData, setFormData] = useState({
     titleEn: "",
@@ -235,58 +233,9 @@ export default function EventsManagement() {
     }
   }, [session])
 
-  // Refresh events when page becomes visible (after returning from event details)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && session?.user?.role === "admin") {
-        console.log('🔄 Page became visible, refreshing events...')
-        fetchEvents()
-      }
-    }
-
-    const handleFocus = () => {
-      if (session?.user?.role === "admin") {
-        console.log('🎯 Window focused, refreshing events...')
-        fetchEvents()
-      }
-    }
-
-    // Check for updates from localStorage (set by event details page)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'eventUpdated' && e.newValue === 'true') {
-        console.log('📡 Event updated detected, refreshing events...')
-        localStorage.removeItem('eventUpdated')
-        fetchEvents()
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-    window.addEventListener('storage', handleStorageChange)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-      window.removeEventListener('storage', handleStorageChange)
-    }
-  }, [session])
-
-  // Auto refresh events every 5 seconds (increased frequency)
-  // useEffect(() => {
-  //   if (session?.user?.role !== "admin") return
-
-  //   const interval = setInterval(() => {
-  //     console.log('⏰ Auto-refreshing events...')
-  //     fetchEvents()
-  //   }, 5000) // 5 seconds instead of 30
-
-  //   return () => clearInterval(interval)
-  // }, [session])
-
   const fetchEvents = async () => {
     setLoading(true)
     try {
-      // Fetch events for list view (non-archived only)
       const eventsRes = await fetch("/api/admin/events", {
         credentials: 'include'
       })
@@ -302,7 +251,6 @@ export default function EventsManagement() {
         }
       }
 
-      // Fetch events for calendar view (all events including archived)
       const calendarRes = await fetch("/api/events/calendar", {
         credentials: 'include'
       })
@@ -361,19 +309,6 @@ export default function EventsManagement() {
       alert(language === "ar" ? "حدث خطأ" : "An error occurred")
     } finally {
       setSaving(false)
-    }
-  }
-
-  const fetchEventDetails = async (eventId: string) => {
-    try {
-      const res = await fetch(`/api/admin/events/${eventId}`)
-      if (res.ok) {
-        const data = await res.json()
-        setEventDetails(data)
-        setShowEventDetails(true)
-      }
-    } catch (error) {
-      console.error("Error fetching event details:", error)
     }
   }
 
@@ -550,7 +485,6 @@ export default function EventsManagement() {
         {viewMode === 'calendar' ? (
           <AdminCalendarView events={calendarEvents} onEventClick={handleEventClick} />
         ) : (
-          /* Events Grid */
           events.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -563,305 +497,305 @@ export default function EventsManagement() {
               </p>
             </motion.div>
           ) : (
-            /* Desktop Table View */
-            <div className="hidden md:block bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-zinc-800/50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الفعالية" : "Event"}</th>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "تاريخ البداية" : "Start Date"}</th>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "تاريخ النهاية" : "End Date"}</th>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "وقت البداية" : "Start Time"}</th>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "وقت النهاية" : "End Time"}</th>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "المارشالات" : "Marshals"}</th>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الحالة" : "Status"}</th>
-                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الإجراءات" : "Actions"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {events.map((event, index) => {
-                      const formatDate = (dateStr: string) => {
-                        const date = new Date(dateStr)
-                        const weekdays = language === "ar" 
-                          ? ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
-                          : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-                        const weekday = weekdays[date.getDay()]
-                        const dateStr2 = date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")
-                        return `${weekday} ${dateStr2}`
-                      }
+            <div>
+              {/* Desktop Table View */}
+              <div className="hidden md:block bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-zinc-800/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الفعالية" : "Event"}</th>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "تاريخ البداية" : "Start Date"}</th>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "تاريخ النهاية" : "End Date"}</th>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "وقت البداية" : "Start Time"}</th>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "وقت النهاية" : "End Time"}</th>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "المارشالات" : "Marshals"}</th>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الحالة" : "Status"}</th>
+                        <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الإجراءات" : "Actions"}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {events.map((event, index) => {
+                        const formatDate = (dateStr: string) => {
+                          const date = new Date(dateStr)
+                          const weekdays = language === "ar" 
+                            ? ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
+                            : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                          const weekday = weekdays[date.getDay()]
+                          const dateStr2 = date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")
+                          return `${weekday} ${dateStr2}`
+                        }
 
-                      const formatTime = (timeStr: string) => {
-                        if (!timeStr) return "-"
-                        const [hours, minutes] = timeStr.split(':')
-                        const hour = parseInt(hours)
-                        const ampm = hour >= 12 ? 'PM' : 'AM'
-                        const hour12 = hour % 12 || 12
-                        return `${hour12}:${minutes} ${ampm}`
-                      }
+                        const formatTime = (timeStr: string) => {
+                          if (!timeStr) return "-"
+                          const [hours, minutes] = timeStr.split(':')
+                          const hour = parseInt(hours)
+                          const ampm = hour >= 12 ? 'PM' : 'AM'
+                          const hour12 = hour % 12 || 12
+                          return `${hour12}:${minutes} ${ampm}`
+                        }
 
-                      return (
-                        <motion.tr
-                          key={event.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          onClick={() => router.push(`/admin/events/${event.id}`)}
-                          className="border-b border-zinc-800 hover:bg-zinc-800/30 cursor-pointer transition-colors"
-                        >
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex gap-1">
-                                {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).slice(0, 3).map((type) => {
-                                  const typeIcons: Record<string, string> = {
-                                    'karting': '🏎️',
-                                    'motocross': '🏍️',
-                                    'rescue': '🚑',
-                                    'circuit': '🏁',
-                                    'drift': '💨',
-                                    'drag-race': '🚦',
-                                    'pit': '🔧'
-                                  }
-                                  return <span key={type} className="text-lg">{typeIcons[type] || '❓'}</span>
-                                })}
-                              </div>
-                              <div>
-                                <div className="text-white font-medium">
-                                  {language === "ar" ? event.titleAr : event.titleEn}
+                        return (
+                          <motion.tr
+                            key={event.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            onClick={() => router.push(`/admin/events/${event.id}`)}
+                            className="border-b border-zinc-800 hover:bg-zinc-800/30 cursor-pointer transition-colors"
+                          >
+                            <td className="px-4 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex gap-1">
+                                  {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).slice(0, 3).map((type) => {
+                                    const typeIcons: Record<string, string> = {
+                                      'karting': '🏎️',
+                                      'motocross': '🏍️',
+                                      'rescue': '🚑',
+                                      'circuit': '🏁',
+                                      'drift': '💨',
+                                      'drag-race': '🚦',
+                                      'pit': '🔧'
+                                    }
+                                    return <span key={type} className="text-lg">{typeIcons[type] || '❓'}</span>
+                                  })}
                                 </div>
-                                <div className="text-gray-400 text-sm">📍 {event.location}</div>
+                                <div>
+                                  <div className="text-white font-medium">
+                                    {language === "ar" ? event.titleAr : event.titleEn}
+                                  </div>
+                                  <div className="text-gray-400 text-sm">📍 {event.location}</div>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-green-400 font-medium">
-                              {formatDate(event.date)}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-red-400 font-medium">
-                              {event.endDate ? formatDate(event.endDate) : "-"}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-green-400 font-medium">
-                              {formatTime(event.time)}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-red-400 font-medium">
-                              {event.endTime ? formatTime(event.endTime) : "-"}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className={`font-bold px-2 py-1 rounded text-center ${
-                              (event.marshalCounts?.accepted || 0) >= event.maxMarshals 
-                                ? 'bg-red-500/20 text-red-400' 
-                                : 'bg-green-500/20 text-green-400'
-                            }`}>
-                              {event.marshalCounts?.accepted || 0}/{event.maxMarshals}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              event.status === "active"
-                                ? "bg-green-600/20 text-green-500"
-                                : event.status === "cancelled"
-                                ? "bg-red-600/20 text-red-500"
-                                : "bg-gray-600/20 text-gray-500"
-                            }`}>
-                              {event.status.toUpperCase()}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex gap-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleArchive(event.id)
-                                }}
-                                className="p-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition-colors text-sm"
-                                title={language === "ar" ? "أرشفة" : "Archive"}
-                              >
-                                📁
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  window.open(`/admin/attendance/print/${event.id}`, '_blank')
-                                }}
-                                className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors text-sm"
-                                title={language === "ar" ? "طباعة" : "Print"}
-                              >
-                                🖨️
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleEdit(event)
-                                }}
-                                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm"
-                                title={language === "ar" ? "تعديل" : "Edit"}
-                              >
-                                ✏️
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDelete(event.id)
-                                }}
-                                disabled={deleting === event.id}
-                                className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm disabled:opacity-50"
-                                title={language === "ar" ? "حذف" : "Delete"}
-                              >
-                                {deleting === event.id ? "..." : "🗑️"}
-                              </button>
-                            </div>
-                          </td>
-                        </motion.tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-green-400 font-medium">
+                                {formatDate(event.date)}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-red-400 font-medium">
+                                {event.endDate ? formatDate(event.endDate) : "-"}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-green-400 font-medium">
+                                {formatTime(event.time)}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-red-400 font-medium">
+                                {event.endTime ? formatTime(event.endTime) : "-"}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className={`font-bold px-2 py-1 rounded text-center ${
+                                (event.marshalCounts?.accepted || 0) >= event.maxMarshals 
+                                  ? 'bg-red-500/20 text-red-400' 
+                                  : 'bg-green-500/20 text-green-400'
+                              }`}>
+                                {event.marshalCounts?.accepted || 0}/{event.maxMarshals}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                event.status === "active"
+                                  ? "bg-green-600/20 text-green-500"
+                                  : event.status === "cancelled"
+                                  ? "bg-red-600/20 text-red-500"
+                                  : "bg-gray-600/20 text-gray-500"
+                              }`}>
+                                {event.status.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleArchive(event.id)
+                                  }}
+                                  className="p-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition-colors text-sm"
+                                  title={language === "ar" ? "أرشفة" : "Archive"}
+                                >
+                                  📁
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    window.open(`/admin/attendance/print/${event.id}`, '_blank')
+                                  }}
+                                  className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors text-sm"
+                                  title={language === "ar" ? "طباعة" : "Print"}
+                                >
+                                  🖨️
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEdit(event)
+                                  }}
+                                  className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm"
+                                  title={language === "ar" ? "تعديل" : "Edit"}
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleDelete(event.id)
+                                  }}
+                                  disabled={deleting === event.id}
+                                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm disabled:opacity-50"
+                                  title={language === "ar" ? "حذف" : "Delete"}
+                                >
+                                  {deleting === event.id ? "..." : "🗑️"}
+                                </button>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Mobile Cards View */}
-          {events.length > 0 && (
-            <div className="md:hidden grid grid-cols-1 gap-4">
-              {events.map((event, index) => {
-                const formatDate = (dateStr: string) => {
-                  const date = new Date(dateStr)
-                  const weekdays = language === "ar" 
-                    ? ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
-                    : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-                  const weekday = weekdays[date.getDay()]
-                  const dateStr2 = date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")
-                  return `${weekday} ${dateStr2}`
-                }
+              {/* Mobile Cards View */}
+              <div className="md:hidden grid grid-cols-1 gap-4">
+                {events.map((event, index) => {
+                  const formatDate = (dateStr: string) => {
+                    const date = new Date(dateStr)
+                    const weekdays = language === "ar" 
+                      ? ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
+                      : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                    const weekday = weekdays[date.getDay()]
+                    const dateStr2 = date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")
+                    return `${weekday} ${dateStr2}`
+                  }
 
-                const formatTime = (timeStr: string) => {
-                  if (!timeStr) return "-"
-                  const [hours, minutes] = timeStr.split(':')
-                  const hour = parseInt(hours)
-                  const ampm = hour >= 12 ? 'PM' : 'AM'
-                  const hour12 = hour % 12 || 12
-                  return `${hour12}:${minutes} ${ampm}`
-                }
+                  const formatTime = (timeStr: string) => {
+                    if (!timeStr) return "-"
+                    const [hours, minutes] = timeStr.split(':')
+                    const hour = parseInt(hours)
+                    const ampm = hour >= 12 ? 'PM' : 'AM'
+                    const hour12 = hour % 12 || 12
+                    return `${hour12}:${minutes} ${ampm}`
+                  }
 
-                return (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => router.push(`/admin/events/${event.id}`)}
-                    className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 cursor-pointer hover:border-red-600/50 transition-all"
-                  >
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).slice(0, 3).map((type) => {
-                          const typeIcons: Record<string, string> = {
-                            'karting': '🏎️',
-                            'motocross': '🏍️',
-                            'rescue': '🚑',
-                            'circuit': '🏁',
-                            'drift': '💨',
-                            'drag-race': '🚦',
-                            'pit': '🔧'
-                          }
-                          return <span key={type} className="text-xl">{typeIcons[type] || '❓'}</span>
-                        })}
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => router.push(`/admin/events/${event.id}`)}
+                      className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 cursor-pointer hover:border-red-600/50 transition-all"
+                    >
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).slice(0, 3).map((type) => {
+                            const typeIcons: Record<string, string> = {
+                              'karting': '🏎️',
+                              'motocross': '🏍️',
+                              'rescue': '🚑',
+                              'circuit': '🏁',
+                              'drift': '💨',
+                              'drag-race': '🚦',
+                              'pit': '🔧'
+                            }
+                            return <span key={type} className="text-xl">{typeIcons[type] || '❓'}</span>
+                          })}
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          event.status === "active"
+                            ? "bg-green-600/20 text-green-500"
+                            : event.status === "cancelled"
+                            ? "bg-red-600/20 text-red-500"
+                            : "bg-gray-600/20 text-gray-500"
+                        }`}>
+                          {event.status.toUpperCase()}
+                        </span>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        event.status === "active"
-                          ? "bg-green-600/20 text-green-500"
-                          : event.status === "cancelled"
-                          ? "bg-red-600/20 text-red-500"
-                          : "bg-gray-600/20 text-gray-500"
-                      }`}>
-                        {event.status.toUpperCase()}
-                      </span>
-                    </div>
 
-                    {/* Title */}
-                    <h3 className="text-white font-bold text-lg mb-2">
-                      {language === "ar" ? event.titleAr : event.titleEn}
-                    </h3>
+                      {/* Title */}
+                      <h3 className="text-white font-bold text-lg mb-2">
+                        {language === "ar" ? event.titleAr : event.titleEn}
+                      </h3>
 
-                    {/* Location */}
-                    <div className="text-gray-400 text-sm mb-3">📍 {event.location}</div>
+                      {/* Location */}
+                      <div className="text-gray-400 text-sm mb-3">📍 {event.location}</div>
 
-                    {/* Dates & Times */}
-                    <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
-                      <div>
-                        <div className="text-gray-400 mb-1">{language === "ar" ? "البداية" : "Start"}</div>
-                        <div className="text-green-400 font-medium">{formatDate(event.date)}</div>
-                        <div className="text-green-400 font-medium">{formatTime(event.time)}</div>
+                      {/* Dates & Times */}
+                      <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
+                        <div>
+                          <div className="text-gray-400 mb-1">{language === "ar" ? "البداية" : "Start"}</div>
+                          <div className="text-green-400 font-medium">{formatDate(event.date)}</div>
+                          <div className="text-green-400 font-medium">{formatTime(event.time)}</div>
+                        </div>
+                        <div>
+                          <div className="text-gray-400 mb-1">{language === "ar" ? "النهاية" : "End"}</div>
+                          <div className="text-red-400 font-medium">{event.endDate ? formatDate(event.endDate) : "-"}</div>
+                          <div className="text-red-400 font-medium">{event.endTime ? formatTime(event.endTime) : "-"}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-gray-400 mb-1">{language === "ar" ? "النهاية" : "End"}</div>
-                        <div className="text-red-400 font-medium">{event.endDate ? formatDate(event.endDate) : "-"}</div>
-                        <div className="text-red-400 font-medium">{event.endTime ? formatTime(event.endTime) : "-"}</div>
-                      </div>
-                    </div>
 
-                    {/* Marshal Count */}
-                    <div className="mb-4">
-                      <div className={`inline-block font-bold px-3 py-1 rounded-full text-sm ${
-                        (event.marshalCounts?.accepted || 0) >= event.maxMarshals 
-                          ? 'bg-red-500/20 text-red-400' 
-                          : 'bg-green-500/20 text-green-400'
-                      }`}>
-                        👥 {event.marshalCounts?.accepted || 0}/{event.maxMarshals} {language === "ar" ? "مارشال" : "marshals"}
+                      {/* Marshal Count */}
+                      <div className="mb-4">
+                        <div className={`inline-block font-bold px-3 py-1 rounded-full text-sm ${
+                          (event.marshalCounts?.accepted || 0) >= event.maxMarshals 
+                            ? 'bg-red-500/20 text-red-400' 
+                            : 'bg-green-500/20 text-green-400'
+                        }`}>
+                          👥 {event.marshalCounts?.accepted || 0}/{event.maxMarshals} {language === "ar" ? "مارشال" : "marshals"}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleArchive(event.id)
-                        }}
-                        className="flex-1 px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm font-medium"
-                      >
-                        📁 {language === "ar" ? "أرشيف" : "Archive"}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          window.open(`/admin/attendance/print/${event.id}`, '_blank')
-                        }}
-                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
-                      >
-                        🖨️ {language === "ar" ? "طباعة" : "Print"}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleEdit(event)
-                        }}
-                        className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
-                      >
-                        ✏️ {language === "ar" ? "تعديل" : "Edit"}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDelete(event.id)
-                        }}
-                        disabled={deleting === event.id}
-                        className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
-                      >
-                        {deleting === event.id ? "..." : (language === "ar" ? "🗑️ حذف" : "🗑️ Delete")}
-                      </button>
-                    </div>
-                  </motion.div>
-                )
-              })}
+                      {/* Actions */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleArchive(event.id)
+                          }}
+                          className="flex-1 px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm font-medium"
+                        >
+                          📁 {language === "ar" ? "أرشيف" : "Archive"}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            window.open(`/admin/attendance/print/${event.id}`, '_blank')
+                          }}
+                          className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+                        >
+                          🖨️ {language === "ar" ? "طباعة" : "Print"}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEdit(event)
+                          }}
+                          className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+                        >
+                          ✏️ {language === "ar" ? "تعديل" : "Edit"}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDelete(event.id)
+                          }}
+                          disabled={deleting === event.id}
+                          className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
+                        >
+                          {deleting === event.id ? "..." : (language === "ar" ? "🗑️ حذف" : "🗑️ Delete")}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
           )
         )}
@@ -1011,13 +945,13 @@ export default function EventsManagement() {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {[
-                      {value: 'karting', labelEn: 'Karting Marshal', labelAr: 'كارتنج مارشال', icon: '�️'},
+                      {value: 'karting', labelEn: 'Karting Marshal', labelAr: 'كارتنج مارشال', icon: '🏎️'},
                       {value: 'motocross', labelEn: 'Motocross Marshal', labelAr: 'موتوكروس مارشال', icon: '🏍️'},
                       {value: 'rescue', labelEn: 'Rescue Marshal', labelAr: 'إنقاذ مارشال', icon: '🚑'},
-                      {value: 'circuit', labelEn: 'Circuit Marshal', labelAr: 'سيركت مارشال', icon: '�'},
+                      {value: 'circuit', labelEn: 'Circuit Marshal', labelAr: 'سيركت مارشال', icon: '🏁'},
                       {value: 'drift', labelEn: 'Drift Marshal', labelAr: 'دريفت مارشال', icon: '💨'},
                       {value: 'drag-race', labelEn: 'Drag Race Marshal', labelAr: 'دراق ريس مارشال', icon: '🚦'},
-                      {value: 'pit', labelEn: 'Pit Marshal', labelAr: 'بت مارشال', icon: '�'}
+                      {value: 'pit', labelEn: 'Pit Marshal', labelAr: 'بت مارشال', icon: '🔧'}
                     ].map((type) => (
                       <label key={type.value} className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg cursor-pointer hover:bg-zinc-800 transition-colors">
                         <input
