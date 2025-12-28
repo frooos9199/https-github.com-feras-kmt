@@ -37,14 +37,34 @@ export async function POST(
       return NextResponse.json({ error: 'Marshal ID is required' }, { status: 400 })
     }
 
-    // التحقق من وجود الحدث
+    // التحقق من وجود الحدث والحد الأقصى
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { id: true, titleEn: true, titleAr: true, marshalTypes: true }
+      include: {
+        _count: {
+          select: {
+            attendances: {
+              where: { status: 'approved' }
+            },
+            eventMarshals: {
+              where: { 
+                status: {
+                  in: ['accepted', 'approved']
+                }
+              }
+            }
+          }
+        }
+      }
     })
 
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    const currentCount = event._count.attendances + event._count.eventMarshals
+    if (currentCount >= event.maxMarshals) {
+      return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
 
     // التحقق من وجود المارشال

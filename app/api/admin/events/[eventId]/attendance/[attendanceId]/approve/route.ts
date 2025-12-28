@@ -16,6 +16,36 @@ export async function POST(
 
     const { eventId, attendanceId } = await params
 
+    // Check if event is at capacity before approving
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        _count: {
+          select: {
+            attendances: {
+              where: { status: 'approved' }
+            },
+            eventMarshals: {
+              where: { 
+                status: {
+                  in: ['accepted', 'approved']
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    const currentCount = event._count.attendances + event._count.eventMarshals
+    if (currentCount >= event.maxMarshals) {
+      return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
+    }
+
     // Update attendance status to approved
     const updatedAttendance = await prisma.attendance.update({
       where: { id: attendanceId },
