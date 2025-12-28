@@ -133,6 +133,7 @@ import { prisma } from "@/lib/prisma"
 import { sendEmail, newEventEmailTemplate } from "@/lib/email"
 import { getUserFromToken } from "@/lib/auth"
 import { notifyMatchingMarshalsAboutNewEvent } from "@/lib/notifications"
+import { calculateMarshalCount } from "@/lib/marshal-count"
 import jwt from "jsonwebtoken"
 // استخراج التوكن والتحقق منه
 function verifyJWT(request: NextRequest) {
@@ -226,7 +227,16 @@ export async function GET(request: NextRequest) {
       return dateA.getTime() - dateB.getTime()
     })
 
-    return NextResponse.json(sortedEvents);
+    // إضافة حساب المارشال الموحد لكل حدث
+    const eventsWithCounts = sortedEvents.map(event => {
+      const counts = calculateMarshalCount(event)
+      return {
+        ...event,
+        marshalCounts: counts
+      }
+    })
+
+    return NextResponse.json(eventsWithCounts);
   } catch (error) {
     console.error("Error fetching events:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { getUserFromToken } from "@/lib/auth"
+import { calculateMarshalCount } from "@/lib/marshal-count"
 
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic'
@@ -135,8 +136,15 @@ export async function GET(
       marshalId: m.marshal.id
     })));
 
+    // إضافة حساب المارشال الموحد
+    const marshalCounts = calculateMarshalCount(event)
+    const eventWithCounts = {
+      ...event,
+      marshalCounts
+    }
+
     // Add cache headers to prevent stale data
-    const response = NextResponse.json(event);
+    const response = NextResponse.json(eventWithCounts);
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');

@@ -27,6 +27,11 @@ interface Event {
     attendances: number
     eventMarshals: number
   }
+  marshalCounts?: {
+    accepted: number
+    available: number
+    maxMarshals: number
+  }
   attendances: Array<{
     id: string
     userId: string
@@ -922,7 +927,7 @@ export default function EventDetails() {
             {/* Accepted Marshals */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">
-                ✅ {language === "ar" ? "المارشالات المضافين" : "Accepted Marshals"} ({event._count.attendances + event._count.eventMarshals}/{event.maxMarshals})
+                ✅ {language === "ar" ? "المارشالات المضافين" : "Accepted Marshals"} ({event.marshalCounts?.accepted || (event._count.attendances + event._count.eventMarshals)}/{event.maxMarshals})
               </h2>
               <div className="flex justify-center gap-4 mb-6">
                 <button
@@ -1266,7 +1271,7 @@ export default function EventDetails() {
               <div className="space-y-4">
                 <div className="bg-green-600/10 border border-green-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المقبولين" : "Accepted"}</p>
-                  <p className="text-green-500 font-bold text-3xl">{event._count.attendances + event._count.eventMarshals}</p>
+                  <p className="text-green-500 font-bold text-3xl">{event.marshalCounts?.accepted || (event._count.attendances + event._count.eventMarshals)}</p>
                 </div>
                 <div className="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المدعوين" : "Invited"}</p>
@@ -1274,7 +1279,7 @@ export default function EventDetails() {
                 </div>
                 <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المتبقي" : "Available"}</p>
-                  <p className="text-yellow-500 font-bold text-3xl">{event.maxMarshals - (event._count.attendances + event._count.eventMarshals)}</p>
+                  <p className="text-yellow-500 font-bold text-3xl">{event.marshalCounts?.available || (event.maxMarshals - (event._count.attendances + event._count.eventMarshals))}</p>
                 </div>
                 <div className="bg-purple-600/10 border border-purple-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "تاريخ الإنشاء" : "Created"}</p>
