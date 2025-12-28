@@ -563,7 +563,8 @@ export default function EventsManagement() {
               </p>
             </motion.div>
           ) : (
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
+            /* Desktop Table View */
+            <div className="hidden md:block bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-zinc-800/50">
@@ -723,6 +724,144 @@ export default function EventsManagement() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* Mobile Cards View */}
+          {events.length > 0 && (
+            <div className="md:hidden grid grid-cols-1 gap-4">
+              {events.map((event, index) => {
+                const formatDate = (dateStr: string) => {
+                  const date = new Date(dateStr)
+                  const weekdays = language === "ar" 
+                    ? ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
+                    : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                  const weekday = weekdays[date.getDay()]
+                  const dateStr2 = date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")
+                  return `${weekday} ${dateStr2}`
+                }
+
+                const formatTime = (timeStr: string) => {
+                  if (!timeStr) return "-"
+                  const [hours, minutes] = timeStr.split(':')
+                  const hour = parseInt(hours)
+                  const ampm = hour >= 12 ? 'PM' : 'AM'
+                  const hour12 = hour % 12 || 12
+                  return `${hour12}:${minutes} ${ampm}`
+                }
+
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => router.push(`/admin/events/${event.id}`)}
+                    className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 cursor-pointer hover:border-red-600/50 transition-all"
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).slice(0, 3).map((type) => {
+                          const typeIcons: Record<string, string> = {
+                            'karting': '🏎️',
+                            'motocross': '🏍️',
+                            'rescue': '🚑',
+                            'circuit': '🏁',
+                            'drift': '💨',
+                            'drag-race': '🚦',
+                            'pit': '🔧'
+                          }
+                          return <span key={type} className="text-xl">{typeIcons[type] || '❓'}</span>
+                        })}
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        event.status === "active"
+                          ? "bg-green-600/20 text-green-500"
+                          : event.status === "cancelled"
+                          ? "bg-red-600/20 text-red-500"
+                          : "bg-gray-600/20 text-gray-500"
+                      }`}>
+                        {event.status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-white font-bold text-lg mb-2">
+                      {language === "ar" ? event.titleAr : event.titleEn}
+                    </h3>
+
+                    {/* Location */}
+                    <div className="text-gray-400 text-sm mb-3">📍 {event.location}</div>
+
+                    {/* Dates & Times */}
+                    <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
+                      <div>
+                        <div className="text-gray-400 mb-1">{language === "ar" ? "البداية" : "Start"}</div>
+                        <div className="text-green-400 font-medium">{formatDate(event.date)}</div>
+                        <div className="text-green-400 font-medium">{formatTime(event.time)}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400 mb-1">{language === "ar" ? "النهاية" : "End"}</div>
+                        <div className="text-red-400 font-medium">{event.endDate ? formatDate(event.endDate) : "-"}</div>
+                        <div className="text-red-400 font-medium">{event.endTime ? formatTime(event.endTime) : "-"}</div>
+                      </div>
+                    </div>
+
+                    {/* Marshal Count */}
+                    <div className="mb-4">
+                      <div className={`inline-block font-bold px-3 py-1 rounded-full text-sm ${
+                        (event.marshalCounts?.accepted || 0) >= event.maxMarshals 
+                          ? 'bg-red-500/20 text-red-400' 
+                          : 'bg-green-500/20 text-green-400'
+                      }`}>
+                        👥 {event.marshalCounts?.accepted || 0}/{event.maxMarshals} {language === "ar" ? "مارشال" : "marshals"}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleArchive(event.id)
+                        }}
+                        className="flex-1 px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm font-medium"
+                      >
+                        📁 {language === "ar" ? "أرشيف" : "Archive"}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          window.open(`/admin/attendance/print/${event.id}`, '_blank')
+                        }}
+                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+                      >
+                        🖨️ {language === "ar" ? "طباعة" : "Print"}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEdit(event)
+                        }}
+                        className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+                      >
+                        ✏️ {language === "ar" ? "تعديل" : "Edit"}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(event.id)
+                        }}
+                        disabled={deleting === event.id}
+                        className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
+                      >
+                        {deleting === event.id ? "..." : (language === "ar" ? "🗑️ حذف" : "🗑️ Delete")}
+                      </button>
+                    </div>
+                  </motion.div>
+                )
+              })}
             </div>
           )
         )}
