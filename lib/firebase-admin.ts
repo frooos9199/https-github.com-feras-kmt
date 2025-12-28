@@ -9,7 +9,7 @@ if (!admin.apps.length) {
       type: "service_account",
       project_id: process.env.FIREBASE_PROJECT_ID,
       private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "dummy_key_id",
-      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')?.replace(/"/g, ''),
       client_email: process.env.FIREBASE_CLIENT_EMAIL,
       client_id: process.env.FIREBASE_CLIENT_ID,
       auth_uri: "https://accounts.google.com/o/oauth2/auth",
@@ -20,6 +20,12 @@ if (!admin.apps.length) {
 
     // Validate required fields
     if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
+      console.error('❌ Missing Firebase credentials:', {
+        project_id: !!serviceAccount.project_id,
+        private_key: !!serviceAccount.private_key,
+        client_email: !!serviceAccount.client_email,
+        private_key_id: !!serviceAccount.private_key_id
+      });
       throw new Error('Missing Firebase credentials');
     }
 
