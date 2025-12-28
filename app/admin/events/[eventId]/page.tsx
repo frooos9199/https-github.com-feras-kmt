@@ -965,94 +965,118 @@ export default function EventDetails() {
                   {language === "ar" ? "تحديث" : "Refresh"}
                 </button>
               </div>
-              {!event.eventMarshals || event.eventMarshals.filter(m => m.status === 'accepted' || m.status === 'approved').length === 0 ? (
-                <p className="text-gray-400 text-center py-8">
-                  {language === "ar" ? "لا يوجد مارشالات مضافين" : "No accepted marshals yet"}
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {event.eventMarshals.filter(m => m.status === 'accepted' || m.status === 'approved').map((invitation) => {
-                    console.log('📊 Rendering accepted marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id, '- Status:', invitation.status);
-                    return (
-                    <div
-                      key={`accepted-${invitation.id}`}
-                      className="flex items-center justify-between bg-zinc-800/50 border border-green-600/50 bg-green-900/20 rounded-xl p-4"
-                    >
-                      <div className="flex items-center gap-3">
-                        {invitation.marshal.image ? (
-                          <img
-                            src={invitation.marshal.image}
-                            alt={invitation.marshal.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-green-600"
-                          />
-                        ) : (
-                          <div className="w-12 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-white font-bold">
-                            {invitation.marshal.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-white font-medium">
-                            {invitation.marshal.employeeId && (
-                              <span className="text-green-400 font-bold mr-2">
-                                {invitation.marshal.employeeId}
-                              </span>
-                            )}
-                            {invitation.marshal.name}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            {invitation.marshal.email}
-                            {invitation.marshal.phone && (
-                              <span className="ml-2 text-gray-500">• {invitation.marshal.phone}</span>
-                            )}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {language === "ar" ? "مضاف في:" : "Added:"} {new Date(invitation.invitedAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
-                          </p>
-                          {/* عرض تخصصات المارشال */}
-                          {invitation.marshal.marshalTypes && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {invitation.marshal.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
-                                const typeLabels: Record<string, {en: string, ar: string, icon: string, color: string}> = {
-                                  'karting': {en: 'Karting', ar: 'كارتنج', icon: '🏎️', color: 'bg-yellow-600'},
-                                  'motocross': {en: 'Motocross', ar: 'موتوكروس', icon: '🏍️', color: 'bg-orange-600'},
-                                  'rescue': {en: 'Rescue', ar: 'إنقاذ', icon: '🚑', color: 'bg-red-600'},
-                                  'circuit': {en: 'Circuit', ar: 'سيركت', icon: '🏁', color: 'bg-blue-600'},
-                                  'drift': {en: 'Drift', ar: 'دريفت', icon: '💨', color: 'bg-purple-600'},
-                                  'drag-race': {en: 'Drag Race', ar: 'دراق ريس', icon: '🚦', color: 'bg-pink-600'},
-                                  'pit': {en: 'Pit', ar: 'بت', icon: '🔧', color: 'bg-teal-600'}
-                                }
-                                const label = typeLabels[type]
-                                if (!label) return null
-                                return (
-                                  <span 
-                                    key={type}
-                                    className={`${label.color} text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1`}
-                                  >
-                                    <span>{label.icon}</span>
-                                    <span>{language === "ar" ? label.ar : label.en}</span>
-                                  </span>
-                                )
-                              })}
+              {(() => {
+                // جمع جميع المارشال المقبولين
+                const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
+                const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
+                
+                // تحويل attendances إلى نفس التنسيق
+                const attendancesAsMarshals = approvedAttendances.map(a => ({
+                  id: a.id,
+                  status: a.status,
+                  invitedAt: a.registeredAt,
+                  marshal: {
+                    id: a.user.id,
+                    employeeId: a.user.employeeId,
+                    name: a.user.name,
+                    email: a.user.email,
+                    phone: a.user.phone,
+                    image: a.user.image,
+                    marshalTypes: null
+                  }
+                }));
+                
+                const allAcceptedMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                
+                return allAcceptedMarshals.length === 0 ? (
+                  <p className="text-gray-400 text-center py-8">
+                    {language === "ar" ? "لا يوجد مارشالات مضافين" : "No accepted marshals yet"}
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {allAcceptedMarshals.map((invitation) => {
+                      console.log('📊 Rendering accepted marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id, '- Status:', invitation.status);
+                      return (
+                      <div
+                        key={`accepted-${invitation.id}`}
+                        className="flex items-center justify-between bg-zinc-800/50 border border-green-600/50 bg-green-900/20 rounded-xl p-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          {invitation.marshal.image ? (
+                            <img
+                              src={invitation.marshal.image}
+                              alt={invitation.marshal.name}
+                              className="w-12 h-12 rounded-full object-cover border-2 border-green-600"
+                            />
+                          ) : (
+                            <div className="w-12 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-white font-bold">
+                              {invitation.marshal.name.charAt(0).toUpperCase()}
                             </div>
                           )}
+                          <div>
+                            <p className="text-white font-medium">
+                              {invitation.marshal.employeeId && (
+                                <span className="text-green-400 font-bold mr-2">
+                                  {invitation.marshal.employeeId}
+                                </span>
+                              )}
+                              {invitation.marshal.name}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              {invitation.marshal.email}
+                              {invitation.marshal.phone && (
+                                <span className="ml-2 text-gray-500">• {invitation.marshal.phone}</span>
+                              )}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {language === "ar" ? "مضاف في:" : "Added:"} {new Date(invitation.invitedAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
+                            </p>
+                            {/* عرض تخصصات المارشال */}
+                            {invitation.marshal.marshalTypes && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {invitation.marshal.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
+                                  const typeLabels: Record<string, {en: string, ar: string, icon: string, color: string}> = {
+                                    'karting': {en: 'Karting', ar: 'كارتنج', icon: '🏎️', color: 'bg-yellow-600'},
+                                    'motocross': {en: 'Motocross', ar: 'موتوكروس', icon: '🏍️', color: 'bg-orange-600'},
+                                    'rescue': {en: 'Rescue', ar: 'إنقاذ', icon: '🚑', color: 'bg-red-600'},
+                                    'circuit': {en: 'Circuit', ar: 'سيركت', icon: '🏁', color: 'bg-blue-600'},
+                                    'drift': {en: 'Drift', ar: 'دريفت', icon: '💨', color: 'bg-purple-600'},
+                                    'drag-race': {en: 'Drag Race', ar: 'دراق ريس', icon: '🚦', color: 'bg-pink-600'},
+                                    'pit': {en: 'Pit', ar: 'بت', icon: '🔧', color: 'bg-teal-600'}
+                                  }
+                                  const label = typeLabels[type]
+                                  if (!label) return null
+                                  return (
+                                    <span 
+                                      key={type}
+                                      className={`${label.color} text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1`}
+                                    >
+                                      <span>{label.icon}</span>
+                                      <span>{language === "ar" ? label.ar : label.en}</span>
+                                    </span>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedMarshalId(invitation.marshal.id)
+                              setShowRemoveMarshalModal(true)
+                            }}
+                            className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
+                          >
+                            {language === "ar" ? "إزالة" : "Remove"}
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedMarshalId(invitation.marshal.id)
-                            setShowRemoveMarshalModal(true)
-                          }}
-                          className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
-                        >
-                          {language === "ar" ? "إزالة" : "Remove"}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                  })}
-                </div>
-              )}
+                    );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Invited Marshals */}
