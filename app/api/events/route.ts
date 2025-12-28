@@ -81,6 +81,9 @@ export async function GET(req: NextRequest) {
             }
           },
           eventMarshals: {
+            where: {
+              marshalId: userId
+            },
             select: {
               id: true,
               status: true,
@@ -100,8 +103,14 @@ export async function GET(req: NextRequest) {
         }
       })
 
-      // Filter events based on marshal types
+      // Filter events: show if marshal types match OR if user has invitation
       allEvents = allEventsData.filter(event => {
+        // Check if user has invitation to this event
+        const hasInvitation = event.eventMarshals.length > 0
+        
+        if (hasInvitation) return true
+        
+        // Check if event matches marshal types
         if (!event.marshalTypes) return false
         
         const eventTypes = event.marshalTypes.split(',').map((t: string) => t.trim())
