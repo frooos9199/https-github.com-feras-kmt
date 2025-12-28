@@ -394,6 +394,28 @@ export default function EventsManagement() {
     setShowModal(true)
   }
 
+  const handleArchive = async (eventId: string) => {
+    if (!confirm(language === "ar" ? "هل تريد أرشفة هذا الحدث؟" : "Archive this event?")) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/admin/events/${eventId}/archive`, {
+        method: "PATCH"
+      })
+
+      if (res.ok) {
+        fetchEvents()
+        alert(language === "ar" ? "تم أرشفة الحدث بنجاح!" : "Event archived successfully!")
+      } else {
+        alert(language === "ar" ? "حدث خطأ" : "An error occurred")
+      }
+    } catch (error) {
+      console.error("Error archiving event:", error)
+      alert(language === "ar" ? "حدث خطأ" : "An error occurred")
+    }
+  }
+
   const handleDelete = async (eventId: string) => {
     if (!confirm(language === "ar" ? "هل أنت متأكد من حذف الفعالية؟" : "Are you sure you want to delete this event?")) {
       return
@@ -607,20 +629,39 @@ export default function EventsManagement() {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => window.open(`/admin/attendance/print/${event.id}`, '_blank')}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleArchive(event.id)
+                          }}
+                          className="flex-1 px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm font-medium"
+                          title={language === "ar" ? "أرشفة الحدث" : "Archive Event"}
+                        >
+                          📁 {language === "ar" ? "أرشيف" : "Archive"}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            window.open(`/admin/attendance/print/${event.id}`, '_blank')
+                          }}
                           className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
                           title={language === "ar" ? "طباعة قائمة الحضور" : "Print Attendance List"}
                         >
                           🖨️ {language === "ar" ? "طباعة" : "Print"}
                         </button>
                         <button
-                          onClick={() => handleEdit(event)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEdit(event)
+                          }}
                           className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
                         >
                           ✏️ {language === "ar" ? "تعديل" : "Edit"}
                         </button>
                         <button
-                          onClick={() => handleDelete(event.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDelete(event.id)
+                          }}
                           disabled={deleting === event.id}
                           className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
                         >
