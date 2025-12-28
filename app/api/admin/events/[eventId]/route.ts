@@ -106,7 +106,18 @@ export async function GET(
           }
         },
         _count: {
-          select: { attendances: true }
+          select: { 
+            attendances: {
+              where: { status: 'approved' }
+            },
+            eventMarshals: {
+              where: {
+                status: {
+                  in: ['accepted', 'approved']
+                }
+              }
+            }
+          }
         }
       }
     });

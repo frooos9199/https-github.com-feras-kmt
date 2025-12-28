@@ -201,6 +201,56 @@ export async function POST(
       return NextResponse.json({ error: 'Marshal already invited' }, { status: 400 })
     }
 
+    // Check event capacity before inviting
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        _count: {
+          select: {
+            attendances: {
+              where: { status: 'approved' }
+            },
+            eventMarshals: {
+              where: { 
+                status: {
+                  in: ['accepted', 'approved']
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    const currentCount = event._count.attendances + event._count.eventMarshals
+    if (currentCount >= event.maxMarshals) {
+      return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
+    }
+
+    // Check marshal type compatibility
+    const eventTypes = event.marshalTypes.split(',').filter(t => t.trim())
+    const marshal = await prisma.user.findUnique({
+      where: { id: marshalId },
+      select: { marshalTypes: true }
+    })
+
+    if (!marshal || !marshal.marshalTypes) {
+      return NextResponse.json({ error: 'Marshal not found or has no types' }, { status: 400 })
+    }
+
+    const marshalTypes = marshal.marshalTypes.split(',').map(t => t.trim())
+    const hasMatchingType = eventTypes.some(eventType =>
+      marshalTypes.includes(eventType.trim())
+    )
+
+    if (!hasMatchingType) {
+      return NextResponse.json({ error: 'Marshal type does not match event requirements' }, { status: 400 })
+    }
+
     // Create invitation
     const invitation = await prisma.eventMarshal.create({
       data: {
