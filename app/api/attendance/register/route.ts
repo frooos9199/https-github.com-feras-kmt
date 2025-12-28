@@ -66,6 +66,51 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Check if user has an invitation for this event
+    const invitation = await prisma.eventMarshal.findFirst({
+      where: {
+        marshalId: userId,
+        eventId: eventId,
+        status: 'invited'
+      }
+    })
+
+    // If user has invitation, accept it instead of creating attendance
+    if (invitation) {
+      const updatedInvitation = await prisma.eventMarshal.update({
+        where: { id: invitation.id },
+        data: {
+          status: 'accepted',
+          respondedAt: new Date()
+        },
+        include: {
+          marshal: true,
+          event: true
+        }
+      })
+
+      // Send confirmation email
+      if (updatedInvitation.marshal.email) {
+        await sendEmail({
+          to: updatedInvitation.marshal.email,
+          subject: `✅ Invitation Accepted - ${updatedInvitation.event.titleEn}`,
+          html: registrationEmailTemplate(
+            updatedInvitation.marshal.name,
+            updatedInvitation.event.titleEn,
+            new Date(updatedInvitation.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            updatedInvitation.event.time,
+            updatedInvitation.event.endDate ? new Date(updatedInvitation.event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
+            updatedInvitation.event.endTime || undefined
+          )
+        })
+      }
+
+      return NextResponse.json({
+        ...updatedInvitation,
+        type: 'invitation_accepted'
+      }, { status: 201 })
+    }
+
     // Check if already registered (allow re-register if last status is 'rejected' or 'cancelled')
     const existing = await prisma.attendance.findFirst({
       where: {
@@ -84,8 +129,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-
-    // Create attendance
     const attendance = await prisma.attendance.create({
       data: {
         userId,
