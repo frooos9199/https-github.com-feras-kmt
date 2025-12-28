@@ -189,19 +189,21 @@ export async function GET(request: NextRequest) {
       include: {
         _count: {
           select: {
+            // Count approved attendances (marshal self-registration requests)
             attendances: {
               where: { status: 'approved' }
             },
+            // Count accepted/approved event marshals (admin-invited marshals)
             eventMarshals: {
               where: { 
-                OR: [
-                  { status: 'accepted' },
-                  { status: 'approved' }
-                ]
+                status: {
+                  in: ['accepted', 'approved']
+                }
               }
             }
           }
         }
+        // Total registered marshals = attendances + eventMarshals
       }
     });
 
