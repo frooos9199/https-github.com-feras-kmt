@@ -998,19 +998,26 @@ export default function EventDetails() {
                   }
                 }));
                 
-                const allAcceptedMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                // إزالة التكرار بناءً على marshal.id
+                const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                const uniqueMarshals = allMarshals.filter((marshal, index, self) => 
+                  index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+                );
                 
-                return allAcceptedMarshals.length === 0 ? (
+                console.log('🔍 Total marshals before dedup:', allMarshals.length);
+                console.log('✅ Unique marshals after dedup:', uniqueMarshals.length);
+                
+                return uniqueMarshals.length === 0 ? (
                   <p className="text-gray-400 text-center py-8">
                     {language === "ar" ? "لا يوجد مارشالات مضافين" : "No accepted marshals yet"}
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {allAcceptedMarshals.map((invitation) => {
-                      console.log('📊 Rendering accepted marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id, '- Status:', invitation.status);
+                    {uniqueMarshals.map((invitation) => {
+                      console.log('📊 Rendering unique marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id);
                       return (
                       <div
-                        key={`accepted-${invitation.id}`}
+                        key={`unique-${invitation.marshal.id}`}
                         className="flex items-center justify-between bg-zinc-800/50 border border-green-600/50 bg-green-900/20 rounded-xl p-4"
                       >
                         <div className="flex items-center gap-3">

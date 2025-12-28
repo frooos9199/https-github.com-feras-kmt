@@ -250,8 +250,18 @@ export default function PrintAttendancePage() {
         <div className="mb-8">
           <div className="mb-4 text-center bg-yellow-100 p-3 border-2 border-yellow-500 rounded">
             <p className="text-lg font-bold">
-              Total Registered: {event.marshalCounts?.accepted || 0} Marshals / 
-              إجمالي المسجلين: {event.marshalCounts?.accepted || 0} مارشال
+              {(() => {
+                // حساب العدد الفريد للمارشال
+                const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
+                const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
+                const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { id: a.user.id } }));
+                const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                const uniqueCount = allMarshals.filter((marshal, index, self) => 
+                  index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+                ).length;
+                
+                return `Total Registered: ${uniqueCount} Marshals / إجمالي المسجلين: ${uniqueCount} مارشال`;
+              })()}
             </p>
           </div>
           <table className="w-full border-collapse border-2 border-black">
@@ -283,23 +293,28 @@ export default function PrintAttendancePage() {
                   status: a.status,
                   marshal: {
                     employeeId: a.user.employeeId,
-                    name: a.user.name
+                    name: a.user.name,
+                    id: a.user.id
                   }
                 }));
                 
-                const allAcceptedMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                // إزالة التكرار بناءً على marshal.id
+                const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                const uniqueMarshals = allMarshals.filter((marshal, index, self) => 
+                  index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+                );
                 
-                console.log('🖨️ Rendering ONLY accepted marshals:', allAcceptedMarshals.length);
+                console.log('🖨️ Print: Total before dedup:', allMarshals.length, 'After dedup:', uniqueMarshals.length);
                 
-                return allAcceptedMarshals.length === 0 ? (
+                return uniqueMarshals.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="border-2 border-black p-6 text-center text-gray-500">
                       No marshals registered yet / لا يوجد مارشالز مسجلين بعد
                     </td>
                   </tr>
                 ) : (
-                  allAcceptedMarshals.map((marshal, index) => (
-                    <tr key={marshal.id} className="hover:bg-gray-50">
+                  uniqueMarshals.map((marshal, index) => (
+                    <tr key={`unique-${marshal.marshal.id}`} className="hover:bg-gray-50">
                       <td className="border-2 border-black p-3 text-center font-semibold">
                         {index + 1}
                       </td>
@@ -325,7 +340,18 @@ export default function PrintAttendancePage() {
           <div className="grid grid-cols-2 gap-8">
             <div>
               <p className="font-semibold mb-2">Total Marshals / إجمالي المارشالات:</p>
-              <p className="text-2xl font-bold">{event.marshalCounts?.accepted || 0}</p>
+              <p className="text-2xl font-bold">
+                {(() => {
+                  // حساب العدد الفريد للمارشال
+                  const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
+                  const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
+                  const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { id: a.user.id } }));
+                  const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                  return allMarshals.filter((marshal, index, self) => 
+                    index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+                  ).length;
+                })()}
+              </p>
             </div>
             <div>
               <p className="font-semibold mb-2">Print Date / تاريخ الطباعة:</p>

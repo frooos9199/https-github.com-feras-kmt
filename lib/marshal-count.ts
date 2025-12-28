@@ -37,12 +37,40 @@ export async function getEventMarshalCount(eventId: string) {
   }
 }
 
-// Function لحساب المارشال من البيانات الموجودة
+// Function لحساب المارشال من البيانات الموجودة مع إزالة التكرار
 export function calculateMarshalCount(event: any) {
-  const attendancesCount = event._count?.attendances || 0
-  const eventMarshalsCount = event._count?.eventMarshals || 0
-  const accepted = attendancesCount + eventMarshalsCount
+  // جمع المارشال المقبولين من eventMarshals
+  const acceptedEventMarshals = event.eventMarshals?.filter((m: any) => 
+    m.status === 'accepted' || m.status === 'approved'
+  ) || []
+  
+  // جمع المارشال المقبولين من attendances
+  const approvedAttendances = event.attendances?.filter((a: any) => 
+    a.status === 'approved'
+  ) || []
+  
+  // تحويل attendances إلى نفس التنسيق
+  const attendancesAsMarshals = approvedAttendances.map((a: any) => ({
+    marshal: { id: a.user?.id || a.userId }
+  }))
+  
+  // جمع جميع المارشال وإزالة التكرار بناءً على marshal.id
+  const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals]
+  const uniqueMarshals = allMarshals.filter((marshal, index, self) => 
+    index === self.findIndex(m => m.marshal.id === marshal.marshal.id)
+  )
+  
+  const accepted = uniqueMarshals.length
   const available = event.maxMarshals - accepted
+
+  console.log('🔢 Marshal Count Calculation:', {
+    eventMarshals: acceptedEventMarshals.length,
+    attendances: approvedAttendances.length,
+    total: allMarshals.length,
+    unique: accepted,
+    available,
+    maxMarshals: event.maxMarshals
+  })
 
   return {
     accepted,
