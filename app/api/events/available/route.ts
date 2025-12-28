@@ -56,6 +56,9 @@ export async function GET(req: NextRequest) {
             }
           },
           {
+            isArchived: false // لا تظهر الأحداث المؤرشفة في القائمة المتاحة
+          },
+          {
             date: {
               gte: new Date() // Events in the future or today
             }
@@ -84,7 +87,13 @@ export async function GET(req: NextRequest) {
                 status: 'approved'
               }
             },
-            eventMarshals: true
+            eventMarshals: {
+              where: {
+                status: {
+                  in: ['accepted', 'approved']
+                }
+              }
+            }
           }
         }
       }
@@ -101,7 +110,7 @@ export async function GET(req: NextRequest) {
       )
 
       // Include event only if user is not already approved/invited AND event is not full
-      return !hasApprovedAttendance && !hasEventMarshal && event._count.attendances < event.maxMarshals
+      return !hasApprovedAttendance && !hasEventMarshal && (event._count.attendances + event._count.eventMarshals) < event.maxMarshals
     })
 
     // ترتيب الأحداث: اليوم أولاً، القادمة بعد ذلك، المنتهية في النهاية
