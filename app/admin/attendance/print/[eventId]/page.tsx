@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import { calculateMarshalCount } from "@/lib/marshal-count"
 
 interface AttendanceRecord {
   id: string
@@ -22,6 +23,23 @@ interface Event {
   endDate: string | null
   location: string
   eventMarshals: AttendanceRecord[]
+  attendances: Array<{
+    id: string
+    status: string
+    user: {
+      employeeId: string
+      name: string
+    }
+  }>
+  _count: {
+    attendances: number
+    eventMarshals: number
+  }
+  marshalCounts?: {
+    accepted: number
+    available: number
+    maxMarshals: number
+  }
 }
 
 export default function PrintAttendancePage() {
@@ -45,14 +63,21 @@ export default function PrintAttendancePage() {
       }
       const eventData = await eventRes.json()
       
+      // حساب المارشال الموحد
+      const marshalCounts = eventData.marshalCounts || calculateMarshalCount(eventData)
+      const eventWithCounts = {
+        ...eventData,
+        marshalCounts
+      }
+      
       // Debug: log marshal counts
       console.log('🖨️ Print Sheet Data:', {
-        totalMarshals: eventData.eventMarshals?.length || 0,
-        acceptedMarshals: eventData.eventMarshals?.filter((m: any) => m.status === 'accepted' || m.status === 'approved').length || 0,
-        invitedMarshals: eventData.eventMarshals?.filter((m: any) => m.status === 'invited').length || 0
+        totalAccepted: marshalCounts.accepted,
+        eventMarshalsAccepted: eventData.eventMarshals?.filter((m: any) => m.status === 'accepted' || m.status === 'approved').length || 0,
+        attendancesApproved: eventData.attendances?.filter((a: any) => a.status === 'approved').length || 0
       })
       
-      setEvent(eventData)
+      setEvent(eventWithCounts)
 
       setLoading(false)
       
@@ -225,8 +250,8 @@ export default function PrintAttendancePage() {
         <div className="mb-8">
           <div className="mb-4 text-center bg-yellow-100 p-3 border-2 border-yellow-500 rounded">
             <p className="text-lg font-bold">
-              Total Registered: {event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0} Marshals / 
-              إجمالي المسجلين: {event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0} مارشال
+              Total Registered: {event.marshalCounts?.accepted || 0} Marshals / 
+              إجمالي المسجلين: {event.marshalCounts?.accepted || 0} مارشال
             </p>
           </div>
           <table className="w-full border-collapse border-2 border-black">
@@ -248,16 +273,32 @@ export default function PrintAttendancePage() {
             </thead>
             <tbody>
               {(() => {
-                const acceptedMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
-                console.log('🖨️ Rendering accepted marshals:', acceptedMarshals.length);
-                return !event.eventMarshals || acceptedMarshals.length === 0 ? (
+                // جمع جميع المارشال المقبولين
+                const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
+                const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
+                
+                // تحويل attendances إلى نفس التنسيق
+                const attendancesAsMarshals = approvedAttendances.map(a => ({
+                  id: a.id,
+                  status: a.status,
+                  marshal: {
+                    employeeId: a.user.employeeId,
+                    name: a.user.name
+                  }
+                }));
+                
+                const allAcceptedMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                
+                console.log('🖨️ Rendering all accepted marshals:', allAcceptedMarshals.length);
+                
+                return allAcceptedMarshals.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="border-2 border-black p-6 text-center text-gray-500">
                       No marshals registered yet / لا يوجد مارشالز مسجلين بعد
                     </td>
                   </tr>
                 ) : (
-                  acceptedMarshals.map((marshal, index) => (
+                  allAcceptedMarshals.map((marshal, index) => (
                     <tr key={marshal.id} className="hover:bg-gray-50">
                       <td className="border-2 border-black p-3 text-center font-semibold">
                         {index + 1}
@@ -284,7 +325,7 @@ export default function PrintAttendancePage() {
           <div className="grid grid-cols-2 gap-8">
             <div>
               <p className="font-semibold mb-2">Total Marshals / إجمالي المارشالات:</p>
-              <p className="text-2xl font-bold">{event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved').length || 0}</p>
+              <p className="text-2xl font-bold">{event.marshalCounts?.accepted || 0}</p>
             </div>
             <div>
               <p className="font-semibold mb-2">Print Date / تاريخ الطباعة:</p>

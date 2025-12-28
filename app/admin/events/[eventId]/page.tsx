@@ -817,14 +817,19 @@ export default function EventDetails() {
                     </div>
                     <div className="text-white font-semibold text-lg mb-1">
                       {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-                        weekday: 'short',
+                        weekday: 'long',
                         year: 'numeric',
-                        month: 'short',
+                        month: 'long',
                         day: 'numeric'
                       })}
                     </div>
                     <div className="text-green-500 text-lg font-bold">
-                      {event.time}
+                      {/* تحويل الوقت إلى 12-hour format */}
+                      {new Date(`2000-01-01T${event.time}`).toLocaleTimeString(language === "ar" ? "ar-EG" : "en-US", {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
                     </div>
                   </div>
 
@@ -841,14 +846,25 @@ export default function EventDetails() {
                       </div>
                       <div className="text-white font-semibold text-lg mb-1">
                         {new Date(event.endDate).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-                          weekday: 'short',
+                          weekday: 'long',
                           year: 'numeric',
-                          month: 'short',
+                          month: 'long',
                           day: 'numeric'
                         })}
                       </div>
                       <div className="text-red-500 text-lg font-bold">
-                        {event.endTime || event.time}
+                        {event.endTime ? 
+                          new Date(`2000-01-01T${event.endTime}`).toLocaleTimeString(language === "ar" ? "ar-EG" : "en-US", {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          }) :
+                          new Date(`2000-01-01T${event.time}`).toLocaleTimeString(language === "ar" ? "ar-EG" : "en-US", {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })
+                        }
                       </div>
                     </div>
                   )}
