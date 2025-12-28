@@ -188,13 +188,41 @@ export async function GET(request: NextRequest) {
         isArchived: false // فلترة الأحداث المؤرشفة من القائمة الرئيسية
       },
       include: {
+        attendances: {
+          where: { status: 'approved' },
+          select: {
+            id: true,
+            status: true,
+            user: {
+              select: {
+                id: true,
+                employeeId: true
+              }
+            }
+          }
+        },
+        eventMarshals: {
+          where: { 
+            status: {
+              in: ['accepted', 'approved']
+            }
+          },
+          select: {
+            id: true,
+            status: true,
+            marshal: {
+              select: {
+                id: true,
+                employeeId: true
+              }
+            }
+          }
+        },
         _count: {
           select: {
-            // Count only approved attendances (marshal self-registration requests)
             attendances: {
               where: { status: 'approved' }
             },
-            // Count only accepted/approved event marshals (admin-invited marshals)
             eventMarshals: {
               where: { 
                 status: {
@@ -204,7 +232,6 @@ export async function GET(request: NextRequest) {
             }
           }
         }
-        // Total registered marshals = approved attendances + accepted eventMarshals
       }
     });
 
