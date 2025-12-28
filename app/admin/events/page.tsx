@@ -616,10 +616,6 @@ export default function EventsManagement() {
                         <div>📍 {event.location}</div>
                         <div className={`👥 ${(event._count.eventMarshals + event._count.attendances) >= event.maxMarshals ? 'bg-red-500/20 text-red-400 font-bold px-2 py-1 rounded' : ''}`}>
                           {event._count.eventMarshals + event._count.attendances}/{event.maxMarshals} {language === "ar" ? "مارشال" : "marshals"}
-                          {/* Debug info */}
-                          <span className="text-xs text-gray-500 block">
-                            (A:{event._count.attendances} + E:{event._count.eventMarshals})
-                          </span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between mb-3">
