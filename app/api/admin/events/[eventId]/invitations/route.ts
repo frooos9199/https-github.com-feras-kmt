@@ -201,32 +201,18 @@ export async function POST(
       return NextResponse.json({ error: 'Marshal already invited' }, { status: 400 })
     }
 
-    // Check event capacity before inviting
+    // Check event capacity before inviting - use unified counting
     const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        _count: {
-          select: {
-            attendances: {
-              where: { status: 'approved' }
-            },
-            eventMarshals: {
-              where: { 
-                status: {
-                  in: ['accepted', 'approved']
-                }
-              }
-            }
-          }
-        }
-      }
+      where: { id: eventId }
     })
 
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const currentCount = event._count.attendances + event._count.eventMarshals
+    const { calculateMarshalCount } = await import('@/lib/marshal-count')
+    const currentCount = await calculateMarshalCount(eventId)
+    
     if (currentCount >= event.maxMarshals) {
       return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
