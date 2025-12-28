@@ -210,10 +210,10 @@ export async function POST(
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const { calculateMarshalCount } = await import('@/lib/marshal-count')
-    const currentCount = await calculateMarshalCount(eventId)
+    const { getEventMarshalCount } = await import('@/lib/marshal-count')
+    const marshalCount = await getEventMarshalCount(eventId)
     
-    if (currentCount >= event.maxMarshals) {
+    if (marshalCount.accepted >= event.maxMarshals) {
       return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
 
