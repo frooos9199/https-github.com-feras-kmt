@@ -58,9 +58,7 @@ export async function GET(
       include: {
         attendances: {
           where: {
-            status: {
-              not: "cancelled" // Exclude cancelled/rejected attendances
-            }
+            status: 'approved' // Only approved attendances
           },
           select: {
             id: true,
@@ -87,7 +85,7 @@ export async function GET(
         eventMarshals: {
           where: {
             status: {
-              not: "removed" // Exclude removed marshals
+              in: ['accepted', 'approved'] // Only accepted/approved marshals
             }
           },
           select: {
@@ -114,7 +112,9 @@ export async function GET(
         _count: {
           select: { 
             attendances: {
-              where: { status: 'approved' }
+              where: { 
+                status: 'approved'
+              }
             },
             eventMarshals: {
               where: {

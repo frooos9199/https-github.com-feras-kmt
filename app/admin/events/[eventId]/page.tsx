@@ -179,7 +179,6 @@ export default function EventDetails() {
     }
 
     const now = Date.now()
-    // Prevent fetching more than once every 0.5 seconds unless forced
     if (!force && now - lastFetchTime < 500) {
       console.log('⏳ Skipping fetchEvent - too soon since last fetch')
       return
@@ -193,33 +192,46 @@ export default function EventDetails() {
       console.log('🚀 Fetching event data...')
       const startTime = performance.now()
 
+      // Fetch main event data (only accepted/approved)
       const res = await fetch(`/api/admin/events/${eventId}`, {
         credentials: 'include',
         headers: {
           'Accept': 'application/json',
-          'Cache-Control': 'no-cache' // Force fresh data
+          'Cache-Control': 'no-cache'
+        }
+      })
+
+      // Fetch pending requests separately
+      const pendingRes = await fetch(`/api/admin/events/${eventId}/pending`, {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
         }
       })
 
       const fetchTime = performance.now() - startTime
       console.log(`📡 API Response received in ${fetchTime.toFixed(2)}ms:`, res.status)
 
-      if (res.ok) {
+      if (res.ok && pendingRes.ok) {
         const data = await res.json()
-        const parseTime = performance.now() - startTime - fetchTime
-        console.log(`📊 Data parsed in ${parseTime.toFixed(2)}ms`)
+        const pendingData = await pendingRes.json()
+        
+        // Combine data
+        const combinedData = {
+          ...data,
+          pendingAttendances: pendingData.pendingAttendances || [],
+          pendingInvitations: pendingData.pendingInvitations || []
+        }
 
-        console.log('📊 Event Marshals count:', data.eventMarshals?.length || 0);
-        console.log('📊 Event Marshals details:', data.eventMarshals?.map((m: any) => ({
-          id: m.id,
-          status: m.status,
-          marshalName: m.marshal.name,
-          marshalId: m.marshal.id
-        })));
+        console.log('📊 Event data loaded:', {
+          acceptedMarshals: data.marshalCounts?.accepted || 0,
+          pendingAttendances: pendingData.pendingAttendances?.length || 0,
+          pendingInvitations: pendingData.pendingInvitations?.length || 0
+        })
 
-        console.log('🔄 Setting event data in state')
-        setEvent(data)
-        setError(null) // Clear any previous errors
+        setEvent(combinedData)
+        setError(null)
 
         setEditForm({
           titleEn: data.titleEn,
@@ -1082,7 +1094,7 @@ export default function EventDetails() {
             {/* Invited Marshals */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">
-                📨 {language === "ar" ? "المارشالات المدعوين" : "Invited Marshals"} ({event.eventMarshals?.filter(m => m.status !== 'accepted' && m.status !== 'approved').length || 0})
+                📨 {language === "ar" ? "المارشالات المدعوين" : "Invited Marshals"} ({event.pendingInvitations?.length || 0})
               </h2>
               <div className="flex justify-center mb-6">
                 <button
@@ -1092,24 +1104,18 @@ export default function EventDetails() {
                   ➕ {language === "ar" ? "دعوة مارشال" : "Invite Marshal"}
                 </button>
               </div>
-              {!event.eventMarshals || event.eventMarshals.filter(m => m.status !== 'accepted' && m.status !== 'approved').length === 0 ? (
+              {!event.pendingInvitations?.length ? (
                 <p className="text-gray-400 text-center py-8">
                   {language === "ar" ? "لا يوجد مارشالات مدعوين" : "No invited marshals yet"}
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {event.eventMarshals.filter(m => m.status !== 'accepted' && m.status !== 'approved').map((invitation) => {
+                  {event.pendingInvitations.map((invitation) => {
                     console.log('📊 Rendering marshal:', invitation.marshal.name, '- ID:', invitation.marshal.id, '- Status:', invitation.status);
                     return (
                     <div
                       key={invitation.id}
-                      className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 ${
-                        invitation.status === 'accepted' 
-                          ? 'border-green-600/50 bg-green-900/20' 
-                          : invitation.status === 'declined'
-                          ? 'border-red-600/50 bg-red-900/20'
-                          : 'border-yellow-600/50 bg-yellow-900/20'
-                      }`}
+                      className={`flex items-center justify-between bg-zinc-800/50 border rounded-xl p-4 border-yellow-600/50 bg-yellow-900/20`}
                     >
                       <div className="flex items-center gap-3">
                         {invitation.marshal.image ? (
@@ -1140,13 +1146,7 @@ export default function EventDetails() {
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
                             {language === "ar" ? "مدعو في:" : "Invited:"} {new Date(invitation.invitedAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
-                            {invitation.respondedAt && (
-                              <span className="ml-2">
-                                {language === "ar" ? "رد في:" : "Responded:"} {new Date(invitation.respondedAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}
-                              </span>
-                            )}
                           </p>
-                          {/* عرض تخصصات المارشال */}
                           {invitation.marshal.marshalTypes && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {invitation.marshal.marshalTypes.split(',').filter(t => t.trim()).map((type) => {
@@ -1176,38 +1176,25 @@ export default function EventDetails() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          invitation.status === 'accepted' 
-                            ? 'bg-green-600/20 text-green-500' 
-                            : invitation.status === 'declined'
-                            ? 'bg-red-600/20 text-red-500'
-                            : 'bg-yellow-600/20 text-yellow-500'
-                        }`}>
-                          {invitation.status === 'accepted' 
-                            ? (language === "ar" ? "مقبول" : "Accepted")
-                            : invitation.status === 'declined'
-                            ? (language === "ar" ? "مرفوض" : "Declined")
-                            : (language === "ar" ? "معلق" : "Pending")
-                          }
+                        <span className="px-2 py-1 rounded-full text-xs font-bold bg-yellow-600/20 text-yellow-500">
+                          {language === "ar" ? "معلق" : "Pending"}
                         </span>
-                        {invitation.status === 'invited' && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleAcceptInvitation(invitation.id)}
-                              disabled={acceptingInvitation === invitation.id}
-                              className="px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
-                            >
-                              {acceptingInvitation === invitation.id ? (language === "ar" ? "جاري..." : "Accepting...") : (language === "ar" ? "قبول" : "Accept")}
-                            </button>
-                            <button
-                              onClick={() => handleRejectInvitation(invitation.id)}
-                              disabled={rejectingInvitation === invitation.id}
-                              className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
-                            >
-                              {rejectingInvitation === invitation.id ? (language === "ar" ? "جاري..." : "Rejecting...") : (language === "ar" ? "رفض" : "Reject")}
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleAcceptInvitation(invitation.id)}
+                            disabled={acceptingInvitation === invitation.id}
+                            className="px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                          >
+                            {acceptingInvitation === invitation.id ? (language === "ar" ? "جاري..." : "Accepting...") : (language === "ar" ? "قبول" : "Accept")}
+                          </button>
+                          <button
+                            onClick={() => handleRejectInvitation(invitation.id)}
+                            disabled={rejectingInvitation === invitation.id}
+                            className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                          >
+                            {rejectingInvitation === invitation.id ? (language === "ar" ? "جاري..." : "Rejecting...") : (language === "ar" ? "رفض" : "Reject")}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1219,15 +1206,15 @@ export default function EventDetails() {
             {/* Pending Attendance Requests */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">
-                ⏳ {language === "ar" ? "طلبات الحضور المعلقة" : "Pending Attendance Requests"} ({event.attendances.filter(a => a.status === 'pending').length})
+                ⏳ {language === "ar" ? "طلبات الحضور المعلقة" : "Pending Attendance Requests"} ({event.pendingAttendances?.length || 0})
               </h2>
-              {!event.attendances.filter(a => a.status === 'pending').length ? (
+              {!event.pendingAttendances?.length ? (
                 <p className="text-gray-400 text-center py-8">
                   {language === "ar" ? "لا توجد طلبات حضور معلقة" : "No pending attendance requests"}
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {event.attendances.filter(a => a.status === 'pending').map((attendance) => (
+                  {event.pendingAttendances.map((attendance) => (
                     <div
                       key={attendance.id}
                       className="flex items-center justify-between bg-zinc-800/50 border border-yellow-600/50 rounded-xl p-4"
@@ -1315,7 +1302,7 @@ export default function EventDetails() {
                 </div>
                 <div className="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المدعوين" : "Invited"}</p>
-                  <p className="text-blue-500 font-bold text-3xl">{event.eventMarshals?.filter(em => em.status === 'invited').length || 0}</p>
+                  <p className="text-blue-500 font-bold text-3xl">{event.pendingInvitations?.length || 0}</p>
                 </div>
                 <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-xl p-4">
                   <p className="text-gray-400 text-sm mb-1">{language === "ar" ? "المتبقي" : "Available"}</p>
