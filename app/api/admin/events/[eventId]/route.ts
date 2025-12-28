@@ -57,6 +57,11 @@ export async function GET(
       where: { id: eventId },
       include: {
         attendances: {
+          where: {
+            status: {
+              not: "cancelled" // Exclude cancelled/rejected attendances
+            }
+          },
           select: {
             id: true,
             userId: true,
@@ -80,6 +85,11 @@ export async function GET(
           }
         },
         eventMarshals: {
+          where: {
+            status: {
+              not: "removed" // Exclude removed marshals
+            }
+          },
           select: {
             id: true,
             status: true,

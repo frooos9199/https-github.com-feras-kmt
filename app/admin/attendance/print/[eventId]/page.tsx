@@ -273,7 +273,7 @@ export default function PrintAttendancePage() {
             </thead>
             <tbody>
               {(() => {
-                // جمع جميع المارشال المقبولين
+                // جمع جميع المارشال المقبولين فقط
                 const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
                 const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
                 
@@ -289,7 +289,7 @@ export default function PrintAttendancePage() {
                 
                 const allAcceptedMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
                 
-                console.log('🖨️ Rendering all accepted marshals:', allAcceptedMarshals.length);
+                console.log('🖨️ Rendering ONLY accepted marshals:', allAcceptedMarshals.length);
                 
                 return allAcceptedMarshals.length === 0 ? (
                   <tr>
