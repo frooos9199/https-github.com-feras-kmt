@@ -163,6 +163,7 @@ interface Event {
   date: string
   endDate: string | null
   time: string
+  endTime: string | null
   location: string
   marshalTypes: string
   maxMarshals: number
@@ -562,122 +563,166 @@ export default function EventsManagement() {
               </p>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event, index) => (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  onClick={() => router.push(`/admin/events/${event.id}`)}
-                  className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer transform hover:scale-105"
-                >
-                  <div className="relative h-32 overflow-hidden">
-                    {/* صورة الهيدر فقط */}
-                    <div className="absolute inset-0 w-full h-full z-0">
-                      <div
-                        style={{
-                          backgroundImage: 'url(/test.jpg)',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
-                          width: '100%',
-                          height: '100%',
-                          position: 'absolute',
-                          inset: 0
-                        }}
-                      />
-                      {/* أزيلت طبقة اللون الداكن لتظهر الصورة بشكل طبيعي */}
-                    </div>
-                  </div>
-                  <div className="flex">
-                    {/* أيقونات المارشال في الجانب الأيسر */}
-                    <div className="flex flex-col items-center justify-center px-3 py-4 gap-2">
-                      {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).map((type) => {
-                        const typeIcons: Record<string, string> = {
-                          'karting': '🏎️',
-                          'motocross': '🏍️',
-                          'rescue': '🚑',
-                          'circuit': '🏁',
-                          'drift': '💨',
-                          'drag-race': '🚦',
-                          'pit': '🔧'
-                        }
-                        return <span key={type} className="text-2xl md:text-3xl">{typeIcons[type] || '❓'}</span>
-                      })}
-                    </div>
-                    {/* معلومات الفعالية */}
-                    <div className="flex-1 p-4">
-                      <h3 className="text-lg font-bold text-white mb-2 truncate">
-                        {language === "ar" ? event.titleAr : event.titleEn}
-                      </h3>
-                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-                        {language === "ar" ? event.descriptionAr : event.descriptionEn}
-                      </p>
-                      <div className="space-y-1 text-sm text-gray-300 mb-4">
-                        <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
-                        <div>🕐 {event.time}</div>
-                        <div>📍 {event.location}</div>
-                        <div className={`👥 ${(event.marshalCounts?.accepted || 0) >= event.maxMarshals ? 'bg-red-500/20 text-red-400 font-bold px-2 py-1 rounded' : 'bg-green-500/20 text-green-400 font-bold px-2 py-1 rounded'}`}>
-                          {event.marshalCounts?.accepted || 0}/{event.maxMarshals} {language === "ar" ? "مارشال" : "marshals"}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          event.status === "active"
-                            ? "bg-green-600/20 text-green-500"
-                            : event.status === "cancelled"
-                            ? "bg-red-600/20 text-red-500"
-                            : "bg-gray-600/20 text-gray-500"
-                        }`}>
-                          {event.status.toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleArchive(event.id)
-                          }}
-                          className="flex-1 px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm font-medium"
-                          title={language === "ar" ? "أرشفة الحدث" : "Archive Event"}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-zinc-800/50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الفعالية" : "Event"}</th>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "تاريخ البداية" : "Start Date"}</th>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "تاريخ النهاية" : "End Date"}</th>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "وقت البداية" : "Start Time"}</th>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "وقت النهاية" : "End Time"}</th>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "المارشالات" : "Marshals"}</th>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الحالة" : "Status"}</th>
+                      <th className="px-4 py-3 text-left text-white font-medium">{language === "ar" ? "الإجراءات" : "Actions"}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {events.map((event, index) => {
+                      const formatDate = (dateStr: string) => {
+                        const date = new Date(dateStr)
+                        const weekdays = language === "ar" 
+                          ? ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
+                          : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                        const weekday = weekdays[date.getDay()]
+                        const dateStr2 = date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")
+                        return `${weekday} ${dateStr2}`
+                      }
+
+                      const formatTime = (timeStr: string) => {
+                        if (!timeStr) return "-"
+                        const [hours, minutes] = timeStr.split(':')
+                        const hour = parseInt(hours)
+                        const ampm = hour >= 12 ? 'PM' : 'AM'
+                        const hour12 = hour % 12 || 12
+                        return `${hour12}:${minutes} ${ampm}`
+                      }
+
+                      return (
+                        <motion.tr
+                          key={event.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          onClick={() => router.push(`/admin/events/${event.id}`)}
+                          className="border-b border-zinc-800 hover:bg-zinc-800/30 cursor-pointer transition-colors"
                         >
-                          📁 {language === "ar" ? "أرشيف" : "Archive"}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            window.open(`/admin/attendance/print/${event.id}`, '_blank')
-                          }}
-                          className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
-                          title={language === "ar" ? "طباعة قائمة الحضور" : "Print Attendance List"}
-                        >
-                          🖨️ {language === "ar" ? "طباعة" : "Print"}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleEdit(event)
-                          }}
-                          className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
-                        >
-                          ✏️ {language === "ar" ? "تعديل" : "Edit"}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDelete(event.id)
-                          }}
-                          disabled={deleting === event.id}
-                          className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
-                        >
-                          {deleting === event.id ? "..." : (language === "ar" ? "🗑️ حذف" : "🗑️ Delete")}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex gap-1">
+                                {event.marshalTypes && event.marshalTypes.split(',').filter(t => t).slice(0, 3).map((type) => {
+                                  const typeIcons: Record<string, string> = {
+                                    'karting': '🏎️',
+                                    'motocross': '🏍️',
+                                    'rescue': '🚑',
+                                    'circuit': '🏁',
+                                    'drift': '💨',
+                                    'drag-race': '🚦',
+                                    'pit': '🔧'
+                                  }
+                                  return <span key={type} className="text-lg">{typeIcons[type] || '❓'}</span>
+                                })}
+                              </div>
+                              <div>
+                                <div className="text-white font-medium">
+                                  {language === "ar" ? event.titleAr : event.titleEn}
+                                </div>
+                                <div className="text-gray-400 text-sm">📍 {event.location}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-green-400 font-medium">
+                              {formatDate(event.date)}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-red-400 font-medium">
+                              {event.endDate ? formatDate(event.endDate) : "-"}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-green-400 font-medium">
+                              {formatTime(event.time)}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-red-400 font-medium">
+                              {event.endTime ? formatTime(event.endTime) : "-"}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className={`font-bold px-2 py-1 rounded text-center ${
+                              (event.marshalCounts?.accepted || 0) >= event.maxMarshals 
+                                ? 'bg-red-500/20 text-red-400' 
+                                : 'bg-green-500/20 text-green-400'
+                            }`}>
+                              {event.marshalCounts?.accepted || 0}/{event.maxMarshals}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              event.status === "active"
+                                ? "bg-green-600/20 text-green-500"
+                                : event.status === "cancelled"
+                                ? "bg-red-600/20 text-red-500"
+                                : "bg-gray-600/20 text-gray-500"
+                            }`}>
+                              {event.status.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex gap-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleArchive(event.id)
+                                }}
+                                className="p-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition-colors text-sm"
+                                title={language === "ar" ? "أرشفة" : "Archive"}
+                              >
+                                📁
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  window.open(`/admin/attendance/print/${event.id}`, '_blank')
+                                }}
+                                className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors text-sm"
+                                title={language === "ar" ? "طباعة" : "Print"}
+                              >
+                                🖨️
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEdit(event)
+                                }}
+                                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm"
+                                title={language === "ar" ? "تعديل" : "Edit"}
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDelete(event.id)
+                                }}
+                                disabled={deleting === event.id}
+                                className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm disabled:opacity-50"
+                                title={language === "ar" ? "حذف" : "Delete"}
+                              >
+                                {deleting === event.id ? "..." : "🗑️"}
+                              </button>
+                            </div>
+                          </td>
+                        </motion.tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )
         )}
