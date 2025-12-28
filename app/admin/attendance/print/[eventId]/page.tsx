@@ -254,8 +254,18 @@ export default function PrintAttendancePage() {
                 // حساب العدد الفريد للمارشال
                 const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
                 const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
-                const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { employeeId: a.user.employeeId } }));
+                const attendancesAsMarshals = approvedAttendances.map(a => ({
+                  marshal: {
+                    employeeId: a.user.employeeId,
+                    name: a.user.name,
+                    id: a.user.id
+                  }
+                }));
+                
                 const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
+                const uniqueCount = allMarshals.filter((marshal, index, self) => 
+                  index === self.findIndex(m => m.marshal.employeeId === marshal.marshal.employeeId)
+                ).length;
                 
                 return `Total Registered: ${uniqueCount} Marshals / إجمالي المسجلين: ${uniqueCount} مارشال`;
               })()}
@@ -342,7 +352,13 @@ export default function PrintAttendancePage() {
                   // حساب العدد الفريد للمارشال
                   const acceptedEventMarshals = event.eventMarshals?.filter(m => m.status === 'accepted' || m.status === 'approved') || [];
                   const approvedAttendances = event.attendances?.filter(a => a.status === 'approved') || [];
-                  const attendancesAsMarshals = approvedAttendances.map(a => ({ marshal: { employeeId: a.user.employeeId } }));
+                  const attendancesAsMarshals = approvedAttendances.map(a => ({
+                    marshal: {
+                      employeeId: a.user.employeeId,
+                      name: a.user.name,
+                      id: a.user.id
+                    }
+                  }));
                   const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals];
                   return allMarshals.filter((marshal, index, self) => 
                     index === self.findIndex(m => m.marshal.employeeId === marshal.marshal.employeeId)
