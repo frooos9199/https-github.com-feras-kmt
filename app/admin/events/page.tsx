@@ -619,8 +619,8 @@ export default function EventsManagement() {
                         <div>📅 {new Date(event.date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</div>
                         <div>🕐 {event.time}</div>
                         <div>📍 {event.location}</div>
-                        <div className={`👥 ${(event.marshalCounts?.accepted || (event._count.eventMarshals + event._count.attendances)) >= event.maxMarshals ? 'bg-red-500/20 text-red-400 font-bold px-2 py-1 rounded' : 'bg-green-500/20 text-green-400 font-bold px-2 py-1 rounded'}`}>
-                          {event.marshalCounts?.accepted || (event._count.eventMarshals + event._count.attendances)}/{event.maxMarshals} {language === "ar" ? "مارشال" : "marshals"}
+                        <div className={`👥 ${(event.marshalCounts?.accepted || 0) >= event.maxMarshals ? 'bg-red-500/20 text-red-400 font-bold px-2 py-1 rounded' : 'bg-green-500/20 text-green-400 font-bold px-2 py-1 rounded'}`}>
+                          {event.marshalCounts?.accepted || 0}/{event.maxMarshals} {language === "ar" ? "مارشال" : "marshals"}
                         </div>
                       </div>
                       <div className="flex items-center justify-between mb-3">
