@@ -1081,7 +1081,7 @@ export default function EventDetails() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => {
-                              setSelectedMarshalId(invitation.marshal.employeeId)
+                              setSelectedMarshalId(invitation.marshal.id)
                               setShowRemoveMarshalModal(true)
                             }}
                             className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg transition-all text-sm font-bold"
