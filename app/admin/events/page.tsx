@@ -863,7 +863,7 @@ export default function EventsManagement() {
                 )
               })}
             </div>
-          )}
+          )
         )}
 
       </main>
