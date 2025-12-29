@@ -46,11 +46,19 @@ export async function POST(
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    // استخدام النظام الموحد لحساب المارشالات
+    // استخدام النظام الموحد لحساب المارشالات مع logging للتشخيص
     const { getEventMarshalCount } = await import('@/lib/marshal-count')
     const marshalCount = await getEventMarshalCount(eventId)
     
+    console.log('=== MARSHAL COUNT DEBUG ===')
+    console.log('Event ID:', eventId)
+    console.log('Max Marshals:', event.maxMarshals)
+    console.log('Current Accepted:', marshalCount.accepted)
+    console.log('Available:', marshalCount.available)
+    console.log('Trying to add marshal:', marshalId)
+    
     if (marshalCount.accepted >= event.maxMarshals) {
+      console.log('BLOCKED: Event at maximum capacity')
       return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
 
