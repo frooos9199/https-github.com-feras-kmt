@@ -49,15 +49,25 @@ export function calculateMarshalCount(event: any) {
     m.status === 'accepted' || m.status === 'approved'
   ) || []
   
+  // Debug logging
+  console.log(`=== CALCULATE MARSHAL COUNT DEBUG ===`)
+  console.log(`Event ID: ${event.id}`)
+  console.log(`Total eventMarshals: ${event.eventMarshals?.length || 0}`)
+  console.log(`Accepted eventMarshals: ${acceptedEventMarshals.length}`)
+  
   // جمع الأرقام الوظيفية الفريدة فقط
   const uniqueEmployeeIds = new Set<string>()
   
-  acceptedEventMarshals.forEach((m: any) => {
+  acceptedEventMarshals.forEach((m: any, index: number) => {
     const employeeId = m.marshal?.employeeId
+    console.log(`Marshal ${index + 1}: employeeId=${employeeId}, status=${m.status}`)
     if (employeeId) {
       uniqueEmployeeIds.add(employeeId)
     }
   })
+  
+  console.log(`Unique Employee IDs: [${Array.from(uniqueEmployeeIds).join(', ')}]`)
+  console.log(`Final count: ${uniqueEmployeeIds.size}`)
   
   const accepted = uniqueEmployeeIds.size
   const available = event.maxMarshals - accepted
