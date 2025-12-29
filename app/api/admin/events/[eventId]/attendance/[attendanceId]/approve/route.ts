@@ -16,33 +16,28 @@ export async function POST(
 
     const { eventId, attendanceId } = await params
 
-    // Check if event is at capacity before approving
+    // الحصول على بيانات الحدث
     const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        _count: {
-          select: {
-            attendances: {
-              where: { status: 'approved' }
-            },
-            eventMarshals: {
-              where: { 
-                status: {
-                  in: ['accepted', 'approved']
-                }
-              }
-            }
-          }
-        }
-      }
+      where: { id: eventId }
     })
 
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const currentCount = event._count.attendances + event._count.eventMarshals
-    if (currentCount >= event.maxMarshals) {
+    // استخدام النظام الموحد لحساب المارشالات مع logging للتشخيص
+    const { getEventMarshalCount } = await import('@/lib/marshal-count')
+    const marshalCount = await getEventMarshalCount(eventId)
+    
+    console.log('=== ATTENDANCE APPROVE DEBUG ===')
+    console.log('Event ID:', eventId)
+    console.log('Attendance ID:', attendanceId)
+    console.log('Max Marshals:', event.maxMarshals)
+    console.log('Current Accepted:', marshalCount.accepted)
+    console.log('Available:', marshalCount.available)
+    
+    if (marshalCount.accepted >= event.maxMarshals) {
+      console.log('BLOCKED: Event at maximum capacity (attendance approve)')
       return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
 
