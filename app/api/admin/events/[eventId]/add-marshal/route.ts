@@ -54,14 +54,31 @@ export async function POST(
       return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
 
-    // التحقق من وجود المارشال
+    // التحقق من عدم وجود المارشال مسبقاً في الحدث بناءً على الرقم الوظيفي
     const marshal = await prisma.user.findUnique({
       where: { id: marshalId },
-      select: { id: true, name: true, marshalTypes: true }
+      select: { id: true, name: true, marshalTypes: true, employeeId: true }
     })
 
     if (!marshal) {
       return NextResponse.json({ error: 'Marshal not found' }, { status: 404 })
+    }
+
+    // التحقق من عدم وجود مارشال بنفس الرقم الوظيفي في الحدث
+    const existingMarshalByEmployeeId = await prisma.eventMarshal.findFirst({
+      where: {
+        eventId,
+        marshal: {
+          employeeId: marshal.employeeId
+        },
+        status: { in: ['accepted', 'approved'] }
+      }
+    })
+
+    if (existingMarshalByEmployeeId) {
+      return NextResponse.json({
+        error: 'A marshal with this employee ID is already registered for this event'
+      }, { status: 400 })
     }
 
     // التحقق من توافق أنواع المارشال مع الحدث
@@ -78,7 +95,7 @@ export async function POST(
       }, { status: 400 })
     }
 
-    // التحقق من عدم وجود المارشال مسبقاً في الحدث
+    // التحقق من عدم وجود المارشال مسبقاً في الحدث (تحقق إضافي)
     const existingEntry = await prisma.eventMarshal.findUnique({
       where: {
         eventId_marshalId: {

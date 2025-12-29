@@ -1,22 +1,14 @@
 import { prisma } from '@/lib/prisma'
 
-// Function موحدة لحساب المارشال المقبولين فقط (بدون الدعوات المعلقة)
+// Function موحدة لحساب المارشال المقبولين فقط بناءً على الرقم الوظيفي
 export async function getEventMarshalCount(eventId: string) {
   const event = await prisma.event.findUnique({
     where: { id: eventId },
     select: {
       maxMarshals: true,
-      attendances: {
-        where: { status: 'approved' },
-        select: {
-          user: {
-            select: { employeeId: true }
-          }
-        }
-      },
       eventMarshals: {
         where: { 
-          status: { in: ['accepted', 'approved'] } // فقط المقبولين، بدون pending
+          status: { in: ['accepted', 'approved'] } // فقط المقبولين
         },
         select: {
           marshal: {
@@ -31,13 +23,16 @@ export async function getEventMarshalCount(eventId: string) {
     return { accepted: 0, available: 0, maxMarshals: 0 }
   }
 
-  // جمع جميع employeeIds وإزالة التكرار
-  const attendanceIds = event.attendances.map(a => a.user.employeeId).filter(Boolean)
-  const eventMarshalIds = event.eventMarshals.map(m => m.marshal.employeeId).filter(Boolean)
-  const allIds = [...attendanceIds, ...eventMarshalIds]
-  const uniqueIds = [...new Set(allIds)]
+  // جمع الأرقام الوظيفية الفريدة للمارشالات المقبولين
+  const uniqueEmployeeIds = new Set<string>()
+  
+  event.eventMarshals.forEach(em => {
+    if (em.marshal?.employeeId) {
+      uniqueEmployeeIds.add(em.marshal.employeeId)
+    }
+  })
 
-  const accepted = uniqueIds.length
+  const accepted = uniqueEmployeeIds.size
   const available = event.maxMarshals - accepted
 
   return {
@@ -47,32 +42,24 @@ export async function getEventMarshalCount(eventId: string) {
   }
 }
 
-// Function لحساب المارشال من البيانات الموجودة مع إزالة التكرار (فقط المقبولين)
+// Function لحساب المارشال من البيانات الموجودة بناءً على الرقم الوظيفي
 export function calculateMarshalCount(event: any) {
-  // جمع المارشال المقبولين من eventMarshals (فقط accepted و approved)
+  // جمع المارشال المقبولين من eventMarshals فقط
   const acceptedEventMarshals = event.eventMarshals?.filter((m: any) => 
     m.status === 'accepted' || m.status === 'approved'
   ) || []
   
-  // جمع المارشال المقبولين من attendances (فقط approved)
-  const approvedAttendances = event.attendances?.filter((a: any) => 
-    a.status === 'approved'
-  ) || []
+  // جمع الأرقام الوظيفية الفريدة
+  const uniqueEmployeeIds = new Set<string>()
   
-  // تحويل attendances إلى نفس التنسيق
-  const attendancesAsMarshals = approvedAttendances.map((a: any) => ({
-    marshal: { employeeId: a.user?.employeeId || a.employeeId }
-  }))
-  
-  // جمع جميع المارشال وإزالة التكرار بناءً على employeeId (رقم الوظيفي)
-  const allMarshals = [...acceptedEventMarshals, ...attendancesAsMarshals]
-  const uniqueMarshals = allMarshals.filter((marshal, index, self) => {
-    const employeeId = marshal.marshal?.employeeId
-    if (!employeeId) return false // تجاهل المارشال بدون employeeId
-    return index === self.findIndex(m => m.marshal?.employeeId === employeeId)
+  acceptedEventMarshals.forEach((m: any) => {
+    const employeeId = m.marshal?.employeeId
+    if (employeeId) {
+      uniqueEmployeeIds.add(employeeId)
+    }
   })
   
-  const accepted = uniqueMarshals.length
+  const accepted = uniqueEmployeeIds.size
   const available = event.maxMarshals - accepted
 
   return {
