@@ -1,5 +1,6 @@
 // تعديل بسيط لاختبار git push
 // آخر تحديث: 26-11-2025 - تعديل اختباري للتأكيد على تحديث git
+// تحديث نظام حساب المارشالات - 26-11-2025
 // POST - Create new event
 export async function POST(request: NextRequest) {
   try {
