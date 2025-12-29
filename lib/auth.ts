@@ -22,23 +22,48 @@ export async function getUserFromToken(req: NextRequest): Promise<{
   image?: string | null;
 } | undefined> {
   const authHeader = req.headers.get("authorization")
+  console.log('[AUTH] Authorization header:', authHeader ? 'Present' : 'Missing');
+  
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.log('[AUTH] Invalid authorization header format');
     return undefined;
   }
   
   const token = authHeader.replace("Bearer ", "")
+  console.log('[AUTH] Token length:', token.length);
+  
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken
-    if (!decoded?.id) {
+    console.log('[AUTH] Token decoded:', {
+      id: decoded.id,
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role
+    });
+    
+    // تجربة عدة مفاتيح ممكنة للمعرف
+    const userId = decoded.userId || decoded.id || decoded.sub;
+    if (!userId) {
+      console.log('[AUTH] No user ID found in token');
       return undefined
     }
+    
+    console.log('[AUTH] Looking up user with ID:', userId);
+    
     // جلب المستخدم من قاعدة البيانات
-    const user = await prisma.user.findUnique({ where: { id: decoded.id } })
-    // طباعة بيانات المستخدم بعد فك التوكن
-    console.log('Decoded user:', user);
+    const user = await prisma.user.findUnique({ where: { id: userId } })
+    
     if (!user) {
+      console.log('[AUTH] User not found in database for ID:', userId);
       return undefined
     }
+    
+    console.log('[AUTH] User found:', {
+      id: user.id,
+      email: user.email,
+      role: user.role
+    });
+    
     // إرجاع بيانات المستخدم (admin أو marshal)
     return {
       id: user.id,
@@ -48,7 +73,7 @@ export async function getUserFromToken(req: NextRequest): Promise<{
       image: user.image
     }
   } catch (e) {
-    console.error('JWT verification error:', e);
+    console.error('[AUTH] JWT verification error:', e.message);
     return undefined
   }
 }

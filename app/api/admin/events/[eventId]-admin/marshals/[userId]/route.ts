@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, removalEmailTemplate } from "@/lib/email"
+import { getUserFromToken } from "@/lib/auth"
 
 // DELETE - Remove marshal from event
 export async function DELETE(
@@ -10,14 +11,35 @@ export async function DELETE(
   { params }: { params: Promise<{ eventId: string; userId: string }> }
 ) {
   try {
-    console.log('[API] Remove Marshal from Event', { params: await params, body: await req.clone().json() });
+    console.log('[API] Remove Marshal from Event - Headers:', Object.fromEntries(req.headers.entries()));
+    
+    let adminUserId: string | null = null
+    let adminUserRole: string | null = null
+
+    // Try NextAuth session first
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "admin") {
-      console.error('[API] Unauthorized remove marshal', { session });
+    if (session?.user?.id) {
+      adminUserId = session.user.id
+      adminUserRole = session.user.role
+      console.log('[API] Using NextAuth session:', { adminUserId, adminUserRole });
+    } else {
+      // Try JWT token
+      const user = await getUserFromToken(req)
+      if (user) {
+        adminUserId = user.id
+        adminUserRole = user.role
+        console.log('[API] Using JWT token:', { adminUserId, adminUserRole });
+      } else {
+        console.log('[API] No valid authentication found');
+      }
+    }
+    
+    if (!adminUserId || adminUserRole !== "admin") {
+      console.error('[API] Unauthorized remove marshal', { adminUserId, adminUserRole });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { eventId: eventIdWithAdmin, userId } = await params
+    const { eventId: eventIdWithAdmin, userId: marshalId } = await params
     // Remove all '-admin' suffixes from eventId for database queries
     const eventId = eventIdWithAdmin.replace(/-admin/g, '')
     const body = await req.json()
@@ -26,24 +48,24 @@ export async function DELETE(
     console.log('[API] Remove Marshal Debug:', {
       eventId,
       eventIdWithAdmin,
-      userId,
+      marshalId,
       reason,
       params: await params
     })
 
     // Use transaction to ensure atomicity
     const result = await prisma.$transaction(async (tx) => {
-      console.log('[API] Starting transaction for marshal removal:', { eventId, userId })
+      console.log('[API] Starting transaction for marshal removal:', { eventId, marshalId })
       // Always try to remove from both tables to ensure complete cleanup
       let removedFromEventMarshals = false
       let removedFromAttendances = false
 
       // First, try to find and remove from eventMarshals table
-      console.log('[API] Searching for eventMarshals with:', { eventId, userId })
+      console.log('[API] Searching for eventMarshals with:', { eventId, marshalId })
       const eventMarshals = await tx.eventMarshal.findMany({
         where: {
           eventId: eventId,
-          marshalId: userId
+          marshalId: marshalId
         },
         include: {
           marshal: {
@@ -76,7 +98,7 @@ export async function DELETE(
       // If found in eventMarshals, remove it and send email asynchronously
       if (eventMarshals.length > 0) {
         const eventMarshal = eventMarshals[0]
-        console.log('[API] Removing marshal from eventMarshals', { eventId, userId, eventMarshalId: eventMarshal.id });
+        console.log('[API] Removing marshal from eventMarshals', { eventId, marshalId, eventMarshalId: eventMarshal.id });
 
         // Send removal notification email asynchronously (don't wait for it)
         if (eventMarshal.marshal.email) {
@@ -99,7 +121,7 @@ export async function DELETE(
         const deleteResult = await tx.eventMarshal.deleteMany({
           where: {
             eventId: eventId,
-            marshalId: userId
+            marshalId: marshalId
           }
         })
         console.log('[API] Delete result for eventMarshals:', deleteResult);
@@ -117,7 +139,7 @@ export async function DELETE(
       const attendances = await tx.attendance.findMany({
         where: {
           eventId: eventId,
-          userId: userId,
+          userId: marshalId,
           status: {
             not: "cancelled" // Only update if not already cancelled
           }
@@ -153,7 +175,7 @@ export async function DELETE(
       // If found in attendances and not already cancelled, update it
       if (attendances.length > 0) {
         const attendance = attendances[0]
-        console.log('[API] Cancelling attendance', { eventId: eventId, userId });
+        console.log('[API] Cancelling attendance', { eventId: eventId, marshalId });
 
         // Send removal notification email asynchronously (only if not already sent for eventMarshals)
         if (!removedFromEventMarshals && attendance.user.email) {
@@ -176,7 +198,7 @@ export async function DELETE(
         const updateResult = await tx.attendance.updateMany({
           where: {
             eventId: eventId,
-            userId: userId,
+            userId: marshalId,
             status: {
               not: "cancelled" // Only update if not already cancelled
             }
@@ -198,7 +220,7 @@ export async function DELETE(
 
     // Check if we actually removed/cancelled anything
     if (!result.removedFromEventMarshals && !result.removedFromAttendances) {
-      console.log('[API] Marshal not found - may have already been removed or never existed', { eventId, userId });
+      console.log('[API] Marshal not found - may have already been removed or never existed', { eventId, marshalId });
       // Instead of returning 404, return success since the marshal is not in the event (desired state)
       return NextResponse.json({ success: true, message: "Marshal is not assigned to this event" })
     }

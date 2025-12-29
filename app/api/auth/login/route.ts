@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 });
     }
 
-    // توليد JWT - استخدام JWT_SECRET للتناسق مع التحقق
-    const jwtSecret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || "dev-secret-key";
+    // توليد JWT - استخدام NEXTAUTH_SECRET أولاً (consistency)
+    const jwtSecret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "dev-secret-key";
     const accessToken = jwt.sign(
       {
         userId: user.id,
