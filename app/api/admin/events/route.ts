@@ -1,6 +1,7 @@
 // تعديل بسيط لاختبار git push
 // آخر تحديث: 26-11-2025 - تعديل اختباري للتأكيد على تحديث git
 // تحديث نظام حساب المارشالات - 26-11-2025
+// FORCE DEPLOYMENT - MARSHAL COUNT SYSTEM FIX - 26-01-2025 16:00
 // POST - Create new event
 export async function POST(request: NextRequest) {
   try {
