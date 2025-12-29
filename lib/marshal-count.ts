@@ -12,9 +12,8 @@ export async function getEventMarshalCount(eventId: string) {
         },
         select: {
           marshal: {
-            select: { employeeId: true, name: true }
-          },
-          status: true
+            select: { employeeId: true }
+          }
         }
       }
     }
@@ -27,23 +26,11 @@ export async function getEventMarshalCount(eventId: string) {
   // جمع الأرقام الوظيفية الفريدة للمارشالات المقبولين
   const uniqueEmployeeIds = new Set<string>()
   
-  console.log('=== EVENT MARSHALS DEBUG ===')
-  console.log('Total eventMarshals found:', event.eventMarshals.length)
-  
-  event.eventMarshals.forEach((em, index) => {
-    console.log(`Marshal ${index + 1}:`, {
-      name: em.marshal?.name,
-      employeeId: em.marshal?.employeeId,
-      status: em.status
-    })
-    
+  event.eventMarshals.forEach(em => {
     if (em.marshal?.employeeId) {
       uniqueEmployeeIds.add(em.marshal.employeeId)
     }
   })
-
-  console.log('Unique Employee IDs:', Array.from(uniqueEmployeeIds))
-  console.log('Unique count:', uniqueEmployeeIds.size)
 
   const accepted = uniqueEmployeeIds.size
   const available = event.maxMarshals - accepted
