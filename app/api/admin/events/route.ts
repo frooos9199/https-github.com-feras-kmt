@@ -189,19 +189,6 @@ export async function GET(request: NextRequest) {
         isArchived: false // فلترة الأحداث المؤرشفة من القائمة الرئيسية
       },
       include: {
-        attendances: {
-          where: { status: 'approved' },
-          select: {
-            id: true,
-            status: true,
-            user: {
-              select: {
-                id: true,
-                employeeId: true
-              }
-            }
-          }
-        },
         eventMarshals: {
           where: { 
             status: {
@@ -215,20 +202,6 @@ export async function GET(request: NextRequest) {
               select: {
                 id: true,
                 employeeId: true
-              }
-            }
-          }
-        },
-        _count: {
-          select: {
-            attendances: {
-              where: { status: 'approved' }
-            },
-            eventMarshals: {
-              where: { 
-                status: {
-                  in: ['accepted', 'approved']
-                }
               }
             }
           }

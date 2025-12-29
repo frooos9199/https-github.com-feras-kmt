@@ -42,14 +42,14 @@ export async function getEventMarshalCount(eventId: string) {
   }
 }
 
-// Function لحساب المارشال من البيانات الموجودة بناءً على الرقم الوظيفي
+// Function لحساب المارشال من البيانات الموجودة - فقط من eventMarshals
 export function calculateMarshalCount(event: any) {
-  // جمع المارشال المقبولين من eventMarshals فقط
+  // حساب المارشال المقبولين فقط من eventMarshals
   const acceptedEventMarshals = event.eventMarshals?.filter((m: any) => 
     m.status === 'accepted' || m.status === 'approved'
   ) || []
   
-  // جمع الأرقام الوظيفية الفريدة
+  // جمع الأرقام الوظيفية الفريدة فقط
   const uniqueEmployeeIds = new Set<string>()
   
   acceptedEventMarshals.forEach((m: any) => {
