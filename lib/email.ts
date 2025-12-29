@@ -1,6 +1,8 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// تحقق من وجود RESEND_API_KEY قبل إنشاء Resend instance
+const resendApiKey = process.env.RESEND_API_KEY
+const resend = resendApiKey ? new Resend(resendApiKey) : null
 
 const LOGO_URL = 'https://https-github-com-feras-kmt.vercel.app/kmt-logo.png'
 
@@ -16,6 +18,12 @@ interface SendEmailParams {
 
 export async function sendEmail({ to, subject, html }: SendEmailParams) {
   try {
+    // تحقق من وجود resend instance
+    if (!resend) {
+      console.warn('RESEND_API_KEY not configured, skipping email send')
+      return { success: false, error: 'Email service not configured' }
+    }
+
     // In testing mode, send to test email and include original recipient in subject
     const actualTo = TESTING_MODE ? TESTING_EMAIL : to
     const actualSubject = TESTING_MODE ? `[TEST] ${subject} (Original: ${to})` : subject
