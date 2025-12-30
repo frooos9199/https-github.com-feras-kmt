@@ -157,8 +157,8 @@ export default function MyAttendancePage() {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [selectedAttendance, setSelectedAttendance] = useState<AttendanceRecord | null>(null)
   const [cancellationReason, setCancellationReason] = useState("")
-  const [approvingId, setApprovingId] = useState<string | null>(null)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
+
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -201,6 +201,30 @@ export default function MyAttendancePage() {
     setShowCancelModal(true)
   }
 
+  const handleReject = async (attendance: AttendanceRecord) => {
+    setRejectingId(attendance.id)
+
+    try {
+      const res = await fetch(`/api/attendance/${attendance.id}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+
+      if (res.ok) {
+        alert(language === "ar" ? "تم رفض طلب الحضور بنجاح" : "Attendance request rejected successfully")
+        fetchAttendances() // Refresh the list
+      } else {
+        const data = await res.json()
+        alert(data.error || (language === "ar" ? "فشل رفض الطلب" : "Failed to reject request"))
+      }
+    } catch (error) {
+      console.error("Reject error:", error)
+      alert(language === "ar" ? "حدث خطأ" : "An error occurred")
+    } finally {
+      setRejectingId(null)
+    }
+  }
+
   const handleCancelConfirm = async () => {
     if (!selectedAttendance || !cancellationReason.trim()) {
       alert(language === "ar" ? "الرجاء إدخال سبب الإلغاء" : "Please enter a cancellation reason")
@@ -237,53 +261,7 @@ export default function MyAttendancePage() {
     }
   }
 
-  const handleApprove = async (attendance: AttendanceRecord) => {
-    setApprovingId(attendance.id)
 
-    try {
-      const res = await fetch(`/api/attendance/${attendance.id}/approve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      })
-
-      if (res.ok) {
-        alert(language === "ar" ? "تم قبول طلب الحضور بنجاح" : "Attendance request approved successfully")
-        fetchAttendances() // Refresh the list
-      } else {
-        const data = await res.json()
-        alert(data.error || (language === "ar" ? "فشل قبول الطلب" : "Failed to approve request"))
-      }
-    } catch (error) {
-      console.error("Approve error:", error)
-      alert(language === "ar" ? "حدث خطأ" : "An error occurred")
-    } finally {
-      setApprovingId(null)
-    }
-  }
-
-  const handleReject = async (attendance: AttendanceRecord) => {
-    setRejectingId(attendance.id)
-
-    try {
-      const res = await fetch(`/api/attendance/${attendance.id}/reject`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      })
-
-      if (res.ok) {
-        alert(language === "ar" ? "تم رفض طلب الحضور بنجاح" : "Attendance request rejected successfully")
-        fetchAttendances() // Refresh the list
-      } else {
-        const data = await res.json()
-        alert(data.error || (language === "ar" ? "فشل رفض الطلب" : "Failed to reject request"))
-      }
-    } catch (error) {
-      console.error("Reject error:", error)
-      alert(language === "ar" ? "حدث خطأ" : "An error occurred")
-    } finally {
-      setRejectingId(null)
-    }
-  }
 
   if (status === "loading" || loading) {
     return (
@@ -554,30 +532,20 @@ export default function MyAttendancePage() {
                       {attendance.status === "cancelled" && (language === "ar" ? "🚫 ملغي" : "🚫 Cancelled")}
                     </div>
 
-                    {/* Approve/Reject Buttons - Show only for pending registrations */}
+
+
+                    {/* Reject Button - Show only for pending registrations */}
                     {attendance.status === "pending" && (
-                      <div className="mt-4 flex gap-2">
-                        <button
-                          onClick={() => handleApprove(attendance)}
-                          disabled={approvingId === attendance.id}
-                          className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
-                        >
-                          {approvingId === attendance.id 
-                            ? (language === "ar" ? "جاري القبول..." : "Approving...")
-                            : (language === "ar" ? "قبول" : "Approve")
-                          }
-                        </button>
-                        <button
-                          onClick={() => handleReject(attendance)}
-                          disabled={rejectingId === attendance.id}
-                          className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
-                        >
-                          {rejectingId === attendance.id 
-                            ? (language === "ar" ? "جاري الرفض..." : "Rejecting...")
-                            : (language === "ar" ? "رفض" : "Reject")
-                          }
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleReject(attendance)}
+                        disabled={rejectingId === attendance.id}
+                        className="mt-4 w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                      >
+                        {rejectingId === attendance.id 
+                          ? (language === "ar" ? "جاري الرفض..." : "Rejecting...")
+                          : (language === "ar" ? "رفض" : "Reject")
+                        }
+                      </button>
                     )}
 
                     {/* Cancel Button - Show only for approved registrations for future events */}
