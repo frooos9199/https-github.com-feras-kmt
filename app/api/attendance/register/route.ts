@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check if user has an invitation for this event
+    // Check if user has an invitation for this event - but still require admin approval
     const invitation = await prisma.eventMarshal.findFirst({
       where: {
         marshalId: userId,
@@ -75,12 +75,12 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // If user has invitation, accept it instead of creating attendance
+    // If user has invitation, update to pending status (still requires admin approval)
     if (invitation) {
       const updatedInvitation = await prisma.eventMarshal.update({
         where: { id: invitation.id },
         data: {
-          status: 'accepted',
+          status: 'pending',
           respondedAt: new Date()
         },
         include: {
@@ -89,25 +89,17 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      // Send confirmation email
-      if (updatedInvitation.marshal.email) {
-        await sendEmail({
-          to: updatedInvitation.marshal.email,
-          subject: `✅ Invitation Accepted - ${updatedInvitation.event.titleEn}`,
-          html: registrationEmailTemplate(
-            updatedInvitation.marshal.name,
-            updatedInvitation.event.titleEn,
-            new Date(updatedInvitation.event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-            updatedInvitation.event.time,
-            updatedInvitation.event.endDate ? new Date(updatedInvitation.event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
-            updatedInvitation.event.endTime || undefined
-          )
-        })
-      }
+      // Notify admins about invitation response
+      await notifyAdminsAboutNewRegistration(
+        updatedInvitation.marshal.name,
+        updatedInvitation.event.titleEn,
+        updatedInvitation.event.titleAr,
+        eventId
+      )
 
       return NextResponse.json({
         ...updatedInvitation,
-        type: 'invitation_accepted'
+        type: 'invitation_responded'
       }, { status: 201 })
     }
 
