@@ -217,7 +217,7 @@ export default function AttendanceManagement() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-colors"
+                className="bg-black border border-red-600/30 rounded-xl overflow-hidden hover:border-red-600/50 transition-colors"
               >
                 <div className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -228,7 +228,7 @@ export default function AttendanceManagement() {
                           {attendance.user.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-lg font-bold text-white mb-1">
+                          <h3 className="text-lg font-bold text-red-500 mb-1">
                             {attendance.user.employeeId && (
                               <span className="text-blue-400 font-bold mr-2">
                                 {attendance.user.employeeId}
