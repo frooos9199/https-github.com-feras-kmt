@@ -32,6 +32,17 @@ const getNotificationsCached = unstable_cache(
         eventId: true,
         isRead: true,
         createdAt: true
+      },
+      include: {
+        event: {
+          select: {
+            id: true,
+            date: true,
+            startDate: true,
+            titleEn: true,
+            titleAr: true
+          }
+        }
       }
     })
   },
