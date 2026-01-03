@@ -64,6 +64,35 @@ interface Event {
       marshalTypes: string
     }
   }>
+  pendingInvitations?: Array<{
+    id: string
+    status: string
+    invitedAt: string
+    respondedAt: string | null
+    marshal: {
+      id: string
+      employeeId: string
+      name: string
+      email: string
+      phone: string
+      image: string | null
+      marshalTypes: string
+    }
+  }>
+  pendingAttendances?: Array<{
+    id: string
+    userId: string
+    status: string
+    registeredAt: string
+    user: {
+      id: string
+      employeeId: string
+      name: string
+      email: string
+      phone: string
+      image: string | null
+    }
+  }>
 }
 
 export default function EventDetails() {
@@ -383,11 +412,9 @@ export default function EventDetails() {
       }
       setEvent(updatedEvent)
     } else {
-      console.log('⚠️ Marshal not found in local data, refreshing from server')
-      // Marshal not found in local data, refresh from server
-      await fetchEvent(true)
-      alert(language === "ar" ? "المارشال غير موجود أو تم حذفه بالفعل" : "Marshal not found or already removed")
-      return
+      console.log('⚠️ Marshal not found in local data, but will try to remove from server anyway')
+      // Marshal not found in local data, but continue to try removing from server
+      // The server will handle if marshal doesn't exist
     }
 
     try {
