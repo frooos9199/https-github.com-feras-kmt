@@ -22,17 +22,6 @@ const getNotificationsCached = unstable_cache(
       },
       orderBy: { createdAt: "desc" },
       take: 50,
-      select: { // نحدد الحقول المطلوبة فقط لتحسين الأداء
-        id: true,
-        type: true,
-        titleEn: true,
-        titleAr: true,
-        messageEn: true,
-        messageAr: true,
-        eventId: true,
-        isRead: true,
-        createdAt: true
-      },
       include: {
         event: {
           select: {
