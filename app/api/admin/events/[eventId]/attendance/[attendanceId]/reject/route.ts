@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { notifyMarshalAboutRegistration } from '@/lib/notifications'
 
 // POST - Reject attendance request
 export async function POST(
@@ -33,11 +34,22 @@ export async function POST(
           select: {
             id: true,
             titleEn: true,
-            titleAr: true
+            titleAr: true,
+            date: true
           }
         }
       }
     })
+
+    // Send notification to marshal
+    await notifyMarshalAboutRegistration(
+      updatedAttendance.userId,
+      updatedAttendance.event.titleEn,
+      updatedAttendance.event.titleAr,
+      updatedAttendance.eventId,
+      false, // rejected
+      updatedAttendance.event.date
+    )
 
     return NextResponse.json({
       success: true,

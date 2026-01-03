@@ -94,7 +94,11 @@ export async function POST(req: NextRequest) {
         updatedInvitation.marshal.name,
         updatedInvitation.event.titleEn,
         updatedInvitation.event.titleAr,
-        eventId
+        eventId,
+        updatedInvitation.marshal.employeeId,
+        updatedInvitation.marshal.phone,
+        updatedInvitation.marshal.marshalTypes,
+        updatedInvitation.event.date
       )
 
       return NextResponse.json({
@@ -138,7 +142,11 @@ export async function POST(req: NextRequest) {
       attendance.user.name,
       attendance.event.titleEn,
       attendance.event.titleAr,
-      eventId
+      eventId,
+      attendance.user.employeeId,
+      attendance.user.phone,
+      attendance.user.marshalTypes,
+      attendance.event.date
     )
 
     // Send confirmation email to user

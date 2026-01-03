@@ -127,14 +127,30 @@ export async function POST(req: NextRequest) {
 
     // Create in-app notifications for all admins
     const reasonText = reason || "No reason provided"
+    const reasonTextAr = reason || "لا يوجد سبب"
+    
+    // Format event date for notification
+    const eventDateAr = new Date(attendance.event.date).toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    
+    const eventDateEn = new Date(attendance.event.date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    
     const notificationPromises = admins.map((admin: any) =>
       createNotification({
         userId: admin.id,
         type: "EVENT_UPDATED",
         titleEn: `Marshal Cancelled: ${attendance.event.titleEn}`,
         titleAr: `مارشال ألغى: ${attendance.event.titleAr}`,
-        messageEn: `${attendance.user.name} cancelled their registration for ${attendance.event.titleEn}.\n\nReason: ${reasonText}`,
-        messageAr: `${attendance.user.name} ألغى تسجيله في ${attendance.event.titleAr}.\n\nالسبب: ${reasonText}`
+        messageEn: `${attendance.user.name} (${attendance.user.employeeId}) - ${attendance.user.phone}\ncancelled their registration for ${attendance.event.titleEn}\n\nEvent Date: ${eventDateEn}\nMarshal Type: ${attendance.user.marshalTypes || 'Not specified'}\nReason: ${reasonText}`,
+        messageAr: `${attendance.user.name} (${attendance.user.employeeId}) - ${attendance.user.phone}\nألغى تسجيله في ${attendance.event.titleAr}\n\nتاريخ الفعالية: ${eventDateAr}\nنوع المارشال: ${attendance.user.marshalTypes || 'غير محدد'}\nالسبب: ${reasonTextAr}`,
+        eventId: attendance.eventId
       })
     )
 

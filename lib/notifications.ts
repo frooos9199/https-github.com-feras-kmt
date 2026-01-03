@@ -131,27 +131,55 @@ export async function notifyMarshalAboutRegistration(
   eventTitleEn: string,
   eventTitleAr: string,
   eventId: string,
-  approved: boolean
+  approved: boolean,
+  eventDate?: Date,
+  eventLocation?: string,
+  eventTime?: string
 ) {
   try {
+    // Format event date if provided
+    let eventDateAr = ''
+    let eventDateEn = ''
+    if (eventDate) {
+      eventDateAr = new Date(eventDate).toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      eventDateEn = new Date(eventDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    }
+
+    const locationInfo = eventLocation ? `\nالموقع: ${eventLocation}` : ''
+    const locationInfoEn = eventLocation ? `\nLocation: ${eventLocation}` : ''
+    
+    const timeInfo = eventTime ? `\nالوقت: ${eventTime}` : ''
+    const timeInfoEn = eventTime ? `\nTime: ${eventTime}` : ''
+    
+    const dateInfo = eventDate ? `\nالتاريخ: ${eventDateAr}` : ''
+    const dateInfoEn = eventDate ? `\nDate: ${eventDateEn}` : ''
+
     if (approved) {
       await createNotification({
         userId,
         type: "REGISTRATION_APPROVED",
-        titleEn: "Registration Approved",
-        titleAr: "تم قبول التسجيل",
-        messageEn: `Your registration for "${eventTitleEn}" has been approved. See you there!`,
-        messageAr: `تم قبول تسجيلك في "${eventTitleAr}". نراك هناك!`,
+        titleEn: "Registration Approved ✅",
+        titleAr: "تم قبول التسجيل ✅",
+        messageEn: `Your registration for "${eventTitleEn}" has been approved. See you there!${dateInfoEn}${timeInfoEn}${locationInfoEn}`,
+        messageAr: `تم قبول تسجيلك في "${eventTitleAr}". نراك هناك!${dateInfo}${timeInfo}${locationInfo}`,
         eventId
       })
     } else {
       await createNotification({
         userId,
         type: "REGISTRATION_REJECTED",
-        titleEn: "Registration Not Approved",
-        titleAr: "لم يتم قبول التسجيل",
-        messageEn: `Your registration for "${eventTitleEn}" was not approved.`,
-        messageAr: `لم يتم قبول تسجيلك في "${eventTitleAr}".`,
+        titleEn: "Registration Not Approved ❌",
+        titleAr: "لم يتم قبول التسجيل ❌",
+        messageEn: `Your registration for "${eventTitleEn}" was not approved.${dateInfoEn}`,
+        messageAr: `لم يتم قبول تسجيلك في "${eventTitleAr}".${dateInfo}`,
         eventId
       })
     }
@@ -165,21 +193,51 @@ export async function notifyAdminsAboutNewRegistration(
   marshalName: string,
   eventTitleEn: string,
   eventTitleAr: string,
-  eventId: string
+  eventId: string,
+  marshalEmployeeId?: string,
+  marshalPhone?: string,
+  marshalTypes?: string,
+  eventDate?: Date
 ) {
   try {
     const admins = await prisma.user.findMany({
       where: { role: "admin" }
     })
 
+    // Format event date if provided
+    let eventDateAr = ''
+    let eventDateEn = ''
+    if (eventDate) {
+      eventDateAr = new Date(eventDate).toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      eventDateEn = new Date(eventDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    }
+
     for (const admin of admins) {
+      const contactInfo = marshalEmployeeId && marshalPhone 
+        ? `${marshalName} (${marshalEmployeeId}) - ${marshalPhone}` 
+        : marshalName
+      
+      const marshalTypeInfo = marshalTypes ? `\nنوع المارشال: ${marshalTypes}` : ''
+      const marshalTypeInfoEn = marshalTypes ? `\nMarshal Type: ${marshalTypes}` : ''
+      
+      const dateInfo = eventDate ? `\nتاريخ الفعالية: ${eventDateAr}` : ''
+      const dateInfoEn = eventDate ? `\nEvent Date: ${eventDateEn}` : ''
+      
       await createNotification({
         userId: admin.id,
         type: "NEW_EVENT",
         titleEn: "New Marshal Registration",
         titleAr: "تسجيل مارشال جديد",
-        messageEn: `${marshalName} has registered for "${eventTitleEn}".`,
-        messageAr: `${marshalName} سجل في "${eventTitleAr}".`,
+        messageEn: `${contactInfo} has registered for "${eventTitleEn}".${marshalTypeInfoEn}${dateInfoEn}`,
+        messageAr: `${contactInfo} سجل في "${eventTitleAr}".${marshalTypeInfo}${dateInfo}`,
         eventId
       })
     }
