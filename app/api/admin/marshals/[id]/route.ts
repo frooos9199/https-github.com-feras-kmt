@@ -110,13 +110,15 @@ export async function PATCH(
 
     const { id } = await params
     const body = await req.json()
-    const { isActive, name, email, phone, nationality, bloodType, marshalTypes, employeeId } = body
+    const { isActive, name, email, phone, civilId, dateOfBirth, nationality, bloodType, marshalTypes, employeeId } = body
 
     const updateData: any = {}
     if (typeof isActive === "boolean") updateData.isActive = isActive
     if (name) updateData.name = name
     if (email) updateData.email = email
     if (phone) updateData.phone = phone
+    if (civilId !== undefined) updateData.civilId = civilId
+    if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null
     if (nationality !== undefined) updateData.nationality = nationality
     if (bloodType !== undefined) updateData.bloodType = bloodType
     if (marshalTypes !== undefined) {

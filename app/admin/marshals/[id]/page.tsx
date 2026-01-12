@@ -123,6 +123,7 @@ export default function AdminMarshalProfile() {
 
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     employeeId: "",
     phone: "",
     civilId: "",
@@ -161,6 +162,7 @@ export default function AdminMarshalProfile() {
         
         setFormData({
           name: data.name || "",
+          email: data.email || "",
           employeeId: data.employeeId || "",
           phone: data.phone || "",
           civilId: data.civilId || "",
@@ -350,7 +352,14 @@ export default function AdminMarshalProfile() {
     setMessage(null)
     try {
       const updateData: any = {
+        name: formData.name,
+        email: formData.email,
         employeeId: formData.employeeId,
+        phone: formData.phone,
+        civilId: formData.civilId,
+        dateOfBirth: formData.dateOfBirth,
+        nationality: formData.nationality,
+        bloodType: formData.bloodType,
         marshalTypes: formData.marshalTypes.join(","),
       }
       const res = await fetch(`/api/admin/marshals/${profile.id}`, {
@@ -362,13 +371,14 @@ export default function AdminMarshalProfile() {
       if (res.ok) {
         setProfile(data)
         setFormData({
-          name: "",
+          name: data.name || "",
+          email: data.email || "",
           employeeId: data.employeeId || "",
-          phone: "",
-          civilId: "",
-          dateOfBirth: "",
-          nationality: "",
-          bloodType: "",
+          phone: data.phone || "",
+          civilId: data.civilId || "",
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
+          nationality: data.nationality || "",
+          bloodType: data.bloodType || "",
           marshalTypes: data.marshalTypes ? data.marshalTypes.split(",").filter((t: string) => t) : [],
         })
         setShowEdit(false)
@@ -669,12 +679,72 @@ export default function AdminMarshalProfile() {
           </motion.div>
         ) : (
           <motion.form onSubmit={handleEdit} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden p-6 space-y-6">
-            {/* نموذج التعديل - الرقم الوظيفي ونوع المارشال فقط */}
+            {/* نموذج التعديل - جميع الحقول */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* الاسم */}
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الاسم" : "Name"}</label>
+                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              
+              {/* البريد الإلكتروني */}
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "البريد الإلكتروني" : "Email"}</label>
+                <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              
+              {/* الرقم الوظيفي */}
               <div>
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم الوظيفي" : "Employee ID"}</label>
                 <input type="text" value={formData.employeeId} onChange={e => setFormData({ ...formData, employeeId: e.target.value })} required className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white font-bold focus:border-red-600 focus:outline-none" />
               </div>
+              
+              {/* رقم الهاتف */}
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "رقم الهاتف" : "Phone Number"}</label>
+                <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              
+              {/* الرقم المدني */}
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الرقم المدني" : "Civil ID"}</label>
+                <input type="text" value={formData.civilId} onChange={e => setFormData({ ...formData, civilId: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              
+              {/* تاريخ الميلاد */}
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "تاريخ الميلاد" : "Date of Birth"}</label>
+                <input type="date" value={formData.dateOfBirth} onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none" />
+              </div>
+              
+              {/* الجنسية */}
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "الجنسية" : "Nationality"}</label>
+                <select value={formData.nationality} onChange={e => setFormData({ ...formData, nationality: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none">
+                  <option value="">{language === "ar" ? "اختر الجنسية" : "Select Nationality"}</option>
+                  {NATIONALITIES.map(nat => (
+                    <option key={nat.value} value={nat.value}>{language === "ar" ? nat.label.ar : nat.label.en}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* فصيلة الدم */}
+              <div>
+                <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "فصيلة الدم" : "Blood Type"}</label>
+                <select value={formData.bloodType} onChange={e => setFormData({ ...formData, bloodType: e.target.value })} className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:border-red-600 focus:outline-none">
+                  <option value="">{language === "ar" ? "اختر فصيلة الدم" : "Select Blood Type"}</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                </select>
+              </div>
+              
+              {/* أنواع المارشال */}
               <div className="md:col-span-2">
                 <label className="block text-gray-400 mb-2 text-sm">{language === "ar" ? "أنواع الوظائف" : "Marshal Types"}</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
