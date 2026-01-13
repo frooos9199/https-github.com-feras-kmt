@@ -21,10 +21,17 @@ if (!admin.apps.length) {
       console.log('⚠️ Service account file not found, using environment variables');
       
       let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
-      // Remove outer quotes if present
-      privateKey = privateKey.replace(/^["']|["']$/g, '');
-      // Replace escaped newlines with actual newlines
-      privateKey = privateKey.replace(/\\n/g, '\n');
+      
+      // Check if it's base64 encoded (no newlines, no BEGIN marker visible)
+      if (!privateKey.includes('BEGIN') && !privateKey.includes('\n')) {
+        // Decode from base64
+        privateKey = Buffer.from(privateKey, 'base64').toString('utf-8');
+      } else {
+        // Remove outer quotes if present
+        privateKey = privateKey.replace(/^["']|["']$/g, '');
+        // Replace escaped newlines with actual newlines
+        privateKey = privateKey.replace(/\\n/g, '\n');
+      }
       
       const serviceAccount = {
         type: "service_account",
