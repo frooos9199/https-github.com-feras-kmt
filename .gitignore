@@ -87,6 +87,8 @@ firebase-service-account.json
 .env.local
 .env.production
 .env.staging
+.env.*
+!.env.example
 
 # Release builds
 android/app/build/outputs/
