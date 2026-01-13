@@ -70,7 +70,7 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential,
-      projectId: process.env.FIREBASE_PROJECT_ID
+      projectId: serviceAccount.project_id || process.env.FIREBASE_PROJECT_ID
     });
 
     console.log('✅ Firebase Admin initialized successfully');
