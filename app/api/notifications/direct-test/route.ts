@@ -1,21 +1,13 @@
 // تجربة إرسال مباشر من Vercel production بدون OAuth error
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { messaging } from '@/lib/firebase-admin';
+import { sendFCMNotification } from '@/lib/fcm-direct';
 
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
 
-    // التحقق من Firebase initialization
-    console.log('[TEST] Firebase messaging:', !!messaging);
-
-    if (!messaging) {
-      return NextResponse.json({
-        error: 'Firebase messaging not initialized',
-        details: 'Check server logs for Firebase initialization errors'
-      }, { status: 500 });
-    }
+    console.log('[TEST] Using direct FCM API');
 
     // العثور على المستخدم
     const user = await prisma.user.findUnique({
@@ -36,9 +28,9 @@ export async function POST(request: Request) {
 
     console.log('[TEST] Attempting to send to token:', user.fcmToken.substring(0, 20) + '...');
 
-    // محاولة الإرسال المباشر
+    // محاولة الإرسال المباشر باستخدام FCM API
     try {
-      const response = await messaging.send({
+      const response = await sendFCMNotification({
         token: user.fcmToken,
         notification: {
           title: 'Direct Test 🧪',
@@ -59,15 +51,8 @@ export async function POST(request: Request) {
             'apns-priority': '10',
             'apns-push-type': 'alert'
           }
-        },
-        android: {
-          priority: 'high',
-          notification: {
-            title: 'Direct Test 🧪',
-            body: 'Testing background notifications directly from Vercel',
-            sound: 'default'
-          }
         }
+      });
       });
 
       console.log('[TEST] ✅ Firebase response:', response);
