@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const { email, mode } = await request.json();
+    const { email, mode, debug } = await request.json();
     const pushMode = (mode === 'silent' || mode === 'alert') ? mode : 'alert';
 
     console.log(`[TEST] Using direct FCM API (mode=${pushMode})`);
@@ -87,6 +87,7 @@ export async function POST(request: Request) {
         message: 'Notification sent successfully!',
         messageId: response,
         mode: pushMode,
+        debug: !!debug,
         user: {
           name: user.name,
           email: user.email
@@ -100,7 +101,8 @@ export async function POST(request: Request) {
         error: 'Firebase send failed',
         code: firebaseError.code,
         message: firebaseError.message,
-        details: firebaseError.toString()
+        details: firebaseError.toString(),
+        debug: !!debug
       }, { status: 500 });
     }
 
