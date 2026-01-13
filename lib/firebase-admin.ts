@@ -19,14 +19,21 @@ if (!admin.apps.length) {
     } else {
       // استخدام متغيرات البيئة كخيار ثاني
       console.log('⚠️ Service account file not found, using environment variables');
+      console.log('🔍 FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID);
+      console.log('🔍 FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL);
+      console.log('🔍 FIREBASE_PRIVATE_KEY length:', process.env.FIREBASE_PRIVATE_KEY?.length || 0);
+      console.log('🔍 FIREBASE_PRIVATE_KEY starts with:', process.env.FIREBASE_PRIVATE_KEY?.substring(0, 50));
       
       let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
       
       // Check if it's base64 encoded (no newlines, no BEGIN marker visible)
       if (!privateKey.includes('BEGIN') && !privateKey.includes('\n')) {
+        console.log('🔄 Detected base64 encoded key, decoding...');
         // Decode from base64
         privateKey = Buffer.from(privateKey, 'base64').toString('utf-8');
+        console.log('✅ Decoded key starts with:', privateKey.substring(0, 50));
       } else {
+        console.log('🔄 Processing standard format key...');
         // Remove outer quotes if present
         privateKey = privateKey.replace(/^["']|["']$/g, '');
         // Replace escaped newlines with actual newlines
