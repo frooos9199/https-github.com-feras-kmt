@@ -7,6 +7,7 @@ import * as path from 'path';
 if (!admin.apps.length) {
   try {
     let credential;
+    let resolvedProjectId: string | undefined;
     
     // محاولة قراءة ملف service account أولاً
     const serviceAccountPath = path.join(process.cwd(), 'firebase-service-account.json');
@@ -15,6 +16,7 @@ if (!admin.apps.length) {
       console.log('✅ Using Firebase service account file');
       const serviceAccountFile = fs.readFileSync(serviceAccountPath, 'utf8');
       const serviceAccount = JSON.parse(serviceAccountFile);
+      resolvedProjectId = serviceAccount?.project_id;
       credential = admin.credential.cert(serviceAccount);
     } else {
       // استخدام متغيرات البيئة كخيار ثاني
@@ -59,14 +61,15 @@ if (!admin.apps.length) {
       }
       
       credential = admin.credential.cert(serviceAccount as admin.ServiceAccount);
+      resolvedProjectId = serviceAccount.project_id;
     }
 
-    const projectId = serviceAccount.project_id || process.env.FIREBASE_PROJECT_ID;
+    const projectId = resolvedProjectId || process.env.FIREBASE_PROJECT_ID;
     
     admin.initializeApp({
       credential,
       projectId: projectId,
-      databaseURL: `https://${projectId}-default-rtdb.firebaseio.com`
+      ...(projectId ? { databaseURL: `https://${projectId}-default-rtdb.firebaseio.com` } : {})
     });
 
     console.log('✅ Firebase Admin initialized successfully');

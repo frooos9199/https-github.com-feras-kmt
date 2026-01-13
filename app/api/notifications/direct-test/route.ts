@@ -5,9 +5,10 @@ import { sendFCMNotification } from '@/lib/fcm-direct';
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email, mode } = await request.json();
+    const pushMode = (mode === 'silent' || mode === 'alert') ? mode : 'alert';
 
-    console.log('[TEST] Using direct FCM API');
+    console.log(`[TEST] Using direct FCM API (mode=${pushMode})`);
 
     // العثور على المستخدم
     const user = await prisma.user.findUnique({
@@ -30,29 +31,51 @@ export async function POST(request: Request) {
 
     // محاولة الإرسال المباشر باستخدام FCM API
     try {
-      const response = await sendFCMNotification({
-        token: user.fcmToken,
-        notification: {
-          title: 'Direct Test 🧪',
-          body: 'Testing background notifications directly from Vercel'
-        },
-        apns: {
-          payload: {
-            aps: {
-              alert: {
-                title: 'Direct Test 🧪',
-                body: 'Testing background notifications directly from Vercel'
+      const title = pushMode === 'silent' ? 'Silent Test' : 'Direct Test 🧪';
+      const body = pushMode === 'silent'
+        ? 'Background (content-available) test'
+        : 'Testing notifications directly from Vercel';
+
+      const response = await sendFCMNotification(
+        pushMode === 'silent'
+          ? {
+              token: user.fcmToken,
+              // Silent/background push: no notification payload.
+              data: {
+                type: 'DIRECT_TEST_SILENT',
+                ts: new Date().toISOString(),
               },
-              sound: 'default',
-              badge: 1
+              apns: {
+                payload: {
+                  aps: {
+                    'content-available': 1,
+                  },
+                },
+                headers: {
+                  // Background pushes should be low priority.
+                  'apns-priority': '5',
+                  'apns-push-type': 'background',
+                },
+              },
             }
-          },
-          headers: {
-            'apns-priority': '10',
-            'apns-push-type': 'alert'
-          }
-        }
-      });
+          : {
+              token: user.fcmToken,
+              notification: { title, body },
+              apns: {
+                payload: {
+                  aps: {
+                    alert: { title, body },
+                    sound: 'default',
+                    badge: 1,
+                  },
+                },
+                headers: {
+                  'apns-priority': '10',
+                  'apns-push-type': 'alert',
+                },
+              },
+            }
+      );
 
       console.log('[TEST] ✅ Firebase response:', response);
 
@@ -60,6 +83,7 @@ export async function POST(request: Request) {
         success: true,
         message: 'Notification sent successfully!',
         messageId: response,
+        mode: pushMode,
         user: {
           name: user.name,
           email: user.email

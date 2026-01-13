@@ -3,7 +3,7 @@ import { GoogleAuth } from 'google-auth-library';
 
 interface FCMMessage {
   token: string;
-  notification: {
+  notification?: {
     title: string;
     body: string;
   };
