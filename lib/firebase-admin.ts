@@ -76,6 +76,11 @@ if (!admin.apps.length) {
     console.log('✅ Firebase Admin initialized successfully');
   } catch (error) {
     console.error('❌ Firebase Admin initialization failed:', error);
+    console.error('❌ Error details:', JSON.stringify(error, null, 2));
+    if (error instanceof Error) {
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+    }
   }
 }
 
