@@ -24,18 +24,15 @@ if (!admin.apps.length) {
 
       const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || '').replace(/^mailto:/i, '');
       
-      let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
+      let privateKey = (process.env.FIREBASE_PRIVATE_KEY || '').trim().replace(/^['"]|['"]$/g, '');
       
-      // Check if it's base64 encoded (no newlines, no BEGIN marker visible)
-      if (!privateKey.includes('BEGIN') && !privateKey.includes('\n')) {
-        // Decode from base64
-        privateKey = Buffer.from(privateKey, 'base64').toString('utf-8');
-      } else {
-        // Remove outer quotes if present
-        privateKey = privateKey.replace(/^["']|["']$/g, '');
-        // Replace escaped newlines with actual newlines
-        privateKey = privateKey.replace(/\\n/g, '\n');
+      // Decode from base64 whenever it's not already a PEM.
+      if (!privateKey.includes('-----BEGIN')) {
+        privateKey = Buffer.from(privateKey.replace(/\s+/g, ''), 'base64').toString('utf-8');
       }
+
+      // Replace escaped newlines with actual newlines
+      privateKey = privateKey.replace(/\\n/g, '\n');
       
       const serviceAccount = {
         type: "service_account",

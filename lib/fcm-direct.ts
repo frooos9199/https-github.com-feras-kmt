@@ -14,10 +14,10 @@ interface FCMMessage {
 export async function sendFCMNotification(message: FCMMessage) {
   try {
     const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || '').replace(/^mailto:/i, '');
-    const rawPrivateKey = process.env.FIREBASE_PRIVATE_KEY || '';
-    const decodedPrivateKey = rawPrivateKey.includes('BEGIN')
+    const rawPrivateKey = (process.env.FIREBASE_PRIVATE_KEY || '').trim().replace(/^['"]|['"]$/g, '');
+    const decodedPrivateKey = rawPrivateKey.includes('-----BEGIN')
       ? rawPrivateKey
-      : Buffer.from(rawPrivateKey, 'base64').toString('utf-8');
+      : Buffer.from(rawPrivateKey.replace(/\s+/g, ''), 'base64').toString('utf-8');
 
     const privateKey = decodedPrivateKey
       .replace(/^["']|["']$/g, '')
