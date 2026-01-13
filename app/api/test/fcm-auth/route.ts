@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleAuth } from 'google-auth-library';
+import { JWT } from 'google-auth-library';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -34,20 +34,19 @@ export async function GET() {
   try {
     const credentials = getSanitizedCredentials();
 
-    const auth = new GoogleAuth({
-      credentials: credentials as any,
+    const jwtClient = new JWT({
+      email: (credentials as any).client_email,
+      key: (credentials as any).private_key,
       scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
     });
 
-    const client = await auth.getClient();
-    const requestHeaders = await client.getRequestHeaders();
-    const authorization = (requestHeaders as any)['Authorization'] || (requestHeaders as any)['authorization'] || '';
+    const tokens = await jwtClient.authorize();
+    const accessToken = tokens?.access_token;
 
     return NextResponse.json({
       ok: true,
-      hasAuthHeader: typeof authorization === 'string' && authorization.length > 0,
-      authHeaderStartsWithBearer: typeof authorization === 'string' && authorization.startsWith('Bearer '),
-      authHeaderLength: typeof authorization === 'string' ? authorization.length : 0,
+      hasAccessToken: typeof accessToken === 'string' && accessToken.length > 0,
+      accessTokenLength: typeof accessToken === 'string' ? accessToken.length : 0,
       projectIdPresent: !!credentials.project_id,
       clientEmailPresent: !!credentials.client_email,
     });

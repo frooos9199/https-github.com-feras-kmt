@@ -1,5 +1,5 @@
 // Direct FCM API call without Firebase Admin SDK
-import { GoogleAuth } from 'google-auth-library';
+import { JWT } from 'google-auth-library';
 
 interface FCMMessage {
   token: string;
@@ -37,17 +37,17 @@ export async function sendFCMNotification(message: FCMMessage) {
       universe_domain: 'googleapis.com'
     };
 
-    // Use GoogleAuth to get access token
-    const auth = new GoogleAuth({
-      credentials: credentials as any,
-      scopes: ['https://www.googleapis.com/auth/firebase.messaging']
+    // Use explicit JWT client for deterministic serverless behavior
+    const jwtClient = new JWT({
+      email: credentials.client_email,
+      key: credentials.private_key,
+      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
     });
 
-    const client = await auth.getClient();
-    const requestHeaders = await client.getRequestHeaders();
-    const authorization = (requestHeaders as any)['Authorization'] || (requestHeaders as any)['authorization'];
-    if (!authorization || typeof authorization !== 'string') {
-      throw new Error('Failed to get authorization header');
+    const tokens = await jwtClient.authorize();
+    const accessToken = tokens?.access_token;
+    if (!accessToken || typeof accessToken !== 'string' || accessToken.length < 20) {
+      throw new Error('Failed to obtain access token from service account');
     }
 
     // Call FCM API directly
@@ -56,7 +56,7 @@ export async function sendFCMNotification(message: FCMMessage) {
       {
         method: 'POST',
         headers: {
-          'Authorization': authorization,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message })
