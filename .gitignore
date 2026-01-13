@@ -80,6 +80,7 @@ GoogleService-Info.plist
 ios/GoogleService-Info.plist
 ios/kmtsysApp/GoogleService-Info.plist
 android/app/google-services.json
+firebase-service-account.json
 
 # Environment variables
 .env

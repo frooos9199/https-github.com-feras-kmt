@@ -1,38 +1,55 @@
 // Firebase Admin SDK for sending push notifications
 import admin from 'firebase-admin';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
   try {
-    // Use environment variables directly
-    const serviceAccount = {
-      type: "service_account",
-      project_id: process.env.FIREBASE_PROJECT_ID,
-      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "dummy_key_id",
-      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')?.replace(/"/g, ''),
-      client_email: process.env.FIREBASE_CLIENT_EMAIL,
-      client_id: process.env.FIREBASE_CLIENT_ID,
-      auth_uri: "https://accounts.google.com/o/oauth2/auth",
-      token_uri: "https://oauth2.googleapis.com/token",
-      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-      client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
-    };
-    console.log('✅ Using Firebase environment variables');
+    let credential;
+    
+    // محاولة قراءة ملف service account أولاً
+    const serviceAccountPath = path.join(process.cwd(), 'firebase-service-account.json');
+    
+    if (fs.existsSync(serviceAccountPath)) {
+      console.log('✅ Using Firebase service account file');
+      const serviceAccountFile = fs.readFileSync(serviceAccountPath, 'utf8');
+      const serviceAccount = JSON.parse(serviceAccountFile);
+      credential = admin.credential.cert(serviceAccount);
+    } else {
+      // استخدام متغيرات البيئة كخيار ثاني
+      console.log('⚠️ Service account file not found, using environment variables');
+      const serviceAccount = {
+        type: "service_account",
+        project_id: process.env.FIREBASE_PROJECT_ID,
+        private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "dummy_key_id",
+        private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')?.replace(/"/g, ''),
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        client_id: process.env.FIREBASE_CLIENT_ID,
+        auth_uri: "https://accounts.google.com/o/oauth2/auth",
+        token_uri: "https://oauth2.googleapis.com/token",
+        auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+        client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`,
+        universe_domain: "googleapis.com"
+      };
 
-    // Validate required fields
-    if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
-      console.error('❌ Missing Firebase credentials:', {
-        project_id: !!serviceAccount.project_id,
-        private_key: !!serviceAccount.private_key,
-        client_email: !!serviceAccount.client_email,
-        private_key_id: !!serviceAccount.private_key_id
-      });
-      throw new Error('Missing Firebase credentials');
+      // Validate required fields
+      if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
+        console.error('❌ Missing Firebase credentials:', {
+          project_id: !!serviceAccount.project_id,
+          private_key: !!serviceAccount.private_key,
+          client_email: !!serviceAccount.client_email,
+          private_key_id: !!serviceAccount.private_key_id
+        });
+        throw new Error('Missing Firebase credentials');
+      }
+      
+      credential = admin.credential.cert(serviceAccount as admin.ServiceAccount);
     }
 
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-      projectId: serviceAccount.project_id
+      credential,
+      projectId: process.env.FIREBASE_PROJECT_ID
     });
 
     console.log('✅ Firebase Admin initialized successfully');
