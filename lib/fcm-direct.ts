@@ -44,10 +44,10 @@ export async function sendFCMNotification(message: FCMMessage) {
     });
 
     const client = await auth.getClient();
-    const accessToken = await client.getAccessToken();
-
-    if (!accessToken.token) {
-      throw new Error('Failed to get access token');
+    const requestHeaders = await client.getRequestHeaders();
+    const authorization = (requestHeaders as any)['Authorization'] || (requestHeaders as any)['authorization'];
+    if (!authorization || typeof authorization !== 'string') {
+      throw new Error('Failed to get authorization header');
     }
 
     // Call FCM API directly
@@ -56,7 +56,7 @@ export async function sendFCMNotification(message: FCMMessage) {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken.token}`,
+          'Authorization': authorization,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message })
