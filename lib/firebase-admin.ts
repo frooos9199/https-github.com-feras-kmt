@@ -26,9 +26,11 @@ if (!admin.apps.length) {
       
       let privateKey = (process.env.FIREBASE_PRIVATE_KEY || '').trim().replace(/^['"]|['"]$/g, '');
       
-      // Decode from base64 whenever it's not already a PEM.
+      // Decode from base64 if it's not already a PEM format
       if (!privateKey.includes('-----BEGIN')) {
-        privateKey = Buffer.from(privateKey.replace(/\s+/g, ''), 'base64').toString('utf-8');
+        console.log('🔄 Detected base64 encoded key, decoding...');
+        privateKey = Buffer.from(privateKey, 'base64').toString('utf-8');
+        console.log('✅ Decoded key starts with:', privateKey.substring(0, 30) + '...');
       }
 
       // Replace escaped newlines with actual newlines
