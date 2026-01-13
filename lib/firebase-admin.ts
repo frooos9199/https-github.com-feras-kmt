@@ -76,7 +76,7 @@ export async function sendPushNotification(
   }
 
   if (!tokens || tokens.length === 0) {
-    console.log('[FCM] No tokens to send to');
+    console.log('[FCM] ⏭️ No tokens to send to (users have not installed the app)');
     return { success: 0, failure: 0 };
   }
 

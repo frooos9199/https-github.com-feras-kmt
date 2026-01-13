@@ -68,7 +68,7 @@ export async function createNotification(params: CreateNotificationParams) {
 
       console.log(`[NOTIFICATION] 📨 Push result: ${result.success} success, ${result.failure} failed`);
     } else {
-      console.log(`[NOTIFICATION] ⚠️ No FCM token for user`);
+      console.log(`[NOTIFICATION] ⏭️ User ${user?.email || params.userId} has no app installed (no FCM token)`);
     }
 
     // إكمال العملية بنجاح
