@@ -53,7 +53,6 @@ export async function POST(request: Request) {
           }
         }
       });
-      });
 
       console.log('[TEST] ✅ Firebase response:', response);
 
