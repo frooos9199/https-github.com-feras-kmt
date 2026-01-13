@@ -21,6 +21,8 @@ if (!admin.apps.length) {
     } else {
       // استخدام متغيرات البيئة كخيار ثاني
       console.log('⚠️ Service account file not found, using environment variables');
+
+      const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || '').replace(/^mailto:/i, '');
       
       let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
       
@@ -40,12 +42,12 @@ if (!admin.apps.length) {
         project_id: process.env.FIREBASE_PROJECT_ID,
         private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
         private_key: privateKey,
-        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        client_email: clientEmail,
         client_id: process.env.FIREBASE_CLIENT_ID,
         auth_uri: "https://accounts.google.com/o/oauth2/auth",
         token_uri: "https://oauth2.googleapis.com/token",
         auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-        client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`,
+        client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${clientEmail}`,
         universe_domain: "googleapis.com"
       };
 

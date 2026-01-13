@@ -13,6 +13,7 @@ interface FCMMessage {
 
 export async function sendFCMNotification(message: FCMMessage) {
   try {
+    const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || '').replace(/^mailto:/i, '');
     const rawPrivateKey = process.env.FIREBASE_PRIVATE_KEY || '';
     const decodedPrivateKey = rawPrivateKey.includes('BEGIN')
       ? rawPrivateKey
@@ -28,7 +29,7 @@ export async function sendFCMNotification(message: FCMMessage) {
       project_id: process.env.FIREBASE_PROJECT_ID,
       private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
       private_key: privateKey,
-      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_email: clientEmail,
       client_id: process.env.FIREBASE_CLIENT_ID,
       auth_uri: 'https://accounts.google.com/o/oauth2/auth',
       token_uri: 'https://oauth2.googleapis.com/token',
