@@ -68,9 +68,12 @@ if (!admin.apps.length) {
       credential = admin.credential.cert(serviceAccount as admin.ServiceAccount);
     }
 
+    const projectId = serviceAccount.project_id || process.env.FIREBASE_PROJECT_ID;
+    
     admin.initializeApp({
       credential,
-      projectId: serviceAccount.project_id || process.env.FIREBASE_PROJECT_ID
+      projectId: projectId,
+      databaseURL: `https://${projectId}-default-rtdb.firebaseio.com`
     });
 
     console.log('✅ Firebase Admin initialized successfully');
