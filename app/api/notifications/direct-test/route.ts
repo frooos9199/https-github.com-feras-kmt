@@ -1,22 +1,19 @@
 // تجربة إرسال مباشر من Vercel production بدون OAuth error
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-
-// استيراد Firebase بشكل مباشر لتجربة
-import admin from 'firebase-admin';
+import { messaging } from '@/lib/firebase-admin';
 
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
 
     // التحقق من Firebase initialization
-    console.log('[TEST] Firebase apps count:', admin.apps.length);
-    console.log('[TEST] Firebase initialized:', admin.apps.length > 0);
+    console.log('[TEST] Firebase messaging:', !!messaging);
 
-    if (admin.apps.length === 0) {
+    if (!messaging) {
       return NextResponse.json({
-        error: 'Firebase not initialized',
-        details: 'Admin SDK not set up'
+        error: 'Firebase messaging not initialized',
+        details: 'Check server logs for Firebase initialization errors'
       }, { status: 500 });
     }
 
@@ -41,7 +38,7 @@ export async function POST(request: Request) {
 
     // محاولة الإرسال المباشر
     try {
-      const response = await admin.messaging().send({
+      const response = await messaging.send({
         token: user.fcmToken,
         notification: {
           title: 'Direct Test 🧪',
