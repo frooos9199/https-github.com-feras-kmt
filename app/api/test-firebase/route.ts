@@ -1,12 +1,10 @@
 // Test Firebase Admin SDK authentication
 import { NextResponse } from 'next/server';
-import { getMessaging } from '@/lib/firebase-admin';
+import { messaging } from '@/lib/firebase-admin';
 
 export async function GET() {
   try {
     // Get Firebase Messaging instance
-    const messaging = getMessaging();
-    
     if (!messaging) {
       return NextResponse.json({ 
         success: false, 
