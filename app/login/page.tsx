@@ -24,16 +24,28 @@ export default function LoginPage() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: true,
-        callbackUrl: "/dashboard"
+        redirect: false // Don't redirect, handle it manually
       })
 
-      if (result?.error) {
-        setError(t("invalidEmailOrPassword"))
+      if (!result?.ok || result?.error) {
+        // Show specific error messages based on response
+        if (result?.error?.includes("Too many login attempts")) {
+          setError(result.error)
+        } else if (result?.error?.includes("Invalid credentials")) {
+          setError(t("invalidEmailOrPassword"))
+        } else {
+          setError(result?.error || t("invalidEmailOrPassword"))
+        }
         setIsLoading(false)
+        return
       }
-      // If successful, NextAuth will handle the redirect
-    } catch (error) {
+
+      // If successful, redirect manually
+      if (result?.ok) {
+        router.push("/dashboard")
+      }
+    } catch (error: any) {
+      console.error("Login error:", error)
       setError(t("somethingWentWrong"))
       setIsLoading(false)
     }

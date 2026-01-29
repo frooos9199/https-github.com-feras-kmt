@@ -29,12 +29,10 @@ export default function ForgotPasswordPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        if (data.code === "EMAIL_NOT_REGISTERED") {
-          throw new Error(data.error)
-        }
         throw new Error(data.error || "Something went wrong")
       }
 
+      // Show success message
       setIsSuccess(true)
     } catch (error: any) {
       setError(error.message)

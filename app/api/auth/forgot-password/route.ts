@@ -17,11 +17,10 @@ export async function POST(req: Request) {
     })
 
     if (!user) {
-      // Return different message if email is not registered
+      // Return same message for security (don't reveal if email exists)
       return NextResponse.json({
-        error: "You are not registered with KMT Marshal Club",
-        code: "EMAIL_NOT_REGISTERED"
-      }, { status: 404 })
+        message: "If an account with this email exists, a password reset link has been sent."
+      })
     }
 
     // Generate reset token
@@ -48,7 +47,7 @@ export async function POST(req: Request) {
         </div>
 
         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <p style="margin: 0 0 15px 0; font-size: 16px;">Hello ${user.name},</p>
+          <p style="margin: 0 0 15px 0; font-size: 16px;">Hello ${user.name || user.email},</p>
           <p style="margin: 0 0 15px 0; line-height: 1.6;">
             You requested a password reset for your KMT Marshal account. Click the button below to reset your password:
           </p>
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
           <div style="text-align: center; margin: 30px 0;">
             <a href="${resetUrl}"
                style="background: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-              Reset Password
+              Reset Your Password
             </a>
           </div>
 
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
             This link will expire in 1 hour for security reasons.
           </p>
           <p style="margin: 10px 0 0 0; font-size: 14px; color: #ccc;">
-            If you didn't request this password reset, please ignore this email.
+            If you didn't request this password reset, please ignore this email and your password will remain unchanged.
           </p>
         </div>
 
@@ -76,12 +75,19 @@ export async function POST(req: Request) {
       </div>
     `
 
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: user.email,
       subject: "🔑 Password Reset - KMT Marshal System",
       html: emailHtml
     })
 
+    console.log("[FORGOT_PASSWORD] Email send result:", {
+      email: user.email,
+      success: emailResult.success,
+      error: emailResult.error
+    })
+
+    // Always return success message for security
     return NextResponse.json({
       message: "If an account with this email exists, a password reset link has been sent."
     })
